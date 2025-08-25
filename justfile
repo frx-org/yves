@@ -22,3 +22,4 @@ check:
 [group("dev")]
 format:
     @nix-shell {{ recapify }}/shell.nix --command "just py-format"
+    @nix-shell {{ recapify }}/shell.nix --command "treefmt"
