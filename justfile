@@ -1,0 +1,24 @@
+recapify := justfile_directory()
+
+[private]
+default:
+    @just --list --unsorted
+
+[private]
+py-check:
+    @uv run ruff check
+    @uv run ruff format --check
+
+[private]
+py-format:
+    @uv run ruff format
+
+# Run checks on codebase
+[group("dev")]
+check:
+    @nix-shell {{ recapify }}/shell.nix --command "just py-check"
+
+# Format codebase
+[group("dev")]
+format:
+    @nix-shell {{ recapify }}/shell.nix --command "just py-format"

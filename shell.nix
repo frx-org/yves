@@ -10,6 +10,7 @@
 
 pkgs.mkShellNoCC {
   packages = with pkgs; [
+    just
     nushell
     uv
   ];
