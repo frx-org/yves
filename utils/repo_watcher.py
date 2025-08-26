@@ -12,7 +12,6 @@ import difflib
 import re
 import fnmatch
 from datetime import datetime
-from typing import Any
 
 
 class FileWatcher:
@@ -46,7 +45,7 @@ class FileWatcher:
         self.output_file: str = output_file
         self.file_patterns: list[str] = file_patterns or []
         self.exclude_patterns: list[str] = exclude_patterns or []
-        self.file_snapshots: dict[str, dict[str, Any]] = {}
+        self.file_snapshots: dict[str, dict[str, object]] = {}
         self.last_check: float = time.time()
         self.major_changes_only: bool = major_changes_only
         self.min_lines_changed: int = min_lines_changed
@@ -61,9 +60,7 @@ class FileWatcher:
                 for _ in f:
                     continue
             return False
-        except UnicodeDecodeError:
-            return True
-        except (OSError, IOError):
+        except (OSError, UnicodeDecodeError):
             return True
 
     def should_watch_file(self, filepath: str) -> bool:
@@ -271,7 +268,7 @@ class FileWatcher:
                         files_to_watch.append(filepath)
         return files_to_watch
 
-    def check_for_changes(self) -> list[dict[str, Any]]:
+    def check_for_changes(self) -> list[dict[str, object]]:
         """
         Check all monitored files for changes and generate diffs.
 
@@ -371,7 +368,7 @@ class FileWatcher:
 
         return changes
 
-    def write_changes_to_file(self, changes: list[dict[str, Any]]) -> None:
+    def write_changes_to_file(self, changes: list[dict[str, object]]) -> None:
         """
         Write detected changes to output file with timestamps and formatting.
         """
