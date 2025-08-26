@@ -4,8 +4,6 @@ Watch for file changes and capture only the diffs (changed content) to a text fi
 This script monitors files for changes and saves the newly changed content without using git.
 """
 
-import subprocess
-import sys
 import os
 import argparse
 import time
@@ -13,9 +11,8 @@ import hashlib
 import difflib
 import re
 import fnmatch
-from pathlib import Path
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Set, Tuple
+from typing import List, Dict, Any, Optional
 
 
 class FileWatcher:
@@ -138,9 +135,10 @@ class FileWatcher:
             - False: File should be ignored based on current filter configuration
 
         Filtering Logic:
-            1. **Exclusion Priority**: Exclude patterns are checked first and take precedence
-            2. **Inclusion Evaluation**: If include patterns are specified, file must match at least one
-            3. **Default Behavior**: If no include patterns specified, all non-excluded files are included
+            1. **Output File Exclusion**: The output file is always excluded to prevent infinite loops
+            2. **Exclusion Priority**: Exclude patterns are checked first and take precedence
+            3. **Inclusion Evaluation**: If include patterns are specified, file must match at least one
+            4. **Default Behavior**: If no include patterns specified, all non-excluded files are included
 
         Pattern Matching:
             - Supports standard glob patterns with wildcards (*, ?, [])
@@ -158,6 +156,11 @@ class FileWatcher:
             - Pattern matching is optimized for common glob expressions
             - Early exit on exclusion match minimizes unnecessary processing
         """
+        # Always exclude the output file to prevent infinite monitoring loops
+        output_path = os.path.abspath(self.output_file)
+        if os.path.abspath(filepath) == output_path:
+            return False
+
         rel_path = os.path.relpath(filepath, self.watch_dir)
 
         # Check exclude patterns
