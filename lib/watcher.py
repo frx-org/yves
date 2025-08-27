@@ -1,0 +1,476 @@
+import os
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Watcher:
+    """File system monitor that captures changes as diffs from multiple repositories.
+
+    Attributes
+    ----------
+    watch_dirs: List of directories to monitor
+    output_file: Output file for diffs
+    file_patterns: Include patterns (e.g., ['*.py', '*.js'])
+    exclude_patterns: Exclude patterns (e.g., ['*.pyc', '__pycache__'])
+    major_changes_only: Filter out minor changes
+    min_lines_changed: Minimum lines for major change
+    similarity_threshold: Minimum similarity ratio [0.0-1.0] for major change detection
+    file_snapshots: Dictionary containing stats files to watch
+    """
+
+    watch_dirs: list[str]
+    output_file: str = "changes.txt"
+    file_patterns: list[str] = field(default_factory=list)
+    exclude_patterns: list[str] = field(default_factory=list)
+    major_changes_only: bool = False
+    min_lines_changed: int = 3
+    similarity_threshold: float = 0.7
+    file_snapshots: dict[str, dict[str, str | list[str] | bool]] = field(
+        default_factory=dict
+    )
+
+
+def should_watch_file(watcher: Watcher, file_path: str) -> bool:
+    """Check if file should be monitored based on patterns.
+
+    Filtering order:
+    1. Exclude output file (prevents infinite loops)
+    2. Check exclude patterns
+    3. Check include patterns (if any)
+    4. Default: include all non-excluded files
+
+    Parameters
+    ----------
+    watcher : Watcher
+    file_path : str
+        Path to the file we analyze to watch or not
+
+    Returns
+    -------
+    bool
+        `True` is `file_path` should be watched, else `False`
+
+    """
+
+    from fnmatch import fnmatch
+
+    from lib.file import find_file_in_dirs
+
+    # Always exclude the output file to prevent infinite monitoring loops
+    output_path = os.path.abspath(watcher.output_file)
+    if os.path.abspath(file_path) == output_path:
+        return False
+
+    watch_dir = find_file_in_dirs(file_path, watcher.watch_dirs)
+    if watch_dir is None:
+        return False
+
+    rel_path = os.path.relpath(file_path, watch_dir)
+
+    for pattern in watcher.exclude_patterns:
+        if fnmatch(rel_path, pattern):
+            return False
+
+    if watcher.file_patterns:
+        for pattern in watcher.file_patterns:
+            if fnmatch(rel_path, pattern):
+                return True
+        return False
+
+    return True
+
+
+def generate_diff(
+    old_lines: list[str],
+    new_lines: list[str],
+    file_name: str,
+) -> str | None:
+    """Generate unified diff between two versions of a file.
+
+    Parameters
+    ----------
+    old_lines : list[str]
+        List of previous lines before modification on the file
+    new_lines : list[str]
+        List of new lines after modification on the file
+    file_name : str
+        Filename of the file
+
+    Returns
+    -------
+    str | None
+        Diff between two versions
+
+    """
+    from difflib import unified_diff
+
+    diff = list(
+        unified_diff(
+            old_lines,
+            new_lines,
+            fromfile=f"a/{file_name}",
+            tofile=f"b/{file_name}",
+            lineterm="",
+        )
+    )
+
+    return "\n".join(diff) if diff else None
+
+
+def normalize_line(watcher: Watcher, line: str) -> str:
+    """Normalize line for major change detection (strip whitespace, ignore comments).
+
+    Parameters
+    ----------
+    watcher : Watcher
+    line : str
+        Line to normalize
+
+    Returns
+    -------
+    str
+       Normalized `line`
+
+    """
+    from re import sub
+
+    if not watcher.major_changes_only:
+        return line
+
+    normalized = line.strip()
+
+    # Skip empty lines and comments
+    if not normalized or normalized.startswith("#") or normalized.startswith("//"):
+        return ""
+
+    # Normalize whitespace
+    normalized = sub(r"\s+", " ", normalized)
+    return normalized
+
+
+def is_major_change(
+    watcher: Watcher,
+    old_lines: list[str],
+    new_lines: list[str],
+    file_path: str,
+) -> bool:
+    """Determine if changes are significant enough to capture.
+
+    Checks for:
+    - Structural code changes (keywords like def, class, function, etc.)
+    - Minimum lines changed threshold
+    - Low similarity between lines (below similarity_threshold)
+
+    Parameters
+    ----------
+    watcher : Watcher
+    old_lines : list[str]
+        List of previous lines before modification on the file
+    new_lines : list[str]
+        List of new lines after modification on the file
+    file_path : str
+        Path to the file to check
+
+    Returns
+    -------
+    bool
+        `True` if `file_path` has majorly changed, else `False`
+
+    """
+    from difflib import SequenceMatcher
+
+    if not watcher.major_changes_only:
+        return True
+
+    # Normalize lines to focus on structural changes
+    old_normalized = [normalize_line(watcher, line) for line in old_lines]
+    new_normalized = [normalize_line(watcher, line) for line in new_lines]
+
+    # Remove empty lines after normalization
+    old_set = set(line for line in old_normalized if line)
+    new_set = set(line for line in new_normalized if line)
+
+    # Calculate differences
+    added_lines = new_set - old_set
+    removed_lines = old_set - new_set
+    total_changes = len(added_lines) + len(removed_lines)
+
+    # Check for code keywords in changes
+    ext = os.path.splitext(file_path)[1].lower()
+
+    # TODO: need to generalize more filetypes
+    if ext in [".py", ".js", ".ts", ".java", ".cpp", ".c", ".go", ".rs"]:
+        code_keywords = [
+            "def ",
+            "class ",
+            "function ",
+            "import ",
+            "from ",
+            "if ",
+            "for ",
+            "while ",
+            "return ",
+            "async ",
+            "await ",
+            "try ",
+            "except ",
+            "catch ",
+            "throw ",
+            "func ",
+            "fn ",
+            "match ",
+        ]
+        for line in added_lines.union(removed_lines):
+            if any(keyword in line.lower() for keyword in code_keywords):
+                return True
+
+    # Check minimum lines threshold
+    if total_changes >= watcher.min_lines_changed:
+        return True
+
+    # Check for significant content changes (not just typos)
+    for old_line, new_line in zip(old_normalized, new_normalized):
+        if old_line != new_line:
+            ratio = SequenceMatcher(None, old_line, new_line).ratio()
+            if ratio < watcher.similarity_threshold:
+                return True
+
+    return False
+
+
+def scan_files(watcher: Watcher) -> list[str]:
+    """Recursively scan all directories for files matching patterns
+
+    Parameters
+    ----------
+    watcher : Watcher
+
+    Returns
+    -------
+    list[str]
+        List of files to watch
+
+    """
+    files_to_watch = []
+    for watch_dir in watcher.watch_dirs:
+        for root, _, files in os.walk(watch_dir):
+            for file in files:
+                filepath = os.path.join(root, file)
+                if should_watch_file(watcher, filepath):
+                    files_to_watch.append(filepath)
+
+    return files_to_watch
+
+
+def check_for_changes(watcher: Watcher) -> list[dict[str, str | list[str] | bool]]:
+    """Check all monitored files for changes and generate diffs.
+
+    Handles both text and binary files appropriately.
+
+    Parameters
+    ----------
+    watcher : Watcher
+
+    Returns
+    -------
+    list[dict[str, object]]
+        Returns list of changes with 'type', 'file', and 'diff' keys.
+
+    """
+    from lib.file import find_file_in_dirs, get_content, get_md5, is_binary
+
+    changes = []
+    files = scan_files(watcher)
+
+    for filepath in files:
+        current_hash = get_md5(filepath)
+        if current_hash is None:
+            continue
+
+        # Find which repository this file belongs to
+        watch_dir = find_file_in_dirs(filepath, watcher.watch_dirs)
+        if watch_dir is None:
+            continue
+
+        # Handle binary files
+        if is_binary(filepath):
+            rel_path = os.path.relpath(filepath, watch_dir)
+            repo_name = os.path.basename(watch_dir)
+
+            if filepath not in watcher.file_snapshots:
+                changes.append(
+                    {
+                        "type": "new",
+                        "file": filepath,
+                        "diff": f"Binary file added: {repo_name}/{rel_path}",
+                    }
+                )
+                watcher.file_snapshots[filepath] = {
+                    "hash": current_hash,
+                    "lines": [],
+                    "is_binary": True,
+                }
+            elif watcher.file_snapshots[filepath]["hash"] != current_hash:
+                changes.append(
+                    {
+                        "type": "modified",
+                        "file": filepath,
+                        "diff": f"Binary file modified: {repo_name}/{rel_path}",
+                    }
+                )
+                watcher.file_snapshots[filepath] = {
+                    "hash": current_hash,
+                    "lines": [],
+                    "is_binary": True,
+                }
+            continue
+
+        # Handle text files
+        current_lines = get_content(filepath)
+        if current_lines is None:
+            continue
+
+        rel_path = os.path.relpath(filepath, watch_dir)
+        repo_name = os.path.basename(watch_dir)
+
+        if filepath not in watcher.file_snapshots:
+            # New file
+            if not watcher.major_changes_only or is_major_change(
+                watcher, [], current_lines, filepath
+            ):
+                diff = generate_diff([], current_lines, f"{repo_name}/{rel_path}")
+                if diff:
+                    changes.append({"type": "new", "file": filepath, "diff": diff})
+
+            watcher.file_snapshots[filepath] = {
+                "hash": current_hash,
+                "lines": current_lines,
+                "is_binary": False,
+            }
+        elif watcher.file_snapshots[filepath]["hash"] != current_hash:
+            # Changed file
+            old_lines: list[str] = watcher.file_snapshots[filepath]["lines"]  # type: ignore
+
+            if is_major_change(watcher, old_lines, current_lines, filepath):
+                diff = generate_diff(
+                    old_lines, current_lines, f"{repo_name}/{rel_path}"
+                )
+                if diff:
+                    changes.append({"type": "modified", "file": filepath, "diff": diff})
+            else:
+                print(f"  Minor change ignored in: {repo_name}/{rel_path}")
+
+            watcher.file_snapshots[filepath] = {
+                "hash": current_hash,
+                "lines": current_lines,
+                "is_binary": False,
+            }
+
+    return changes
+
+
+def write_changes_to_file(
+    watcher: Watcher, changes: list[dict[str, str | list[str] | bool]]
+) -> None:
+    """Write detected changes to output file with timestamps and formatting.
+
+    Parameters
+    ----------
+    watcher : Watcher
+    changes : list[dict[str, str | list[str] | bool]]
+      List of changes to write in `watcher.output_file`
+
+    """
+    from datetime import datetime
+
+    from lib.file import find_file_in_dirs
+
+    if not changes:
+        return
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with open(watcher.output_file, "w", encoding="utf-8") as f:
+        f.write(f"\n{'=' * 80}\n")
+        f.write(f"CHANGES DETECTED AT: {timestamp}\n")
+        f.write(f"{'=' * 80}\n")
+
+        for change in changes:
+            # Find the repository name for display
+            watch_dir = find_file_in_dirs(change["file"], watcher.watch_dirs)  # type: ignore
+            if watch_dir:
+                rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
+                repo_name = os.path.basename(watch_dir)
+                display_path = f"{repo_name}/{rel_path}"
+            else:
+                display_path = change["file"]
+
+            f.write(f"\n--- {change['type'].upper()}: {display_path} ---\n")  # type: ignore
+            f.write(change["diff"])  # type: ignore
+            f.write(f"\n--- END OF DIFF FOR {display_path} ---\n")
+
+    print(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    for change in changes:
+        watch_dir = find_file_in_dirs(change["file"], watcher.watch_dirs)  # type: ignore
+        if watch_dir:
+            rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
+            repo_name = os.path.basename(watch_dir)
+            display_path = f"{repo_name}/{rel_path}"
+        else:
+            display_path = change["file"]
+        print(f"  {change['type']}: {display_path}")
+
+
+def watch(watcher: Watcher) -> None:
+    """Start monitoring loop. Runs until Ctrl+C is pressed.
+
+    Parameters
+    ----------
+    watcher : Watcher
+
+    """
+
+    from time import sleep
+
+    from lib.file import get_content, get_md5, is_binary
+
+    print(f"Watching {len(watcher.watch_dirs)} repositories:")
+    for watch_dir in watcher.watch_dirs:
+        print(f"  - {watch_dir}")
+    print(f"Output file: {watcher.output_file}")
+    if watcher.file_patterns:
+        print(f"Watching patterns: {watcher.file_patterns}")
+    if watcher.exclude_patterns:
+        print(f"Excluding patterns: {watcher.exclude_patterns}")
+    print("Press Ctrl+C to stop watching...")
+    print("-" * 50)
+
+    print("Initial scan...")
+    file_paths = scan_files(watcher)
+    for file_path in file_paths:
+        current_hash = get_md5(file_path)
+        if current_hash:
+            if is_binary(file_path):
+                watcher.file_snapshots[file_path] = {
+                    "hash": current_hash,
+                    "lines": [],
+                    "is_binary": True,
+                }
+            else:
+                current_lines = get_content(file_path)
+                if current_lines is not None:
+                    watcher.file_snapshots[file_path] = {
+                        "hash": current_hash,
+                        "lines": current_lines,
+                        "is_binary": False,
+                    }
+    print(f"Monitoring {len(watcher.file_snapshots)} files")
+
+    try:
+        while True:
+            sleep(1)
+            changes = check_for_changes(watcher)
+            if changes:
+                write_changes_to_file(watcher, changes)
+    except KeyboardInterrupt:
+        print("\nStopped watching directory")
