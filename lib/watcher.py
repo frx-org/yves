@@ -439,12 +439,14 @@ def signal_handler(signal: int, frame: FrameType | None):
     exit(0)
 
 
-def watch(watcher: Watcher) -> None:
+def watch(watcher: Watcher, timeout: int = 1) -> None:
     """Start monitoring loop. Runs until Ctrl+C is pressed.
 
     Parameters
     ----------
     watcher : Watcher
+    timeout : int
+        Timeout in seconds in the while loop
 
     """
 
@@ -492,4 +494,4 @@ def watch(watcher: Watcher) -> None:
         changes = check_for_changes(watcher)
         if changes:
             write_changes_to_file(watcher, changes)
-        sleep(1)
+        sleep(timeout)
