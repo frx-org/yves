@@ -4,12 +4,12 @@ from types import FrameType
 
 
 @dataclass
-class Watcher:
+class FileWatcher:
     """File system monitor that captures changes as diffs from multiple repositories.
 
     Attributes
     ----------
-    watch_dirs: List of directories to monitor
+    dirs: List of directories to monitor
     output_file: Output file for diffs
     file_patterns: Include patterns (e.g., ['*.py', '*.js'])
     exclude_patterns: Exclude patterns (e.g., ['*.pyc', '__pycache__'])
@@ -19,7 +19,7 @@ class Watcher:
     file_snapshots: Dictionary containing stats files to watch
     """
 
-    watch_dirs: list[str]
+    dirs: list[str]
     output_file: str = "changes.txt"
     file_patterns: list[str] = field(default_factory=list)
     exclude_patterns: list[str] = field(default_factory=list)
@@ -31,7 +31,7 @@ class Watcher:
     )
 
 
-def should_watch_file(watcher: Watcher, file_path: str) -> bool:
+def should_watch_file(watcher: FileWatcher, file_path: str) -> bool:
     """Check if file should be monitored based on patterns.
 
     Filtering order:
@@ -42,7 +42,7 @@ def should_watch_file(watcher: Watcher, file_path: str) -> bool:
 
     Parameters
     ----------
-    watcher : Watcher
+    watcher : FileWatcher
     file_path : str
         Path to the file we analyze to watch or not
 
@@ -62,7 +62,7 @@ def should_watch_file(watcher: Watcher, file_path: str) -> bool:
     if os.path.abspath(file_path) == output_path:
         return False
 
-    watch_dir = find_file_in_dirs(file_path, watcher.watch_dirs)
+    watch_dir = find_file_in_dirs(file_path, watcher.dirs)
     if watch_dir is None:
         return False
 
@@ -118,12 +118,12 @@ def generate_diff(
     return "\n".join(diff) if diff else None
 
 
-def normalize_line(watcher: Watcher, line: str) -> str:
+def normalize_line(watcher: FileWatcher, line: str) -> str:
     """Normalize line for major change detection (strip whitespace, ignore comments).
 
     Parameters
     ----------
-    watcher : Watcher
+    watcher : FileWatcher
     line : str
         Line to normalize
 
@@ -150,7 +150,7 @@ def normalize_line(watcher: Watcher, line: str) -> str:
 
 
 def is_major_change(
-    watcher: Watcher,
+    watcher: FileWatcher,
     old_lines: list[str],
     new_lines: list[str],
     file_path: str,
@@ -164,7 +164,7 @@ def is_major_change(
 
     Parameters
     ----------
-    watcher : Watcher
+    watcher : FileWatcher
     old_lines : list[str]
         List of previous lines before modification on the file
     new_lines : list[str]
@@ -239,12 +239,12 @@ def is_major_change(
     return False
 
 
-def scan_files(watcher: Watcher) -> list[str]:
+def scan_files(watcher: FileWatcher) -> list[str]:
     """Recursively scan all directories for files matching patterns
 
     Parameters
     ----------
-    watcher : Watcher
+    watcher : FileWatcher
 
     Returns
     -------
@@ -253,7 +253,7 @@ def scan_files(watcher: Watcher) -> list[str]:
 
     """
     files_to_watch = []
-    for watch_dir in watcher.watch_dirs:
+    for watch_dir in watcher.dirs:
         for root, _, files in os.walk(watch_dir):
             for file in files:
                 filepath = os.path.join(root, file)
@@ -263,14 +263,14 @@ def scan_files(watcher: Watcher) -> list[str]:
     return files_to_watch
 
 
-def check_for_changes(watcher: Watcher) -> list[dict[str, str | list[str] | bool]]:
+def check_for_changes(watcher: FileWatcher) -> list[dict[str, str | list[str] | bool]]:
     """Check all monitored files for changes and generate diffs.
 
     Handles both text and binary files appropriately.
 
     Parameters
     ----------
-    watcher : Watcher
+    watcher : FileWatcher
 
     Returns
     -------
@@ -289,7 +289,7 @@ def check_for_changes(watcher: Watcher) -> list[dict[str, str | list[str] | bool
             continue
 
         # Find which repository this file belongs to
-        watch_dir = find_file_in_dirs(filepath, watcher.watch_dirs)
+        watch_dir = find_file_in_dirs(filepath, watcher.dirs)
         if watch_dir is None:
             continue
 
@@ -371,13 +371,13 @@ def check_for_changes(watcher: Watcher) -> list[dict[str, str | list[str] | bool
 
 
 def write_changes_to_file(
-    watcher: Watcher, changes: list[dict[str, str | list[str] | bool]]
+    watcher: FileWatcher, changes: list[dict[str, str | list[str] | bool]]
 ) -> None:
     """Write detected changes to output file with timestamps and formatting.
 
     Parameters
     ----------
-    watcher : Watcher
+    watcher : FileWatcher
     changes : list[dict[str, str | list[str] | bool]]
       List of changes to write in `watcher.output_file`
 
@@ -398,7 +398,7 @@ def write_changes_to_file(
 
         for change in changes:
             # Find the repository name for display
-            watch_dir = find_file_in_dirs(change["file"], watcher.watch_dirs)  # type: ignore
+            watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
             if watch_dir:
                 rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
                 repo_name = os.path.basename(watch_dir)
@@ -412,7 +412,7 @@ def write_changes_to_file(
 
     print(f"Captured {len(changes)} file changes to {watcher.output_file}")
     for change in changes:
-        watch_dir = find_file_in_dirs(change["file"], watcher.watch_dirs)  # type: ignore
+        watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
         if watch_dir:
             rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
             repo_name = os.path.basename(watch_dir)
@@ -439,12 +439,12 @@ def signal_handler(signal: int, frame: FrameType | None):
     exit(0)
 
 
-def watch(watcher: Watcher, timeout: int = 1) -> None:
+def watch(watcher: FileWatcher, timeout: int = 1) -> None:
     """Start monitoring loop. Runs until Ctrl+C is pressed.
 
     Parameters
     ----------
-    watcher : Watcher
+    watcher : FileWatcher
     timeout : int
         Timeout in seconds in the while loop
 
@@ -455,8 +455,8 @@ def watch(watcher: Watcher, timeout: int = 1) -> None:
 
     from lib.file import get_content, get_md5, is_binary
 
-    print(f"Watching {len(watcher.watch_dirs)} repositories:")
-    for watch_dir in watcher.watch_dirs:
+    print(f"Watching {len(watcher.dirs)} repositories:")
+    for watch_dir in watcher.dirs:
         print(f"  - {watch_dir}")
     print(f"Output file: {watcher.output_file}")
     if watcher.file_patterns:
