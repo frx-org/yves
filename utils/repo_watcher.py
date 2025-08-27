@@ -39,7 +39,7 @@ class FileWatcher:
             exclude_patterns: Exclude patterns (e.g., ['*.pyc', '__pycache__'])
             major_changes_only: Filter out minor changes
             min_lines_changed: Minimum lines for major change
-            similarity_threshold: Minimum similarity ratio (0.0-1.0) for major change detection
+            similarity_threshold: Minimum similarity ratio [0.0-1.0] for major change detection
         """
         self.watch_dirs: list[str] = [os.path.abspath(d) for d in watch_dirs]
         self.output_file: str = output_file
@@ -495,13 +495,13 @@ Examples:
         "--min-lines",
         type=int,
         default=3,
-        help="Minimum lines changed to consider it major (default: 3)",
+        help="Minimum lines changed to consider it major",
     )
     parser.add_argument(
         "--similarity-threshold",
         type=float,
         default=0.7,
-        help="Minimum similarity ratio (0.0-1.0) for major change detection (default: 0.7)",
+        help="Minimum similarity ratio [0.0-1.0] for major change detection",
     )
 
     args = parser.parse_args()
