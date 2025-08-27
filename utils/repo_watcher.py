@@ -127,7 +127,7 @@ class FileWatcher:
             with open(filepath, "rb") as f:
                 content = f.read()
                 return hashlib.md5(content).hexdigest()
-        except (OSError, IOError):
+        except OSError:
             return None
 
     def get_file_lines(self, filepath: str) -> list[str] | None:
@@ -137,7 +137,7 @@ class FileWatcher:
         try:
             with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                 return f.readlines()
-        except (OSError, IOError):
+        except OSError:
             return None
 
     def generate_diff(
