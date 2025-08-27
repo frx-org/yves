@@ -478,7 +478,7 @@ Examples:
         "--output",
         "-o",
         default="changes.txt",
-        help="Output file for changes (default: changes.txt)",
+        help="Output file for changes",
     )
     parser.add_argument(
         "--patterns", nargs="*", help="File patterns to watch (e.g., *.py *.txt)"
