@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass, field
+from types import FrameType
 
 
 @dataclass
@@ -421,6 +422,23 @@ def write_changes_to_file(
         print(f"  {change['type']}: {display_path}")
 
 
+def signal_handler(signal: int, frame: FrameType | None):
+    """Handle signal. For now we suppose that we only catch SIGTERM and SIGINT to cleanly exit the program.
+    This function is supposed to be called with `signal.signal(SIG, signal_handler)`
+
+    Parameters
+    ----------
+    signal : int
+        First argument needed by `signal.signal`
+    frame : FrameType | None
+        Second argument needed by `signal.signal`
+
+    """
+    from sys import exit
+
+    exit(0)
+
+
 def watch(watcher: Watcher) -> None:
     """Start monitoring loop. Runs until Ctrl+C is pressed.
 
@@ -430,6 +448,7 @@ def watch(watcher: Watcher) -> None:
 
     """
 
+    from signal import SIGINT, SIGTERM, signal
     from time import sleep
 
     from lib.file import get_content, get_md5, is_binary
@@ -466,11 +485,11 @@ def watch(watcher: Watcher) -> None:
                     }
     print(f"Monitoring {len(watcher.file_snapshots)} files")
 
-    try:
-        while True:
-            sleep(1)
-            changes = check_for_changes(watcher)
-            if changes:
-                write_changes_to_file(watcher, changes)
-    except KeyboardInterrupt:
-        print("\nStopped watching directory")
+    signal(SIGTERM, signal_handler)
+    signal(SIGINT, signal_handler)
+
+    while True:
+        changes = check_for_changes(watcher)
+        if changes:
+            write_changes_to_file(watcher, changes)
+        sleep(1)
