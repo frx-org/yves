@@ -134,11 +134,8 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
     signal(SIGTERM, signal_handler)
     signal(SIGINT, signal_handler)
 
-    try:
-        while True:
-            completed_commands = check_for_completed_commands(watcher)
-            if completed_commands:
-                write_commands_to_file(watcher, completed_commands)
-            sleep(timeout)
-    except KeyboardInterrupt:
-        print("\nStopped watching tmux panes")
+    while True:
+        completed_commands = check_for_completed_commands(watcher)
+        if completed_commands:
+            write_commands_to_file(watcher, completed_commands)
+        sleep(timeout)
