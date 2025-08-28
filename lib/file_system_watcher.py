@@ -416,7 +416,7 @@ def write_changes_to_file(
             watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
             if watch_dir:
                 rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
-                repo_name = os.path.basename(watch_dir)
+                repo_name = os.path.basename(os.path.normpath(watch_dir))
                 display_path = f"{repo_name}/{rel_path}"
             else:
                 display_path = change["file"]
