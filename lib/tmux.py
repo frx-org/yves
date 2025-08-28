@@ -3,7 +3,15 @@ import subprocess
 
 
 def get_tmux_pane_content(pane: str) -> str:
-    """Capture and return the content of a specific tmux pane."""
+    """
+    Captures and returns the content of a specific tmux pane.
+
+    Args:
+        pane (str): The target tmux pane identifier (e.g., 'session:window.pane').
+
+    Returns:
+        str: The content of the pane, or None if capture fails.
+    """
     try:
         result = subprocess.run(
             ["tmux", "capture-pane", "-t", pane, "-S", "-1000", "-p"],
@@ -24,7 +32,15 @@ def get_tmux_pane_content(pane: str) -> str:
 
 
 def get_command_from_content(pane_content: str) -> str:
-    """Extract the most recently executed command from pane content."""
+    """
+    Extracts the most recently executed command from the pane content.
+
+    Args:
+        pane_content (str): The full text content of a tmux pane.
+
+    Returns:
+        str: The extracted command, or an empty string if no command is found.
+    """
 
     if not is_command_finished(pane_content):
         return ""
@@ -61,7 +77,15 @@ def get_command_from_content(pane_content: str) -> str:
 
 
 def extract_last_command_output(pane_content: str) -> str:
-    """Extract only the output from the last executed command."""
+    """
+    Extracts only the output from the last executed command in the pane.
+
+    Args:
+        pane_content (str): The text content of the tmux pane.
+
+    Returns:
+        str: The output of the last command.
+    """
     lines = pane_content.strip().split("\n")
     if not lines:
         return ""
@@ -110,7 +134,15 @@ def extract_last_command_output(pane_content: str) -> str:
 
 
 def _is_valid_command(cmd: str) -> bool:
-    """Filter out basic/uninteresting commands to reduce noise."""
+    """
+    Filters out basic or uninteresting commands to reduce noise.
+
+    Args:
+        cmd (str): The command string to validate.
+
+    Returns:
+        bool: True if the command is considered valid, False otherwise.
+    """
     if not cmd:
         return False
 
@@ -124,7 +156,16 @@ def _is_valid_command(cmd: str) -> bool:
 
 
 def is_command_finished(pane_content: str) -> bool:
-    """Check if the last line indicates a command has finished and shell is ready."""
+    """
+    Checks if the last line of the pane content indicates that a command has
+    finished and the shell is ready for a new command.
+
+    Args:
+        pane_content (str): The text content of the tmux pane.
+
+    Returns:
+        bool: True if the command is finished, False otherwise.
+    """
     lines = pane_content.strip().split("\n")
     if not lines:
         return False
