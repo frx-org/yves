@@ -10,14 +10,20 @@ from lib.tmux_watcher import TmuxWatcher, watch
 def main() -> None:
     """Parse command line arguments and start the tmux pane watcher."""
     parser = argparse.ArgumentParser(
-        description="Watch tmux panes for command completion and capture outputs"
+        description="Watch tmux panes for command completion and capture outputs",
+        epilog="""
+Examples:
+  %(prog)s 0 1 --output tmux_log.txt
+  %(prog)s my_session:0.0 --full-output
+  %(prog)s 0 --output session.log
+""",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument(
-        "--panes",
+        "panes",
         nargs="+",
-        required=True,
-        help="Tmux panes to monitor (e.g., 0:0.0 1:0.0)",
+        help="List of tmux panes to watch (e.g., 0, 1, my_session:my_window.1)",
     )
     parser.add_argument(
         "--output",
