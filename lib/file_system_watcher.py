@@ -416,8 +416,21 @@ def write_changes_to_file(
     else:
         all_events = []
 
-    # Append new changes
-    changes_list = []
+        for change in changes:
+            # Find the repository name for display
+            watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
+            if watch_dir:
+                rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
+                repo_name = os.path.basename(os.path.normpath(watch_dir))
+                display_path = f"{repo_name}/{rel_path}"
+            else:
+                display_path = change["file"]
+
+            f.write(f"\n--- {change['type'].upper()}: {display_path} ---\n")  # type: ignore
+            f.write(change["diff"])  # type: ignore
+            f.write(f"\n--- END OF DIFF FOR {display_path} ---\n")
+
+    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
     for change in changes:
         watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
         if watch_dir:
