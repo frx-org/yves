@@ -21,9 +21,10 @@ Examples:
     )
 
     parser.add_argument(
-        "panes",
+        "--panes",
         nargs="+",
         help="List of tmux panes to watch (e.g., 0, 1, my_session:my_window.1)",
+        default=[],
     )
     parser.add_argument(
         "--output",

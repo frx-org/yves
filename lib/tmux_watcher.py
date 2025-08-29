@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from types import FrameType
 from datetime import datetime
+import subprocess
 
 
 @dataclass
@@ -129,6 +130,52 @@ def signal_handler(signal: int, frame: FrameType | None):
     exit(0)
 
 
+def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
+    """
+    Continuously monitor and update the list of all active tmux pane IDs.
+    Prints added and removed panes, including when all panes are closed.
+
+    Parameters
+    ----------
+    watcher : TmuxWatcher
+        The watcher instance to update.
+    timeout : int
+        The timeout duration for checking active panes.
+    """
+    from time import sleep
+
+    previous_panes = set(watcher.panes)
+    try:
+        result = subprocess.run(
+            ["tmux", "list-panes", "-a", "-F", "#S:#I.#P"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            current_panes = set(result.stdout.strip().splitlines())
+        else:
+            current_panes = set()
+    except Exception as e:
+        print(f"Error getting active tmux panes: {e}")
+        current_panes = set()
+    added = current_panes - previous_panes
+    removed = previous_panes - current_panes
+    if added:
+        print(f"New panes detected: {added}")
+    if removed:
+        print(f"Panes closed: {removed}")
+    watcher.panes = list(current_panes)
+    if len(watcher.panes) == 0:
+        print("[WARNING] No active tmux panes detected.")
+        while result.returncode != 0:
+            result = subprocess.run(
+                ["tmux", "list-panes", "-a", "-F", "#S:#I.#P"],
+                capture_output=True,
+                text=True,
+            )
+            sleep(timeout)
+
+
 def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
     """
     Start the main watching loop to monitor panes continuously.
@@ -144,7 +191,11 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
     from signal import SIGINT, SIGTERM, signal
     from time import sleep
 
-    print(f"Watching tmux panes: {', '.join(watcher.panes)}")
+    initial_panes = watcher.panes.copy()
+    if initial_panes:
+        print(f"Watching tmux panes: {', '.join(initial_panes)}")
+    else:
+        print("No specified panes to watch. Will monitor all tmux panes")
     print(f"Output file: {watcher.output_file}")
     print(
         f"Capture mode: {'Full output' if watcher.capture_full_output else 'Last command only'}"
@@ -156,6 +207,8 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
     signal(SIGINT, signal_handler)
 
     while True:
+        if not initial_panes:
+            get_active_tmux_panes(watcher, timeout)
         completed_commands = check_for_completed_commands(watcher)
         if completed_commands:
             write_commands_to_file(watcher, completed_commands)
