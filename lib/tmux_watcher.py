@@ -172,6 +172,48 @@ def signal_handler(signal: int, frame: FrameType | None):
 
     exit(0)
 
+def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
+    """
+    Continuously monitor and update the list of all active tmux pane IDs.
+    Prints added and removed panes, including when all panes are closed.
+
+    Parameters
+    ----------
+    watcher : TmuxWatcher
+        The watcher instance to update.
+    """
+    from time import sleep
+
+    previous_panes = set(watcher.panes)
+    try:
+        result = subprocess.run(
+            ["tmux", "list-panes", "-a", "-F", "#S:#I.#P"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            current_panes = set(result.stdout.strip().splitlines())
+        else:
+            current_panes = set()
+    except Exception as e:
+        print(f"Error getting active tmux panes: {e}")
+        current_panes = set()
+    added = current_panes - previous_panes
+    removed = previous_panes - current_panes
+    if added:
+        print(f"New panes detected: {added}")
+    if removed:
+        print(f"Panes closed: {removed}")
+    watcher.panes = list(current_panes)
+    if len(watcher.panes)==0:
+        print('[WARNING] No active tmux panes detected.')
+        while result.returncode != 0:
+            result = subprocess.run(
+                ["tmux", "list-panes", "-a", "-F", "#S:#I.#P"],
+                capture_output=True,
+                text=True,
+            )
+            sleep(timeout)
 
 def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
     """
@@ -233,7 +275,6 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
 
     from signal import SIGINT, SIGTERM, signal
     from time import sleep
-
     initial_panes = watcher.panes.copy()
     if initial_panes:
         logger.info(f"Watching tmux panes: {', '.join(initial_panes)}")
