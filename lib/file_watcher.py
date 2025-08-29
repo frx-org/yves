@@ -1,6 +1,9 @@
+import logging
 import os
 from dataclasses import dataclass, field
 from types import FrameType
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -359,7 +362,7 @@ def check_for_changes(watcher: FileWatcher) -> list[dict[str, str | list[str] | 
                 if diff:
                     changes.append({"type": "modified", "file": filepath, "diff": diff})
             else:
-                print(f"  Minor change ignored in: {repo_name}/{rel_path}")
+                logger.debug(f"  Minor change ignored in: {repo_name}/{rel_path}")
 
             watcher.file_snapshots[filepath] = {
                 "hash": current_hash,
@@ -410,7 +413,7 @@ def write_changes_to_file(
             f.write(change["diff"])  # type: ignore
             f.write(f"\n--- END OF DIFF FOR {display_path} ---\n")
 
-    print(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
     for change in changes:
         watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
         if watch_dir:
@@ -419,7 +422,7 @@ def write_changes_to_file(
             display_path = f"{repo_name}/{rel_path}"
         else:
             display_path = change["file"]
-        print(f"  {change['type']}: {display_path}")
+        logger.info(f"  {change['type']}: {display_path}")
 
 
 def signal_handler(signal: int, frame: FrameType | None):
@@ -455,18 +458,18 @@ def watch(watcher: FileWatcher, timeout: int = 1) -> None:
 
     from lib.file import get_content, get_md5, is_binary
 
-    print(f"Watching {len(watcher.dirs)} repositories:")
+    logger.info(f"Watching {len(watcher.dirs)} repositories:")
     for watch_dir in watcher.dirs:
-        print(f"  - {watch_dir}")
-    print(f"Output file: {watcher.output_file}")
+        logger.info(f"  - {watch_dir}")
+    logger.info(f"Output file: {watcher.output_file}")
     if watcher.file_patterns:
-        print(f"Watching patterns: {watcher.file_patterns}")
+        logger.info(f"Watching patterns: {watcher.file_patterns}")
     if watcher.exclude_patterns:
-        print(f"Excluding patterns: {watcher.exclude_patterns}")
-    print("Press Ctrl+C to stop watching...")
-    print("-" * 50)
+        logger.info(f"Excluding patterns: {watcher.exclude_patterns}")
+    logger.info("Press Ctrl+C to stop watching...")
+    logger.info("-" * 50)
 
-    print("Initial scan...")
+    logger.info("Initial scan...")
     file_paths = scan_files(watcher)
     for file_path in file_paths:
         current_hash = get_md5(file_path)
@@ -485,7 +488,7 @@ def watch(watcher: FileWatcher, timeout: int = 1) -> None:
                         "lines": current_lines,
                         "is_binary": False,
                     }
-    print(f"Monitoring {len(watcher.file_snapshots)} files")
+    logger.info(f"Monitoring {len(watcher.file_snapshots)} files")
 
     signal(SIGTERM, signal_handler)
     signal(SIGINT, signal_handler)
