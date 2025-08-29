@@ -22,7 +22,19 @@ class TmuxWatcher:
 
 
 def check_for_completed_commands(watcher: TmuxWatcher) -> list[dict[str, object]]:
-    """Check all monitored panes for newly completed commands."""
+    """
+    Check all monitored panes for newly completed commands.
+
+    Parameters
+    ----------
+    watcher : TmuxWatcher
+        The watcher instance containing pane states and configuration.
+
+    Returns
+    -------
+    list of dict
+        List of completed commands with pane, command, output, and timestamp.
+    """
     from lib.tmux import (
         extract_last_command_output,
         is_command_finished,
@@ -73,7 +85,16 @@ def check_for_completed_commands(watcher: TmuxWatcher) -> list[dict[str, object]
 def write_commands_to_file(
     watcher: TmuxWatcher, completed_commands: list[dict[str, object]]
 ) -> None:
-    """Write completed commands and their outputs to the output file."""
+    """
+    Write completed commands and their outputs to the output file.
+
+    Parameters
+    ----------
+    watcher : TmuxWatcher
+        The watcher instance with the output file path.
+    completed_commands : list of dict
+        List of completed command objects to write.
+    """
     if not completed_commands:
         return
 
@@ -93,16 +114,15 @@ def write_commands_to_file(
 
 
 def signal_handler(signal: int, frame: FrameType | None):
-    """Handle signal. For now we suppose that we only catch SIGTERM and SIGINT to cleanly exit the program.
-    This function is supposed to be called with `signal.signal(SIG, signal_handler)`
+    """
+    Handle signal for clean exit (SIGTERM, SIGINT).
 
     Parameters
     ----------
     signal : int
-        First argument needed by `signal.signal`
-    frame : FrameType | None
-        Second argument needed by `signal.signal`
-
+        Signal number (from signal.signal).
+    frame : FrameType or None
+        Current stack frame (from signal.signal).
     """
     from sys import exit
 
@@ -110,14 +130,15 @@ def signal_handler(signal: int, frame: FrameType | None):
 
 
 def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
-    """Start the main watching loop to monitor panes continuously.
+    """
+    Start the main watching loop to monitor panes continuously.
 
     Parameters
     ----------
     watcher : TmuxWatcher
-    timeout : int
-        Timeout in seconds in the while loop
-
+        The watcher instance to monitor.
+    timeout : int, optional
+        Timeout in seconds between checks (default is 1).
     """
 
     from signal import SIGINT, SIGTERM, signal

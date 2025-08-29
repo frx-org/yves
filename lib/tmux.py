@@ -4,13 +4,17 @@ import subprocess
 
 def get_tmux_pane_content(pane: str) -> str:
     """
-    Captures and returns the content of a specific tmux pane.
+    Capture and return the content of a specific tmux pane.
 
-    Args:
-        pane (str): The target tmux pane identifier (e.g., 'session:window.pane').
+    Parameters
+    ----------
+    pane : str
+        The target tmux pane identifier (e.g., 'session:window.pane').
 
-    Returns:
-        str: The content of the pane, or None if capture fails.
+    Returns
+    -------
+    str or None
+        The content of the pane, or None if capture fails.
     """
     try:
         result = subprocess.run(
@@ -33,13 +37,17 @@ def get_tmux_pane_content(pane: str) -> str:
 
 def get_command_from_content(pane_content: str) -> str:
     """
-    Extracts the most recently executed command from the pane content.
+    Extract the most recently executed command from pane content.
 
-    Args:
-        pane_content (str): The full text content of a tmux pane.
+    Parameters
+    ----------
+    pane_content : str
+        The full text content of a tmux pane.
 
-    Returns:
-        str: The extracted command, or an empty string if no command is found.
+    Returns
+    -------
+    str
+        The extracted command, or an empty string if no command is found.
     """
 
     if not is_command_finished(pane_content):
@@ -57,7 +65,7 @@ def get_command_from_content(pane_content: str) -> str:
         bash_match = re.match(r"^[^$]*\$\s*(.+)$", line)
         if bash_match:
             cmd = bash_match.group(1).strip()
-            if _is_valid_command(cmd):
+            if is_valid_command(cmd):
                 return cmd
 
         for char in ["❯", "➜", "→", "»", "⟩"]:
@@ -65,12 +73,12 @@ def get_command_from_content(pane_content: str) -> str:
                 parts = line.split(char, 1)
                 if len(parts) > 1 and parts[1].strip():
                     cmd = parts[1].strip()
-                    if _is_valid_command(cmd):
+                    if is_valid_command(cmd):
                         return cmd
 
         if line.startswith(">>> ") and len(line) > 4:
             cmd = line[4:].strip()
-            if _is_valid_command(cmd):
+            if is_valid_command(cmd):
                 return cmd
 
     return ""
@@ -78,13 +86,17 @@ def get_command_from_content(pane_content: str) -> str:
 
 def extract_last_command_output(pane_content: str) -> str:
     """
-    Extracts only the output from the last executed command in the pane.
+    Extract only the output from the last executed command.
 
-    Args:
-        pane_content (str): The text content of the tmux pane.
+    Parameters
+    ----------
+    pane_content : str
+        The text content of the tmux pane.
 
-    Returns:
-        str: The output of the last command.
+    Returns
+    -------
+    str
+        The output of the last command.
     """
     lines = pane_content.strip().split("\n")
     if not lines:
@@ -133,15 +145,19 @@ def extract_last_command_output(pane_content: str) -> str:
     return "\n".join(result_lines)
 
 
-def _is_valid_command(cmd: str) -> bool:
+def is_valid_command(cmd: str) -> bool:
     """
-    Filters out basic or uninteresting commands to reduce noise.
+    Filter out basic/uninteresting commands to reduce noise.
 
-    Args:
-        cmd (str): The command string to validate.
+    Parameters
+    ----------
+    cmd : str
+        The command string to validate.
 
-    Returns:
-        bool: True if the command is considered valid, False otherwise.
+    Returns
+    -------
+    bool
+        True if the command is considered valid, False otherwise.
     """
     if not cmd:
         return False
@@ -157,14 +173,17 @@ def _is_valid_command(cmd: str) -> bool:
 
 def is_command_finished(pane_content: str) -> bool:
     """
-    Checks if the last line of the pane content indicates that a command has
-    finished and the shell is ready for a new command.
+    Check if the last line indicates a command has finished and shell is ready.
 
-    Args:
-        pane_content (str): The text content of the tmux pane.
+    Parameters
+    ----------
+    pane_content : str
+        The text content of the tmux pane.
 
-    Returns:
-        bool: True if the command is finished, False otherwise.
+    Returns
+    -------
+    bool
+        True if the command is finished, False otherwise.
     """
     lines = pane_content.strip().split("\n")
     if not lines:
