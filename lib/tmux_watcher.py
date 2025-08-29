@@ -3,6 +3,8 @@ import logging
 from types import FrameType
 from datetime import datetime
 import subprocess
+import os
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +133,25 @@ def write_commands_to_file(
             f.write(cmd["output"])
             f.write(f"\n{'=' * 80}\n")
 
+    # Append new completed commands
+    for cmd in completed_commands:
+        timestamp_str = cmd["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
+        all_events.append(
+            {
+                "event_type": "command_completed",
+                "timestamp": timestamp_str,
+                "pane": cmd["pane"],
+                "command": cmd["command"],
+                # Split output into lines for easier processing later
+                "output": cmd["output"].splitlines(),
+            }
+        )
+
+    # Write updated JSON back to file
+    with open(watcher.output_file, "w", encoding="utf-8") as f:
+        json.dump(all_events, f, ensure_ascii=False, indent=2)
+
+    # Log info
     logger.info(f"Captured {len(completed_commands)} completed commands")
     for cmd in completed_commands:
         logger.info(f"  [{cmd['pane']}] {cmd['command']}")
@@ -212,7 +233,6 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
 
     from signal import SIGINT, SIGTERM, signal
     from time import sleep
-
     initial_panes = watcher.panes.copy()
     if initial_panes:
         logger.info(f"Watching tmux panes: {', '.join(initial_panes)}")

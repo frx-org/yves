@@ -2,6 +2,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from types import FrameType
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -433,7 +434,34 @@ def write_changes_to_file(
             display_path = f"{repo_name}/{rel_path}"
         else:
             display_path = change["file"]
-        logger.info(f"  {change['type']}: {display_path}")
+
+        changes_list.append(
+            {
+                "file": display_path,
+                "status": change["type"].lower(),  # e.g., "modified", "new"
+                "diff": change.get("diff", "").splitlines()
+                if isinstance(change.get("diff"), str)
+                else change.get("diff", []),
+                "is_binary": change.get("is_binary", False),
+            }
+        )
+
+    all_events.append(
+        {
+            "event_type": "changes_detected",
+            "timestamp": timestamp,
+            "changes": changes_list,
+        }
+    )
+
+    # Write updated JSON back to file
+    with open(watcher.output_file, "w", encoding="utf-8") as f:
+        json.dump(all_events, f, ensure_ascii=False, indent=2)
+
+    # Logging
+    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    for change in changes_list:
+        logger.info(f"  {change['status']}: {change['file']}")
 
 
 def signal_handler(signal: int, frame: FrameType | None):
