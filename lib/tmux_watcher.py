@@ -132,7 +132,7 @@ def signal_handler(signal: int, frame: FrameType | None):
 
 def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
     """
-    Continuously monitor and update the list of all active tmux pane IDs.
+    Continuously monitor and update the list of all active tmux pane indices.
     Prints added and removed panes, including when all panes are closed.
 
     Parameters
