@@ -40,8 +40,7 @@ def should_watch_file(watcher: FileWatcher, file_path: str) -> bool:
     Filtering order:
     1. Exclude output file (prevents infinite loops)
     2. Check exclude patterns
-    3. Check include patterns (if any)
-    4. Default: include all non-excluded files
+    3. Default: include all non-excluded files
 
     Parameters
     ----------
@@ -74,12 +73,6 @@ def should_watch_file(watcher: FileWatcher, file_path: str) -> bool:
     for pattern in watcher.exclude_patterns:
         if fnmatch(rel_path, pattern):
             return False
-
-    if watcher.file_patterns:
-        for pattern in watcher.file_patterns:
-            if fnmatch(rel_path, pattern):
-                return True
-        return False
 
     return True
 
@@ -255,13 +248,27 @@ def scan_files(watcher: FileWatcher) -> list[str]:
         List of files to watch
 
     """
-    files_to_watch = []
-    for watch_dir in watcher.dirs:
-        for root, _, files in os.walk(watch_dir):
-            for file in files:
-                filepath = os.path.join(root, file)
-                if should_watch_file(watcher, filepath):
-                    files_to_watch.append(filepath)
+    from glob import iglob
+    from time import time
+
+    def glob_fn(file_patterns, parent_dir):
+        result = []
+        for file_pattern in file_patterns:
+            result += iglob(f"{parent_dir}/**/{file_pattern}", recursive=True)
+
+        if len(result) == 0:
+            result = iglob(f"{parent_dir}/**/*", recursive=True)
+
+        return result
+
+    t_start = time()
+    files_to_watch = [
+        p
+        for watch_dir in watcher.dirs
+        for p in glob_fn(watcher.file_patterns, watch_dir)
+        if (should_watch_file(watcher, p) and os.path.isfile(p))
+    ]
+    logging.debug(f"Scanning took {time() - t_start}s")
 
     return files_to_watch
 
