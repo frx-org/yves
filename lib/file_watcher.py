@@ -488,13 +488,19 @@ def watch(watcher: FileWatcher, timeout: int = 1) -> None:
                         "lines": current_lines,
                         "is_binary": False,
                     }
-    logger.info(f"Monitoring {len(watcher.file_snapshots)} files")
+
+    logger.debug(f"Monitoring {len(watcher.file_snapshots)} files")
+    for file_snapshot in watcher.file_snapshots:
+        logger.debug(f" - {file_snapshot}")
 
     signal(SIGTERM, signal_handler)
     signal(SIGINT, signal_handler)
 
+    logging.info("Watching for changes...")
     while True:
         changes = check_for_changes(watcher)
         if changes:
+            logging.debug(f"Found {len(changes)} changes")
             write_changes_to_file(watcher, changes)
+
         sleep(timeout)
