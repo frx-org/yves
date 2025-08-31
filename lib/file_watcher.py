@@ -401,7 +401,7 @@ def write_changes_to_file(
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    with open(watcher.output_file, "w", encoding="utf-8") as f:
+    with open(watcher.output_file, "w+", encoding="utf-8") as f:
         f.write(f"\n{'=' * 80}\n")
         f.write(f"CHANGES DETECTED AT: {timestamp}\n")
         f.write(f"{'=' * 80}\n")
