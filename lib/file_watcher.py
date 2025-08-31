@@ -480,21 +480,20 @@ def watch(watcher: FileWatcher, timeout: int = 1) -> None:
     file_paths = scan_files(watcher)
     for file_path in file_paths:
         current_hash = get_md5(file_path)
-        if current_hash:
-            if is_binary(file_path):
+        if is_binary(file_path):
+            watcher.file_snapshots[file_path] = {
+                "hash": current_hash,
+                "lines": [],
+                "is_binary": True,
+            }
+        else:
+            current_lines = get_content(file_path)
+            if current_lines is not None:
                 watcher.file_snapshots[file_path] = {
                     "hash": current_hash,
-                    "lines": [],
-                    "is_binary": True,
+                    "lines": current_lines,
+                    "is_binary": False,
                 }
-            else:
-                current_lines = get_content(file_path)
-                if current_lines is not None:
-                    watcher.file_snapshots[file_path] = {
-                        "hash": current_hash,
-                        "lines": current_lines,
-                        "is_binary": False,
-                    }
 
     logger.debug(f"Monitoring {len(watcher.file_snapshots)} files")
     for file_snapshot in watcher.file_snapshots:
