@@ -135,6 +135,7 @@ def write_commands_to_file(
 
     # Append new completed commands
     for cmd in completed_commands:
+<<<<<<< HEAD
         timestamp_str = int(cmd["timestamp"].timestamp())
         all_events.append(
             {
@@ -146,6 +147,17 @@ def write_commands_to_file(
                 "output": cmd["output"].splitlines(),
             }
         )
+=======
+        timestamp_str = cmd["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
+        all_events.append({
+            "event_type": "command_completed",
+            "timestamp": timestamp_str,
+            "pane": cmd["pane"],
+            "command": cmd["command"],
+            # Split output into lines for easier processing later
+            "output": cmd["output"].splitlines()
+        })
+>>>>>>> 1302af3 (feat: save logs using json format)
 
     # Write updated JSON back to file
     with open(watcher.output_file, "w", encoding="utf-8") as f:

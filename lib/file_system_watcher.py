@@ -416,21 +416,8 @@ def write_changes_to_file(
     else:
         all_events = []
 
-        for change in changes:
-            # Find the repository name for display
-            watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
-            if watch_dir:
-                rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
-                repo_name = os.path.basename(os.path.normpath(watch_dir))
-                display_path = f"{repo_name}/{rel_path}"
-            else:
-                display_path = change["file"]
-
-            f.write(f"\n--- {change['type'].upper()}: {display_path} ---\n")  # type: ignore
-            f.write(change["diff"])  # type: ignore
-            f.write(f"\n--- END OF DIFF FOR {display_path} ---\n")
-
-    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    # Append new changes
+    changes_list = []
     for change in changes:
         watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
         if watch_dir:
@@ -440,24 +427,18 @@ def write_changes_to_file(
         else:
             display_path = change["file"]
 
-        changes_list.append(
-            {
-                "file": display_path,
-                "status": change["type"].lower(),  # e.g., "modified", "new"
-                "diff": change.get("diff", "").splitlines()
-                if isinstance(change.get("diff"), str)
-                else change.get("diff", []),
-                "is_binary": change.get("is_binary", False),
-            }
-        )
+        changes_list.append({
+            "file": display_path,
+            "status": change["type"].lower(),  # e.g., "modified", "new"
+            "diff": change.get("diff", "").splitlines() if isinstance(change.get("diff"), str) else change.get("diff", []),
+            "is_binary": change.get("is_binary", False)
+        })
 
-    all_events.append(
-        {
-            "event_type": "changes_detected",
-            "timestamp": timestamp,
-            "changes": changes_list,
-        }
-    )
+    all_events.append({
+        "event_type": "changes_detected",
+        "timestamp": timestamp,
+        "changes": changes_list
+    })
 
     # Write updated JSON back to file
     with open(watcher.output_file, "w", encoding="utf-8") as f:
