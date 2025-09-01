@@ -275,6 +275,7 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
 
     from signal import SIGINT, SIGTERM, signal
     from time import sleep
+
     initial_panes = watcher.panes.copy()
     if initial_panes:
         logger.info(f"Watching tmux panes: {', '.join(initial_panes)}")
