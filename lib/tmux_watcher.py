@@ -6,6 +6,7 @@ import subprocess
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class TmuxWatcher:
     """Tmux pane monitor that captures tmux pane commands and outputs.
