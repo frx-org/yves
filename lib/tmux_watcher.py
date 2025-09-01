@@ -25,7 +25,6 @@ class TmuxWatcher:
     capture_full_output: bool = False
     pane_states: dict[str, dict[str, object]] = field(default_factory=dict)
 
-<<<<<<< HEAD
 
 def update_from_config(watcher: TmuxWatcher, config_path: str) -> None:
     """Read a config file and update `watcher`.
@@ -47,8 +46,6 @@ def update_from_config(watcher: TmuxWatcher, config_path: str) -> None:
     watcher.capture_full_output = cfg.getbool("tmux", "capture_full_output")  # type: ignore
 
 
-=======
->>>>>>> b4b64f6 (feat: add possibility to monitor realtime all tmux panes.)
 def check_for_completed_commands(watcher: TmuxWatcher) -> list[dict[str, object]]:
     """
     Check all monitored panes for newly completed commands.
