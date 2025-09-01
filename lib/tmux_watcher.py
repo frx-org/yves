@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
+import logging
 from types import FrameType
 from datetime import datetime
 import subprocess
 
+logger = logging.getLogger(__name__)
 
 @dataclass
 class TmuxWatcher:
@@ -109,9 +111,9 @@ def write_commands_to_file(
             f.write(cmd["output"])
             f.write(f"\n{'=' * 80}\n")
 
-    print(f"Captured {len(completed_commands)} completed commands")
+    logger.info(f"Captured {len(completed_commands)} completed commands")
     for cmd in completed_commands:
-        print(f"  [{cmd['pane']}] {cmd['command']}")
+        logger.info(f"  [{cmd['pane']}] {cmd['command']}")
 
 
 def signal_handler(signal: int, frame: FrameType | None):
@@ -156,17 +158,17 @@ def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
         else:
             current_panes = set()
     except Exception as e:
-        print(f"Error getting active tmux panes: {e}")
+        logger.error(f"Error getting active tmux panes: {e}")
         current_panes = set()
     added = current_panes - previous_panes
     removed = previous_panes - current_panes
     if added:
-        print(f"New panes detected: {added}")
+        logger.info(f"New panes detected: {added}")
     if removed:
-        print(f"Panes closed: {removed}")
+        logger.info(f"Panes closed: {removed}")
     watcher.panes = list(current_panes)
     if len(watcher.panes) == 0:
-        print("[WARNING] No active tmux panes detected.")
+        logger.warning("No active tmux panes detected.")
         while result.returncode != 0:
             result = subprocess.run(
                 ["tmux", "list-panes", "-a", "-F", "#S:#I.#P"],
@@ -193,15 +195,15 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
 
     initial_panes = watcher.panes.copy()
     if initial_panes:
-        print(f"Watching tmux panes: {', '.join(initial_panes)}")
+        logger.info(f"Watching tmux panes: {', '.join(initial_panes)}")
     else:
-        print("No specified panes to watch. Will monitor all tmux panes")
-    print(f"Output file: {watcher.output_file}")
-    print(
+        logger.info("No specified panes to watch. Will monitor all tmux panes")
+    logger.info(f"Output file: {watcher.output_file}")
+    logger.info(
         f"Capture mode: {'Full output' if watcher.capture_full_output else 'Last command only'}"
     )
-    print("Press Ctrl+C to stop watching...")
-    print("-" * 50)
+    logger.info("Press Ctrl+C to stop watching...")
+    logger.info("-" * 50)
 
     signal(SIGTERM, signal_handler)
     signal(SIGINT, signal_handler)
