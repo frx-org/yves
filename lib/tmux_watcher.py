@@ -135,7 +135,7 @@ def write_commands_to_file(
 
     # Append new completed commands
     for cmd in completed_commands:
-        timestamp_str = cmd["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_str = int(cmd["timestamp"].timestamp())
         all_events.append(
             {
                 "event_type": "command_completed",

@@ -404,7 +404,7 @@ def write_changes_to_file(
     if not changes:
         return
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = int(datetime.now().timestamp())
 
     # Load existing JSON if the file exists
     if os.path.exists(watcher.output_file):
