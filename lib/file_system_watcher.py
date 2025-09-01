@@ -406,31 +406,23 @@ def write_changes_to_file(
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    with open(watcher.output_file, "w+", encoding="utf-8") as f:
-        f.write(f"\n{'=' * 80}\n")
-        f.write(f"CHANGES DETECTED AT: {timestamp}\n")
-        f.write(f"{'=' * 80}\n")
+    # Load existing JSON if the file exists
+    if os.path.exists(watcher.output_file):
+        with open(watcher.output_file, "r", encoding="utf-8") as f:
+            try:
+                all_events = json.load(f)
+            except json.JSONDecodeError:
+                all_events = []
+    else:
+        all_events = []
 
-        for change in changes:
-            # Find the repository name for display
-            watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
-            if watch_dir:
-                rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
-                repo_name = os.path.basename(os.path.normpath(watch_dir))
-                display_path = f"{repo_name}/{rel_path}"
-            else:
-                display_path = change["file"]
-
-            f.write(f"\n--- {change['type'].upper()}: {display_path} ---\n")  # type: ignore
-            f.write(change["diff"])  # type: ignore
-            f.write(f"\n--- END OF DIFF FOR {display_path} ---\n")
-
-    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    # Append new changes
+    changes_list = []
     for change in changes:
         watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
         if watch_dir:
             rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
-            repo_name = os.path.basename(watch_dir)
+            repo_name = os.path.basename(os.path.normpath(watch_dir))
             display_path = f"{repo_name}/{rel_path}"
         else:
             display_path = change["file"]
