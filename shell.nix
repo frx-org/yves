@@ -12,7 +12,6 @@ pkgs.mkShellNoCC {
   packages = with pkgs; [
     just
     nixfmt-tree
-    nushell
     uv
   ];
 }
