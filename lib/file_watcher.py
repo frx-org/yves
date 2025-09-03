@@ -34,40 +34,6 @@ class FileWatcher:
     )
 
 
-def should_watch_file(watcher: FileWatcher, file_path: str) -> bool:
-    """Check if file should be monitored based on patterns.
-
-    Filtering order:
-    1. Exclude output file (prevents infinite loops)
-    2. Default: include all non-excluded files
-
-    Parameters
-    ----------
-    watcher : FileWatcher
-    file_path : str
-        Path to the file we analyze to watch or not
-
-    Returns
-    -------
-    bool
-        `True` is `file_path` should be watched, else `False`
-
-    """
-
-    from lib.file import find_file_in_dirs
-
-    # Always exclude the output file to prevent infinite monitoring loops
-    output_path = os.path.abspath(watcher.output_file)
-    if os.path.abspath(file_path) == output_path:
-        return False
-
-    watch_dir = find_file_in_dirs(file_path, watcher.dirs)
-    if watch_dir is None:
-        return False
-
-    return True
-
-
 def generate_diff(
     old_lines: list[str],
     new_lines: list[str],
@@ -265,12 +231,17 @@ def scan_files(watcher: FileWatcher) -> list[str]:
         return result
 
     t_start = time()
-    files_to_watch = [
-        p
-        for watch_dir in watcher.dirs
-        for p in glob_fn(watcher.file_patterns, watcher.exclude_patterns, watch_dir)
-        if (should_watch_file(watcher, p) and os.path.isfile(p))
-    ]
+    files_to_watch = []
+    for watch_dir in watcher.dirs:
+        for p in glob_fn(watcher.file_patterns, watcher.exclude_patterns, watch_dir):
+            # always exclude the output file to prevent infinite monitoring loops
+            abs_output_path = os.path.abspath(watcher.output_file)
+            abs_p = os.path.abspath(p)
+            not_output_file = abs_p != abs_output_path
+
+            if not_output_file and os.path.isfile(p):
+                files_to_watch.append(p)
+
     logging.debug(f"Scanning took {time() - t_start}s")
 
     return files_to_watch
