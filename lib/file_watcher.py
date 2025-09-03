@@ -14,8 +14,8 @@ class FileWatcher:
     ----------
     dirs: List of directories to monitor
     output_file: Output file for diffs
-    file_patterns: Include patterns (e.g., ['*.py', '*.js'])
-    exclude_patterns: Exclude patterns (e.g., ['*.pyc', '__pycache__'])
+    include_filetypes: Include filetypes (e.g., ['.py', '.js'])
+    exclude_filetypes: Exclude filetypes (e.g., ['.pyc'])
     major_changes_only: Filter out minor changes
     min_lines_changed: Minimum lines for major change
     similarity_threshold: Minimum similarity ratio [0.0-1.0] for major change detection
@@ -24,8 +24,8 @@ class FileWatcher:
 
     dirs: list[str]
     output_file: str = "changes.txt"
-    file_patterns: list[str] = field(default_factory=list)
-    exclude_patterns: list[str] = field(default_factory=list)
+    include_filetypes: list[str] = field(default_factory=list)
+    exclude_filetypes: list[str] = field(default_factory=list)
     major_changes_only: bool = False
     min_lines_changed: int = 3
     similarity_threshold: float = 0.7
@@ -193,7 +193,7 @@ def is_major_change(
 
 
 def scan_files(watcher: FileWatcher) -> list[str]:
-    """Recursively scan all directories for files matching patterns
+    """Recursively scan all directories for files matching filetypes
 
     Parameters
     ----------
@@ -209,22 +209,24 @@ def scan_files(watcher: FileWatcher) -> list[str]:
     from glob import iglob
     from time import time
 
-    def exclude_patterns_fn(path: str, exclude_patterns: list[str]):
-        return not any({path.endswith(pattern[1:]) for pattern in exclude_patterns})
+    def exclude_filetypes_fn(path: str, exclude_filetypes: list[str]):
+        return not any({path.endswith(filetype) for filetype in exclude_filetypes})
 
-    def glob_fn(file_patterns: list[str], exclude_patterns: list[str], parent_dir: str):
+    def glob_fn(
+        include_filetypes: list[str], exclude_filetypes: list[str], parent_dir: str
+    ):
         result = []
-        for file_pattern in file_patterns:
-            result += iglob(f"{parent_dir}/**/{file_pattern}", recursive=True)
+        for include_filetype in include_filetypes:
+            result += iglob(f"{parent_dir}/**/{include_filetype}", recursive=True)
 
         if len(result) == 0:
-            if len(file_patterns) > 0:
+            if len(include_filetypes) > 0:
                 return []
 
             result = iglob(f"{parent_dir}/**/*", recursive=True)
 
         result = filter(
-            partial(exclude_patterns_fn, exclude_patterns=exclude_patterns),
+            partial(exclude_filetypes_fn, exclude_filetypes=exclude_filetypes),
             result,
         )
 
@@ -233,7 +235,9 @@ def scan_files(watcher: FileWatcher) -> list[str]:
     t_start = time()
     files_to_watch = []
     for watch_dir in watcher.dirs:
-        for p in glob_fn(watcher.file_patterns, watcher.exclude_patterns, watch_dir):
+        for p in glob_fn(
+            watcher.include_filetypes, watcher.exclude_filetypes, watch_dir
+        ):
             # always exclude the output file to prevent infinite monitoring loops
             abs_output_path = os.path.abspath(watcher.output_file)
             abs_p = os.path.abspath(p)
@@ -443,10 +447,10 @@ def watch(watcher: FileWatcher, timeout: int = 1) -> None:
     for watch_dir in watcher.dirs:
         logger.info(f"  - {watch_dir}")
     logger.info(f"Output file: {watcher.output_file}")
-    if watcher.file_patterns:
-        logger.info(f"Watching patterns: {watcher.file_patterns}")
-    if watcher.exclude_patterns:
-        logger.info(f"Excluding patterns: {watcher.exclude_patterns}")
+    if watcher.include_filetypes:
+        logger.info(f"Watching filetypes: {watcher.include_filetypes}")
+    if watcher.exclude_filetypes:
+        logger.info(f"Excluding filetypes: {watcher.exclude_filetypes}")
     logger.info("Press Ctrl+C to stop watching...")
     logger.info("-" * 50)
 
