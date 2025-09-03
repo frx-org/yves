@@ -257,6 +257,9 @@ def scan_files(watcher: FileWatcher) -> list[str]:
             result += iglob(f"{parent_dir}/**/{file_pattern}", recursive=True)
 
         if len(result) == 0:
+            if len(file_patterns) > 0:
+                return []
+
             result = iglob(f"{parent_dir}/**/*", recursive=True)
 
         return result
