@@ -14,7 +14,6 @@ class TmuxWatcher:
     ----------
     panes: List of tmux panes to monitor
     output_file: Output file for command outputs
-    file_patterns: Include patterns (e.g., ['*.py', '*.js'])
     capture_full_output: If True, capture full pane content instead of just last command
     pane_states: Dictionary to hold the state of each tmux pane
     """
