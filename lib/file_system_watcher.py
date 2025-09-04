@@ -34,6 +34,30 @@ class FileSystemWatcher:
     )
 
 
+def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
+    """Read a config file and update `watcher`.
+
+    Parameters
+    ----------
+    watcher : FileSystemWatcher
+        Watcher values to be updated
+    config_path : str
+        Path to the configuration file
+
+    """
+    from lib.cfg import parse_config
+
+    cfg = parse_config(config_path)
+
+    watcher.dirs = cfg.getlist("filesystem", "dirs")  # type: ignore
+    watcher.output_file = cfg["filesystem"]["output_file"]
+    watcher.file_patterns = cfg.getlist("filesystem", "file_patterns")  # type: ignore
+    watcher.exclude_patterns = cfg.getlist("filesystem", "exclude_patterns")  # type: ignore
+    watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore
+    watcher.min_lines_changed = cfg.getint("filesystem", "min_lines_changed")
+    watcher.similarity_threshold = cfg.getfloat("filesystem", "similarity_threshold")
+
+
 def generate_diff(
     old_lines: list[str],
     new_lines: list[str],
