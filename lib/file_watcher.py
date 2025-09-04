@@ -14,8 +14,8 @@ class FileWatcher:
     ----------
     dirs: List of directories to monitor
     output_file: Output file for diffs
-    file_patterns: Include patterns (e.g., ['*.py', '*.js'])
-    exclude_patterns: Exclude patterns (e.g., ['*.pyc', '__pycache__'])
+    include_filetypes: Include filetypes (e.g., ['.py', '.js'])
+    exclude_filetypes: Exclude filetypes (e.g., ['.pyc'])
     major_changes_only: Filter out minor changes
     min_lines_changed: Minimum lines for major change
     similarity_threshold: Minimum similarity ratio [0.0-1.0] for major change detection
@@ -24,64 +24,14 @@ class FileWatcher:
 
     dirs: list[str]
     output_file: str = "changes.txt"
-    file_patterns: list[str] = field(default_factory=list)
-    exclude_patterns: list[str] = field(default_factory=list)
+    include_filetypes: list[str] = field(default_factory=list)
+    exclude_filetypes: list[str] = field(default_factory=list)
     major_changes_only: bool = False
     min_lines_changed: int = 3
     similarity_threshold: float = 0.7
     file_snapshots: dict[str, dict[str, str | list[str] | bool]] = field(
         default_factory=dict
     )
-
-
-def should_watch_file(watcher: FileWatcher, file_path: str) -> bool:
-    """Check if file should be monitored based on patterns.
-
-    Filtering order:
-    1. Exclude output file (prevents infinite loops)
-    2. Check exclude patterns
-    3. Check include patterns (if any)
-    4. Default: include all non-excluded files
-
-    Parameters
-    ----------
-    watcher : FileWatcher
-    file_path : str
-        Path to the file we analyze to watch or not
-
-    Returns
-    -------
-    bool
-        `True` is `file_path` should be watched, else `False`
-
-    """
-
-    from fnmatch import fnmatch
-
-    from lib.file import find_file_in_dirs
-
-    # Always exclude the output file to prevent infinite monitoring loops
-    output_path = os.path.abspath(watcher.output_file)
-    if os.path.abspath(file_path) == output_path:
-        return False
-
-    watch_dir = find_file_in_dirs(file_path, watcher.dirs)
-    if watch_dir is None:
-        return False
-
-    rel_path = os.path.relpath(file_path, watch_dir)
-
-    for pattern in watcher.exclude_patterns:
-        if fnmatch(rel_path, pattern):
-            return False
-
-    if watcher.file_patterns:
-        for pattern in watcher.file_patterns:
-            if fnmatch(rel_path, pattern):
-                return True
-        return False
-
-    return True
 
 
 def generate_diff(
@@ -243,7 +193,7 @@ def is_major_change(
 
 
 def scan_files(watcher: FileWatcher) -> list[str]:
-    """Recursively scan all directories for files matching patterns
+    """Recursively scan all directories for files matching filetypes
 
     Parameters
     ----------
@@ -255,13 +205,48 @@ def scan_files(watcher: FileWatcher) -> list[str]:
         List of files to watch
 
     """
+    from functools import partial
+    from glob import iglob
+    from time import time
+
+    def exclude_filetypes_fn(path: str, exclude_filetypes: list[str]):
+        return not any({path.endswith(filetype) for filetype in exclude_filetypes})
+
+    def glob_fn(
+        include_filetypes: list[str], exclude_filetypes: list[str], parent_dir: str
+    ):
+        result = []
+        for include_filetype in include_filetypes:
+            result += iglob(f"{parent_dir}/**/*{include_filetype}", recursive=True)
+
+        if len(result) == 0:
+            if len(include_filetypes) > 0:
+                return []
+
+            result = iglob(f"{parent_dir}/**/*", recursive=True)
+
+        result = filter(
+            partial(exclude_filetypes_fn, exclude_filetypes=exclude_filetypes),
+            result,
+        )
+
+        return result
+
+    t_start = time()
     files_to_watch = []
     for watch_dir in watcher.dirs:
-        for root, _, files in os.walk(watch_dir):
-            for file in files:
-                filepath = os.path.join(root, file)
-                if should_watch_file(watcher, filepath):
-                    files_to_watch.append(filepath)
+        for p in glob_fn(
+            watcher.include_filetypes, watcher.exclude_filetypes, watch_dir
+        ):
+            # always exclude the output file to prevent infinite monitoring loops
+            abs_output_path = os.path.abspath(watcher.output_file)
+            abs_p = os.path.abspath(p)
+            not_output_file = abs_p != abs_output_path
+
+            if not_output_file and os.path.isfile(p):
+                files_to_watch.append(p)
+
+    logging.debug(f"Scanning took {time() - t_start}s")
 
     return files_to_watch
 
@@ -394,7 +379,7 @@ def write_changes_to_file(
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    with open(watcher.output_file, "w", encoding="utf-8") as f:
+    with open(watcher.output_file, "w+", encoding="utf-8") as f:
         f.write(f"\n{'=' * 80}\n")
         f.write(f"CHANGES DETECTED AT: {timestamp}\n")
         f.write(f"{'=' * 80}\n")
@@ -462,10 +447,10 @@ def watch(watcher: FileWatcher, timeout: int = 1) -> None:
     for watch_dir in watcher.dirs:
         logger.info(f"  - {watch_dir}")
     logger.info(f"Output file: {watcher.output_file}")
-    if watcher.file_patterns:
-        logger.info(f"Watching patterns: {watcher.file_patterns}")
-    if watcher.exclude_patterns:
-        logger.info(f"Excluding patterns: {watcher.exclude_patterns}")
+    if watcher.include_filetypes:
+        logger.info(f"Watching filetypes: {watcher.include_filetypes}")
+    if watcher.exclude_filetypes:
+        logger.info(f"Excluding filetypes: {watcher.exclude_filetypes}")
     logger.info("Press Ctrl+C to stop watching...")
     logger.info("-" * 50)
 
@@ -473,28 +458,33 @@ def watch(watcher: FileWatcher, timeout: int = 1) -> None:
     file_paths = scan_files(watcher)
     for file_path in file_paths:
         current_hash = get_md5(file_path)
-        if current_hash:
-            if is_binary(file_path):
+        if is_binary(file_path):
+            watcher.file_snapshots[file_path] = {
+                "hash": current_hash,
+                "lines": [],
+                "is_binary": True,
+            }
+        else:
+            current_lines = get_content(file_path)
+            if current_lines is not None:
                 watcher.file_snapshots[file_path] = {
                     "hash": current_hash,
-                    "lines": [],
-                    "is_binary": True,
+                    "lines": current_lines,
+                    "is_binary": False,
                 }
-            else:
-                current_lines = get_content(file_path)
-                if current_lines is not None:
-                    watcher.file_snapshots[file_path] = {
-                        "hash": current_hash,
-                        "lines": current_lines,
-                        "is_binary": False,
-                    }
-    logger.info(f"Monitoring {len(watcher.file_snapshots)} files")
+
+    logger.debug(f"Monitoring {len(watcher.file_snapshots)} files")
+    for file_snapshot in watcher.file_snapshots:
+        logger.debug(f" - {file_snapshot}")
 
     signal(SIGTERM, signal_handler)
     signal(SIGINT, signal_handler)
 
+    logging.info("Watching for changes...")
     while True:
         changes = check_for_changes(watcher)
         if changes:
+            logging.debug(f"Found {len(changes)} changes")
             write_changes_to_file(watcher, changes)
+
         sleep(timeout)
