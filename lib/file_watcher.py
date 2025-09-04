@@ -217,7 +217,7 @@ def scan_files(watcher: FileWatcher) -> list[str]:
     ):
         result = []
         for include_filetype in include_filetypes:
-            result += iglob(f"{parent_dir}/**/{include_filetype}", recursive=True)
+            result += iglob(f"{parent_dir}/**/*{include_filetype}", recursive=True)
 
         if len(result) == 0:
             if len(include_filetypes) > 0:
