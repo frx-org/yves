@@ -5,6 +5,12 @@ Main script to monitor files using FileWatcher from lib.
 
 import argparse
 from lib.file_watcher import FileWatcher, watch
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - [%(levelname)s] - %(message)s",
+)
 
 
 def main() -> None:
