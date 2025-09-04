@@ -30,10 +30,16 @@ Examples:
         help="Output file for changes",
     )
     parser.add_argument(
-        "--include", nargs="*", default=[],help="File patterns to watch (e.g., *.py *.txt)"
+        "--include",
+        nargs="*",
+        default=[],
+        help="File patterns to watch (e.g., *.py *.txt)",
     )
     parser.add_argument(
-        "--exclude", nargs="*", default=[], help="Patterns to exclude (e.g., *.pyc __pycache__)"
+        "--exclude",
+        nargs="*",
+        default=[],
+        help="Patterns to exclude (e.g., *.pyc __pycache__)",
     )
     parser.add_argument(
         "--major-only",
