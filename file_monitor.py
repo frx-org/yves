@@ -15,8 +15,8 @@ def main() -> None:
 Examples:
   %(prog)s . --output changes.txt
   %(prog)s /path/to/repo1 /path/to/repo2 --output changes.txt
-  %(prog)s /path/to/code --patterns "*.py" "*.js" --output code_changes.txt
-  %(prog)s . --exclude "*.pyc" "__pycache__" "*.log" --output filtered.txt
+  %(prog)s /path/to/code --include ".py" ".js" --output code_changes.txt
+  %(prog)s . --exclude ".pyc" "__pycache__" ".log" --output filtered.txt
   %(prog)s . --major-only --min-lines 5 --output major.txt
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -65,8 +65,8 @@ Examples:
     watcher = FileWatcher(
         dirs=args.dirs,
         output_file=args.output,
-        file_patterns=args.patterns,
-        exclude_patterns=args.exclude,
+        include_filetypes=args.include,
+        exclude_filetypes=args.exclude,
         major_changes_only=args.major_only,
         min_lines_changed=args.min_lines,
         similarity_threshold=args.similarity_threshold,
