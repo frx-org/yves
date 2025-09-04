@@ -33,6 +33,11 @@ def default_config() -> ConfigParser:
         "min_lines_changed": "3",
         "similarity_threshold": "0.7",
     }
+    config["tmux"] = {
+        "panes": "",
+        "output_file": "changes.txt",
+        "capture_full_output": "False",
+    }
 
     return config
 
