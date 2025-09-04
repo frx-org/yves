@@ -27,8 +27,8 @@ def default_config() -> ConfigParser:
     config["filesystem"] = {
         "dirs": "",
         "output_file": "changes.txt",
-        "file_patterns": "",
-        "exclude_patterns": "",
+        "include_filetypes": "",
+        "exclude_filetypes": "",
         "major_changes_only": "False",
         "min_lines_changed": "3",
         "similarity_threshold": "0.7",
