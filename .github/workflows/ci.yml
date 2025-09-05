@@ -37,3 +37,22 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Nix format
         run: nix-shell ./shell.nix --command "treefmt --ci"
+
+  pytest:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: [ruff, nix-fmt]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.0
+      - name: Install python
+        uses: actions/setup-python@v5.6.0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6.6.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+      - name: pytest
+        run: uv run pytest

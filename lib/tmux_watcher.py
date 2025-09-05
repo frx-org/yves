@@ -14,7 +14,6 @@ class TmuxWatcher:
     ----------
     panes: List of tmux panes to monitor
     output_file: Output file for command outputs
-    file_patterns: Include patterns (e.g., ['*.py', '*.js'])
     capture_full_output: If True, capture full pane content instead of just last command
     pane_states: Dictionary to hold the state of each tmux pane
     """
@@ -23,6 +22,26 @@ class TmuxWatcher:
     output_file: str = "changes.txt"
     capture_full_output: bool = False
     pane_states: dict[str, dict[str, object]] = field(default_factory=dict)
+
+
+def update_from_config(watcher: TmuxWatcher, config_path: str) -> None:
+    """Read a config file and update `watcher`.
+
+    Parameters
+    ----------
+    watcher : TmuxWatcher
+        Watcher values to be updated
+    config_path : str
+        Path to the configuration file
+
+    """
+    from lib.cfg import parse_config
+
+    cfg = parse_config(config_path)
+
+    watcher.panes = cfg.getlist("tmux", "panes")  # type: ignore
+    watcher.output_file = cfg["tmux"]["output_file"]
+    watcher.capture_full_output = cfg.getbool("tmux", "capture_full_output")  # type: ignore
 
 
 def check_for_completed_commands(watcher: TmuxWatcher) -> list[dict[str, object]]:

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class FileWatcher:
+class FileSystemWatcher:
     """File system monitor that captures changes as diffs from multiple repositories.
 
     Attributes
@@ -32,6 +32,30 @@ class FileWatcher:
     file_snapshots: dict[str, dict[str, str | list[str] | bool]] = field(
         default_factory=dict
     )
+
+
+def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
+    """Read a config file and update `watcher`.
+
+    Parameters
+    ----------
+    watcher : FileSystemWatcher
+        Watcher values to be updated
+    config_path : str
+        Path to the configuration file
+
+    """
+    from lib.cfg import parse_config
+
+    cfg = parse_config(config_path)
+
+    watcher.dirs = cfg.getlist("filesystem", "dirs")  # type: ignore
+    watcher.output_file = cfg["filesystem"]["output_file"]
+    watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
+    watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore
+    watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore
+    watcher.min_lines_changed = cfg.getint("filesystem", "min_lines_changed")
+    watcher.similarity_threshold = cfg.getfloat("filesystem", "similarity_threshold")
 
 
 def generate_diff(
@@ -71,12 +95,12 @@ def generate_diff(
     return "\n".join(diff) if diff else None
 
 
-def normalize_line(watcher: FileWatcher, line: str) -> str:
+def normalize_line(watcher: FileSystemWatcher, line: str) -> str:
     """Normalize line for major change detection (strip whitespace, ignore comments).
 
     Parameters
     ----------
-    watcher : FileWatcher
+    watcher : FileSystemWatcher
     line : str
         Line to normalize
 
@@ -103,7 +127,7 @@ def normalize_line(watcher: FileWatcher, line: str) -> str:
 
 
 def is_major_change(
-    watcher: FileWatcher,
+    watcher: FileSystemWatcher,
     old_lines: list[str],
     new_lines: list[str],
     file_path: str,
@@ -117,7 +141,7 @@ def is_major_change(
 
     Parameters
     ----------
-    watcher : FileWatcher
+    watcher : FileSystemWatcher
     old_lines : list[str]
         List of previous lines before modification on the file
     new_lines : list[str]
@@ -192,12 +216,12 @@ def is_major_change(
     return False
 
 
-def scan_files(watcher: FileWatcher) -> list[str]:
+def scan_files(watcher: FileSystemWatcher) -> list[str]:
     """Recursively scan all directories for files matching filetypes
 
     Parameters
     ----------
-    watcher : FileWatcher
+    watcher : FileSystemWatcher
 
     Returns
     -------
@@ -251,14 +275,16 @@ def scan_files(watcher: FileWatcher) -> list[str]:
     return files_to_watch
 
 
-def check_for_changes(watcher: FileWatcher) -> list[dict[str, str | list[str] | bool]]:
+def check_for_changes(
+    watcher: FileSystemWatcher,
+) -> list[dict[str, str | list[str] | bool]]:
     """Check all monitored files for changes and generate diffs.
 
     Handles both text and binary files appropriately.
 
     Parameters
     ----------
-    watcher : FileWatcher
+    watcher : FileSystemWatcher
 
     Returns
     -------
@@ -359,13 +385,13 @@ def check_for_changes(watcher: FileWatcher) -> list[dict[str, str | list[str] | 
 
 
 def write_changes_to_file(
-    watcher: FileWatcher, changes: list[dict[str, str | list[str] | bool]]
+    watcher: FileSystemWatcher, changes: list[dict[str, str | list[str] | bool]]
 ) -> None:
     """Write detected changes to output file with timestamps and formatting.
 
     Parameters
     ----------
-    watcher : FileWatcher
+    watcher : FileSystemWatcher
     changes : list[dict[str, str | list[str] | bool]]
       List of changes to write in `watcher.output_file`
 
@@ -427,12 +453,12 @@ def signal_handler(signal: int, frame: FrameType | None):
     exit(0)
 
 
-def watch(watcher: FileWatcher, timeout: int = 1) -> None:
+def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
     """Start monitoring loop. Runs until Ctrl+C is pressed.
 
     Parameters
     ----------
-    watcher : FileWatcher
+    watcher : FileSystemWatcher
     timeout : int
         Timeout in seconds in the while loop
 
