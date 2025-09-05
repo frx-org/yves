@@ -39,7 +39,7 @@ Examples:
         "--include",
         nargs="*",
         default=[],
-        help="File patterns to watch (e.g., *.py *.txt)",
+        help="File patterns to watch (e.g., .py .txt)",
     )
     parser.add_argument(
         "--exclude",
