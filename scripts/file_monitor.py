@@ -45,7 +45,7 @@ Examples:
         "--exclude",
         nargs="*",
         default=[],
-        help="Patterns to exclude (e.g., *.pyc __pycache__)",
+        help="Patterns to exclude (e.g., .pyc __pycache__)",
     )
     parser.add_argument(
         "--major-only",
