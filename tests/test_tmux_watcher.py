@@ -1,15 +1,11 @@
-def test_update_from_config():
+def test_update_from_config(tmpdir):
     """Test `update_from_config` if it updates the current `TmuxWatcher` instance"""
-    import os
     from configparser import ConfigParser
     from uuid import uuid4
 
     from lib.tmux_watcher import TmuxWatcher, update_from_config
 
-    abs_path = os.path.join("/tmp/new/dir/here", f"{uuid4().hex}")
-    if not os.path.exists(os.path.dirname(abs_path)):
-        os.makedirs(abs_path, exist_ok=True)
-
+    abs_path = tmpdir / f"{uuid4().hex}"
     default_watcher = TmuxWatcher([])
     watcher = TmuxWatcher([])
 
