@@ -4,7 +4,7 @@ Main script to monitor files using FileWatcher from lib.
 """
 
 import argparse
-from lib.file_watcher import FileWatcher, watch
+from lib.file_system_watcher import FileSystemWatcher, watch
 import logging
 
 logging.basicConfig(
