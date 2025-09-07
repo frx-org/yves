@@ -74,7 +74,7 @@ Examples:
 
     args = parser.parse_args()
 
-    watcher = FileWatcher(
+    watcher = FileSystemWatcher(
         dirs=args.dirs,
         output_file=args.output,
         include_filetypes=args.include,
