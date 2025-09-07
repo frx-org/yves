@@ -3,6 +3,8 @@ import logging
 from types import FrameType
 from datetime import datetime
 import subprocess
+import os
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -121,16 +123,35 @@ def write_commands_to_file(
     if not completed_commands:
         return
 
-    with open(watcher.output_file, "a", encoding="utf-8") as f:
-        for cmd in completed_commands:
-            timestamp = cmd["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
-            f.write(f"\n{'=' * 80}\n")
-            f.write(f"COMMAND COMPLETED AT: {timestamp} | PANE: {cmd['pane']}\n")
-            f.write(f"COMMAND: {cmd['command']}\n")
-            f.write(f"{'=' * 80}\n")
-            f.write(cmd["output"])
-            f.write(f"\n{'=' * 80}\n")
+    # Load existing JSON if the file exists
+    if os.path.exists(watcher.output_file):
+        with open(watcher.output_file, "r", encoding="utf-8") as f:
+            try:
+                all_events = json.load(f)
+            except json.JSONDecodeError:
+                all_events = []
+    else:
+        all_events = []
 
+    # Append new completed commands
+    for cmd in completed_commands:
+        timestamp_str = int(cmd["timestamp"].timestamp())
+        all_events.append(
+            {
+                "event_type": "command_completed",
+                "timestamp": timestamp_str,
+                "pane": cmd["pane"],
+                "command": cmd["command"],
+                # Split output into lines for easier processing later
+                "output": cmd["output"].splitlines(),
+            }
+        )
+
+    # Write updated JSON back to file
+    with open(watcher.output_file, "w", encoding="utf-8") as f:
+        json.dump(all_events, f, ensure_ascii=False, indent=2)
+
+    # Log info
     logger.info(f"Captured {len(completed_commands)} completed commands")
     for cmd in completed_commands:
         logger.info(f"  [{cmd['pane']}] {cmd['command']}")

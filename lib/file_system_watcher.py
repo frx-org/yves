@@ -2,6 +2,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from types import FrameType
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -403,37 +404,56 @@ def write_changes_to_file(
     if not changes:
         return
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = int(datetime.now().timestamp())
 
-    with open(watcher.output_file, "w+", encoding="utf-8") as f:
-        f.write(f"\n{'=' * 80}\n")
-        f.write(f"CHANGES DETECTED AT: {timestamp}\n")
-        f.write(f"{'=' * 80}\n")
+    # Load existing JSON if the file exists
+    if os.path.exists(watcher.output_file):
+        with open(watcher.output_file, "r", encoding="utf-8") as f:
+            try:
+                all_events = json.load(f)
+            except json.JSONDecodeError:
+                all_events = []
+    else:
+        all_events = []
 
-        for change in changes:
-            # Find the repository name for display
-            watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
-            if watch_dir:
-                rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
-                repo_name = os.path.basename(watch_dir)
-                display_path = f"{repo_name}/{rel_path}"
-            else:
-                display_path = change["file"]
-
-            f.write(f"\n--- {change['type'].upper()}: {display_path} ---\n")  # type: ignore
-            f.write(change["diff"])  # type: ignore
-            f.write(f"\n--- END OF DIFF FOR {display_path} ---\n")
-
-    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    # Append new changes
+    changes_list = []
     for change in changes:
         watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
         if watch_dir:
             rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
-            repo_name = os.path.basename(watch_dir)
+            repo_name = os.path.basename(os.path.normpath(watch_dir))
             display_path = f"{repo_name}/{rel_path}"
         else:
             display_path = change["file"]
-        logger.info(f"  {change['type']}: {display_path}")
+
+        changes_list.append(
+            {
+                "file": display_path,
+                "status": change["type"].lower(),  # e.g., "modified", "new"
+                "diff": change.get("diff", "").splitlines()
+                if isinstance(change.get("diff"), str)
+                else change.get("diff", []),
+                "is_binary": change.get("is_binary", False),
+            }
+        )
+
+    all_events.append(
+        {
+            "event_type": "changes_detected",
+            "timestamp": timestamp,
+            "changes": changes_list,
+        }
+    )
+
+    # Write updated JSON back to file
+    with open(watcher.output_file, "w", encoding="utf-8") as f:
+        json.dump(all_events, f, ensure_ascii=False, indent=2)
+
+    # Logging
+    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    for change in changes_list:
+        logger.info(f"  {change['status']}: {change['file']}")
 
 
 def signal_handler(signal: int, frame: FrameType | None):

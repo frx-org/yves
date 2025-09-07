@@ -5,6 +5,12 @@ Main script to monitor tmux panes using TmuxWatcher from lib.
 
 import argparse
 from lib.tmux_watcher import TmuxWatcher, watch
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - [%(levelname)s] - %(message)s",
+)
 
 
 def main() -> None:
