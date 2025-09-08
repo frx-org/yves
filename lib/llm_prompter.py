@@ -126,3 +126,33 @@ def summarize(summarizer: LLMSummarizer):
         return summarize_one(summarizer, list_text[0], prompt="single")
     return summarize_many(summarizer, list_text)
 
+
+def generate_summary(summarizer: LLMSummarizer) -> None:
+    """
+    Save the generated summary to the specified output file.
+
+    Parameters
+    ----------
+    summarizer : LLMSummarizer
+        The summarizer instance.
+    """
+    if not summarizer.api_key:
+        logger.error(
+            "API key is required. Either set it using CLI argument or LLM_API_KEY environment variable."
+        )
+        return
+    logger.info(
+        f"Generating summary using {summarizer.model_name} from {summarizer.provider}..."
+    )
+    logger.info(f"Reading logs: {summarizer.tmux_log_path}, {summarizer.fs_log_path}")
+    logger.info(f"Output will be saved to: {summarizer.output_file}")
+    summary = summarize(summarizer)
+    if summary is None:
+        logger.error("No summary generated to save.")
+        return
+    try:
+        with open(summarizer.output_file, "w", encoding="utf-8") as f:
+            f.write(summary)
+        logger.info(f"Summary saved to {summarizer.output_file}")
+    except Exception as e:
+        logger.error(f"Failed to save summary: {e}")
