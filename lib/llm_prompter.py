@@ -1,9 +1,9 @@
-from dataclasses import dataclass, field
-import json
+from dataclasses import dataclass
 import logging
 import litellm
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class LLMSummarizer:
@@ -18,8 +18,6 @@ class LLMSummarizer:
         Name of the model to use (e.g., 'gpt-4', 'claude-3').
     provider : str
         Name of the LLM provider (e.g., 'openai', 'anthropic').
-    system_prompt : str
-        System prompt to guide the summarization style.
     tmux_log_path : str
         Path to the tmux log file.
     fs_log_path : str
@@ -27,6 +25,7 @@ class LLMSummarizer:
     output_file : str
         Path to the output file for the summary.
     """
+
     api_key: str
     model_name: str
     provider: str
@@ -34,13 +33,6 @@ class LLMSummarizer:
     fs_log_path: str
     output_file: str = "summary_output.txt"
     token_limit: int = 1000000
-    system_prompt: str = (
-        "You are a professional summarization assistant. "
-        "Summarize the input in Markdown, using headings, bullet points, and tables. "
-        "Do not use emojis or decorative formatting. Highlight key actions and results."
-        # To be elaborated later on.
-    )
-
 
 
 def summarize(summarizer: LLMSummarizer):
