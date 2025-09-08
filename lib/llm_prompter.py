@@ -98,3 +98,31 @@ def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str:
     return summary
 
 
+def summarize(summarizer: LLMSummarizer):
+    """
+    Generate a summary for the given text using the configured LLM via litellm.
+
+    Parameters
+    ----------
+    summarizer : LLMSummarizer
+        The summarizer instance with API key, model, etc.
+    text : str
+        The input text to summarize.
+
+    Returns
+    -------
+    str or None
+        The generated summary, or None if the API call fails.
+
+    """
+    from lib.llm import merge_logs_by_timestamp, split_json_by_token_limit
+
+    text = merge_logs_by_timestamp(summarizer.tmux_log_path, summarizer.fs_log_path)
+    list_text = split_json_by_token_limit(text, summarizer.token_limit)
+    if len(list_text) < 2:
+        if len(list_text) == 0:
+            logger.warning("No text to summarize.")
+            return None
+        return summarize_one(summarizer, list_text[0], prompt="single")
+    return summarize_many(summarizer, list_text)
+
