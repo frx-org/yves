@@ -35,37 +35,38 @@ class LLMSummarizer:
     token_limit: int = 1000000
 
 
-def summarize(summarizer: LLMSummarizer):
+def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str:
     """
-    Generate a summary for the given text using the configured LLM via litellm.
+    Generate a summary for a single text chunk using the configured LLM via litellm.
 
     Parameters
     ----------
     summarizer : LLMSummarizer
         The summarizer instance with API key, model, etc.
     text : str
-        The input text to summarize.
+        The input text chunk to summarize.
+    prompt : str
+        The name of the prompt to load from the prompts directory.
 
     Returns
     -------
     str or None
         The generated summary, or None if the API call fails.
-
     """
-    from lib.llm import merge_logs_by_timestamp
+    from lib.llm import load_prompt
 
-    text = merge_logs_by_timestamp(summarizer.tmux_log_path, summarizer.fs_log_path)
+    system_prompt = load_prompt(prompt)
+
     try:
         response = litellm.completion(
             api_key=summarizer.api_key,
-            model=summarizer.model_name,
+            model=f"{summarizer.provider}/{summarizer.model_name}",
             messages=[
-                {"role": "system", "content": summarizer.system_prompt},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": text},
             ],
-            provider=summarizer.provider,
         )
-        return response['choices'][0]['message']['content']
+        return response["choices"][0]["message"]["content"]
     except Exception as e:
         logger.error(f"LLM summarization failed: {e}")
         return None
