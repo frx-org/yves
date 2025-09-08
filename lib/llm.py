@@ -1,4 +1,5 @@
 import json
+import os
 
 
 def read_json_log(path: str) -> list[dict]:
@@ -18,8 +19,34 @@ def read_json_log(path: str) -> list[dict]:
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
-    except Exception as e:
+    except json.JSONDecodeError:
         return []
+
+
+def load_prompt(prompt_name: str) -> str:
+    """
+    Load a system prompt from the prompts directory.
+
+    Parameters
+    ----------
+    prompt_name : str
+        Name of the prompt (e.g., "text" loads "prompts/text_system_prompt.txt").
+
+    Returns
+    -------
+    str
+        The content of the prompt file.
+
+    """
+    # Get the root directory of the project
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    prompt_file = os.path.join(root_dir, "prompts", f"{prompt_name}_system_prompt.txt")
+
+    if not os.path.exists(prompt_file):
+        raise FileNotFoundError(f"Prompt file not found: {prompt_file}")
+
+    with open(prompt_file, "r", encoding="utf-8") as f:
+        return f.read().strip()
 
 
 def merge_logs_by_timestamp(tmux_log_path: str, fs_log_path: str) -> str:
