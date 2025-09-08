@@ -111,22 +111,3 @@ def split_json_by_token_limit(json_str: str, token_limit: int) -> list[str]:
     if current:
         sublists.append(json.dumps(current, ensure_ascii=False))
     return sublists
-
-
-if __name__ == "__main__":
-    # Test the merge_logs_by_timestamp function with your provided paths
-    tmux_log_path: str = "/home/kfrem/temp/recapify/test_file_monitor.txt"
-    fs_log_path: str = "/home/kfrem/temp/recapify/changes.txt"
-    merged_json_str: list[dict] = merge_logs_by_timestamp(tmux_log_path, fs_log_path)
-    print("Merged events (sorted by timestamp):")
-    print(merged_json_str)
-    print(f"Total events: {len(merged_json_str)}")
-
-    # Test the split_json_by_token_limit function
-    token_limit: int = 4000  # Example token limit
-    split_jsons: list[str] = split_json_by_token_limit(merged_json_str, token_limit)
-    print(f"\nSplit into {len(split_jsons)} sublists (token limit: {token_limit}):")
-    breakpoint()
-    for i, sublist_json in enumerate(split_jsons):
-        print(f"--- Sublist {i+1} ---")
-        print(sublist_json)
