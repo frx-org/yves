@@ -89,7 +89,8 @@ def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str:
         The combined summary, or None if any API call fails.
     """
     summary = ""
-    for idx, text in enumerate(list_text):
+    summary = summarize_one(summarizer, list_text[0], prompt="single")
+    for idx, text in enumerate(list_text[1:]):
         logger.info(f"Summarizing chunk {idx + 1}/{len(list_text)}")
         summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
         if summary is None:
