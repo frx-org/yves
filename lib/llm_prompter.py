@@ -71,3 +71,30 @@ def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str:
         logger.error(f"LLM summarization failed: {e}")
         return None
 
+
+def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str:
+    """
+    Generate a summary for multiple text chunks by summarizing each and then combining.
+
+    Parameters
+    ----------
+    summarizer : LLMSummarizer
+        The summarizer instance with API key, model, etc.
+    list_text : list of str
+        List of input text chunks to summarize.
+
+    Returns
+    -------
+    str or None
+        The combined summary, or None if any API call fails.
+    """
+    summary = ""
+    for idx, text in enumerate(list_text):
+        logger.info(f"Summarizing chunk {idx + 1}/{len(list_text)}")
+        summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
+        if summary is None:
+            logger.error("Failed to summarize one of the chunks.")
+            return None
+    return summary
+
+
