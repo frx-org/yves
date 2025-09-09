@@ -89,6 +89,7 @@ def split_json_by_token_limit(json_str: str, token_limit: int) -> list[str]:
     list of str
         List of JSON strings, each representing a sublist within the token limit.
     """
+    num_chars_per_token = 3.5
     try:
         items = json.loads(json_str)
     except json.JSONDecodeError:
@@ -98,9 +99,7 @@ def split_json_by_token_limit(json_str: str, token_limit: int) -> list[str]:
     current_tokens = 0
     for item in items:
         item_str = json.dumps(item, ensure_ascii=False)
-        item_tokens = (
-            len(item_str.split()) // 3.5
-        )  # Rough estimate: 1 token ≈ 3.5 characters
+        item_tokens = len(item_str.split()) // num_chars_per_token
         if current_tokens + item_tokens > token_limit:
             sublists.append(json.dumps(current, ensure_ascii=False))
             current = [item]
