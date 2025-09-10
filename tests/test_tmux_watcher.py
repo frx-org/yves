@@ -12,7 +12,7 @@ def test_update_from_config(tmpdir):
     config = ConfigParser()
     config["tmux"] = {
         "panes": "0 , 1,my_session:my_window.1",
-        "output_file": "new_output_file.txt",
+        "output_file": "new_output_file.json",
         "capture_full_output": "True",
     }
     with open(abs_path, "w") as f:
@@ -22,6 +22,6 @@ def test_update_from_config(tmpdir):
     assert default_watcher != watcher
     assert watcher == TmuxWatcher(
         ["0", "1", "my_session:my_window.1"],
-        "new_output_file.txt",
+        "new_output_file.json",
         True,
     )

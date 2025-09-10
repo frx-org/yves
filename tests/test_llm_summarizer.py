@@ -13,10 +13,10 @@ def test_update_from_config(tmpdir):
 
     config = ConfigParser()
     config["filesystem"] = {
-        "output_file": "fs_output_file.txt",
+        "output_file": "fs_output_file.json",
     }
     config["tmux"] = {
-        "output_file": "tmux_output_file.txt",
+        "output_file": "tmux_output_file.json",
     }
     config["llm"] = {
         "api_key": "this-is-my-api-secret",
@@ -37,8 +37,8 @@ def test_update_from_config(tmpdir):
         "this-is-my-api-secret",
         "gpt-4o-mini",
         "openai",
-        "tmux_output_file.txt",
-        "fs_output_file.txt",
+        "tmux_output_file.json",
+        "fs_output_file.json",
         summarize_output_dir,
         154546,
         datetime.strptime("15:49", "%H:%M").time(),

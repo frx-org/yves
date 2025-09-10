@@ -23,7 +23,7 @@ class FileSystemWatcher:
     """
 
     dirs: list[str]
-    output_file: str = "changes.txt"
+    output_file: str = "changes.json"
     include_filetypes: list[str] = field(default_factory=list)
     exclude_filetypes: list[str] = field(default_factory=list)
     major_changes_only: bool = False
@@ -50,7 +50,7 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
     cfg = parse_config(config_path)
 
     watcher.dirs = [os.path.expanduser(p) for p in cfg.getlist("filesystem", "dirs")]  # type: ignore
-    watcher.output_file = cfg["filesystem"]["output_file"]
+    watcher.output_file = os.path.expanduser(cfg["filesystem"]["output_file"])
     watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
     watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore
     watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore

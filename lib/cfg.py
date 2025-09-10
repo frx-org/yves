@@ -26,7 +26,7 @@ def default_config() -> ConfigParser:
     )
     config["filesystem"] = {
         "dirs": "",
-        "output_file": "fs_changes.txt",
+        "output_file": "~/.local/state/recapify/fs_changes.json",
         "include_filetypes": "",
         "exclude_filetypes": "",
         "major_changes_only": "False",
@@ -35,7 +35,7 @@ def default_config() -> ConfigParser:
     }
     config["tmux"] = {
         "panes": "",
-        "output_file": "tmux_changes.txt",
+        "output_file": "~/.local/state/recapify/tmux_changes.json",
         "capture_full_output": "False",
     }
     config["llm"] = {

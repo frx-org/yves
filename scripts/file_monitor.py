@@ -19,11 +19,11 @@ def main() -> None:
         description="Watch files for changes and capture diffs",
         epilog="""
 Examples:
-  %(prog)s . --output changes.txt
-  %(prog)s /path/to/repo1 /path/to/repo2 --output changes.txt
-  %(prog)s /path/to/code --include ".py" ".js" --output code_changes.txt
-  %(prog)s . --exclude ".pyc" "__pycache__" ".log" --output filtered.txt
-  %(prog)s . --major-only --min-lines 5 --output major.txt
+  %(prog)s . --output changes.json
+  %(prog)s /path/to/repo1 /path/to/repo2 --output changes.json
+  %(prog)s /path/to/code --include ".py" ".js" --output code_changes.json
+  %(prog)s . --exclude ".pyc" "__pycache__" ".log" --output filtered.json
+  %(prog)s . --major-only --min-lines 5 --output major.json
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -32,7 +32,7 @@ Examples:
     parser.add_argument(
         "--output",
         "-o",
-        default="changes.txt",
+        default="changes.json",
         help="Output file for changes",
     )
     parser.add_argument(

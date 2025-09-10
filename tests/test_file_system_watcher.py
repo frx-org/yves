@@ -13,7 +13,7 @@ def test_update_from_config(tmpdir):
     config = ConfigParser()
     config["filesystem"] = {
         "dirs": "~, . ,/home/me",
-        "output_file": "new_output_file.txt",
+        "output_file": "new_output_file.json",
         "include_filetypes": ".py ,.nix,.nu",
         "exclude_filetypes": ".o",
         "major_changes_only": "True",
@@ -27,7 +27,7 @@ def test_update_from_config(tmpdir):
     assert default_watcher != watcher
     assert watcher == FileSystemWatcher(
         [os.path.expanduser("~"), ".", "/home/me"],
-        "new_output_file.txt",
+        "new_output_file.json",
         [".py", ".nix", ".nu"],
         [".o"],
         True,

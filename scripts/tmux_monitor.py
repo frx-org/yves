@@ -19,7 +19,7 @@ def main() -> None:
         description="Watch tmux panes for command completion and capture outputs",
         epilog="""
 Examples:
-  %(prog)s 0 1 --output tmux_log.txt
+  %(prog)s 0 1 --output tmux_log.json
   %(prog)s my_session:0.0 --full-output
   %(prog)s 0 --output session.log
 """,
@@ -35,7 +35,7 @@ Examples:
     parser.add_argument(
         "--output",
         "-o",
-        default="changes.txt",
+        default="changes.json",
         help="Output file for command outputs",
     )
     parser.add_argument(
