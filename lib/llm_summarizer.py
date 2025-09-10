@@ -71,6 +71,29 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
     summarizer.run_hour = cfg.gettime("summarizer", "at")  # type: ignore
 
 
+def get_extra_headers(provider: str) -> dict:
+    """Return `extra_headers` value for litellm `completion` function
+
+    Parameters
+    ----------
+    provider : str
+        Provider name used for LLM
+
+    Returns
+    -------
+    dict
+        Dictionary to be passed as argument to litellm `completion` function
+
+    """
+    if provider == "github_copilot":
+        return {
+            "editor-version": "vscode/1.85.1",
+            "Copilot-Integration-Id": "vscode-chat",
+        }
+    else:
+        return {}
+
+
 def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | None:
     """
     Generate a summary for a single text chunk using the configured LLM via litellm.
@@ -101,6 +124,7 @@ def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | No
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": text},
             ],
+            extra_headers=get_extra_headers(summarizer.provider),
         )
         return response["choices"][0]["message"]["content"]
     except Exception as e:
