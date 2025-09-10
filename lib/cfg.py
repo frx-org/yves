@@ -44,7 +44,7 @@ def default_config() -> ConfigParser:
         "provider": "",
     }
     config["summarizer"] = {
-        "output_file": "summary_output.txt",
+        "output_dir": "~/.local/share/recapify",
         "token_limit": "1000000",
         "at": "19:00",
     }

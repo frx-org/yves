@@ -7,6 +7,7 @@ def test_update_from_config(tmpdir):
     from lib.llm_summarizer import LLMSummarizer, update_from_config
 
     abs_path = tmpdir / f"{uuid4().hex}"
+    summarize_output_dir = tmpdir / "summarize_dir"
     default_summarizer = LLMSummarizer("", "", "", "", "")
     summarizer = LLMSummarizer("", "", "", "", "")
 
@@ -23,7 +24,7 @@ def test_update_from_config(tmpdir):
         "provider": "openai",
     }
     config["summarizer"] = {
-        "output_file": "summarized.txt",
+        "output_dir": summarize_output_dir,
         "token_limit": "154546",
         "at": "15:49",
     }
@@ -38,7 +39,7 @@ def test_update_from_config(tmpdir):
         "openai",
         "tmux_output_file.txt",
         "fs_output_file.txt",
-        "summarized.txt",
+        summarize_output_dir,
         154546,
         datetime.strptime("15:49", "%H:%M").time(),
     )
