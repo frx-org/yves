@@ -270,7 +270,7 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
             if not_output_file and os.path.isfile(p):
                 files_to_watch.append(p)
 
-    logging.debug(f"Scanning took {time() - t_start}s")
+    logger.debug(f"Scanning took {time() - t_start}s")
 
     return files_to_watch
 
@@ -504,11 +504,11 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
     for file_snapshot in watcher.file_snapshots:
         logger.debug(f" - {file_snapshot}")
 
-    logging.info("Watching for changes...")
+    logger.info("Watching for changes...")
     while True:
         changes = check_for_changes(watcher)
         if changes:
-            logging.debug(f"Found {len(changes)} changes")
+            logger.debug(f"Found {len(changes)} changes")
             write_changes_to_file(watcher, changes)
 
         sleep(timeout)
