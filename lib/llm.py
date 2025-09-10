@@ -2,27 +2,6 @@ import json
 import os
 
 
-def read_json_log(path: str) -> list[dict]:
-    """
-    Read a JSON log file and return a list of events.
-
-    Parameters
-    ----------
-    path : str
-        Path to the JSON log file.
-
-    Returns
-    -------
-    list of dict
-        List of event dicts from the log file.
-    """
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except json.JSONDecodeError:
-        return []
-
-
 def load_prompt(prompt_name: str) -> str:
     """
     Load a system prompt from the prompts directory.
@@ -65,6 +44,27 @@ def merge_logs_by_timestamp(tmux_log_path: str, fs_log_path: str) -> str:
     str
         JSON string of all events from both logs, sorted by timestamp.
     """
+
+    def read_json_log(path: str) -> list[dict]:
+        """
+        Read a JSON log file and return a list of events.
+
+        Parameters
+        ----------
+        path : str
+            Path to the JSON log file.
+
+        Returns
+        -------
+        list of dict
+            List of event dicts from the log file.
+        """
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return []
+
     tmux_events: list[dict] = read_json_log(tmux_log_path)
     fs_events: list[dict] = read_json_log(fs_log_path)
     all_events: list[dict] = tmux_events + fs_events
