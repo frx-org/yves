@@ -35,7 +35,7 @@ class LLMSummarizer:
     token_limit: int = 1000000
 
 
-def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str:
+def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | None:
     """
     Generate a summary for a single text chunk using the configured LLM via litellm.
 
@@ -72,7 +72,7 @@ def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str:
         return None
 
 
-def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str:
+def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str | None:
     """
     Generate a summary for multiple text chunks by summarizing each and then combining.
 
