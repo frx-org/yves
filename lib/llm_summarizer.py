@@ -192,7 +192,7 @@ def summarize(summarizer: LLMSummarizer):
     return summarize_many(summarizer, list_text)
 
 
-def generate_summary(summarizer: LLMSummarizer) -> None:
+def generate_summary(summarizer: LLMSummarizer, timeout: int = 1) -> None:
     """
     Save the generated summary to the specified output file.
 
@@ -200,8 +200,11 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
     ----------
     summarizer : LLMSummarizer
         The summarizer instance.
+    timeout : int
+        Timeout in seconds in the while loop
     """
     from datetime import date
+    from time import sleep
 
     today = date.today().strftime("%Y-%m-%d")
     if not os.path.exists(summarizer.output_dir):
@@ -239,3 +242,5 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
                 logger.debug(f"Emptying {summarizer.tmux_log_path}")
 
             break
+
+        sleep(timeout)
