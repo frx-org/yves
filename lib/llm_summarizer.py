@@ -1,5 +1,7 @@
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from datetime import datetime
+
 import litellm
 
 logger = logging.getLogger(__name__)
@@ -24,7 +26,13 @@ class LLMSummarizer:
         Path to the filesystem watcher log file.
     output_file : str
         Path to the output file for the summary.
+    run_hour: time
+        Hour to give the summary of the day
+    last_run_day: time
+        Last time we gave a summary
     """
+
+    from datetime import date, time
 
     api_key: str
     model_name: str
@@ -33,6 +41,8 @@ class LLMSummarizer:
     fs_log_path: str
     output_file: str = "summary_output.txt"
     token_limit: int = 1000000
+    run_hour: time = datetime.strptime("19:00", "%H:%M").time()
+    last_run_day: date = datetime.strptime("0001-01-01", "%Y-%m-%d").date()
 
 
 def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
@@ -57,6 +67,7 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
     summarizer.tmux_log_path = cfg["tmux"]["output_file"]
     summarizer.output_file = cfg["summarizer"]["output_file"]
     summarizer.token_limit = cfg.getint("summarizer", "token_limit")
+    summarizer.run_hour = cfg.gettime("summarizer", "at")  # type: ignore
 
 
 def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | None:
@@ -167,18 +178,27 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
             "API key is required. Either set it using CLI argument or LLM_API_KEY environment variable."
         )
         return
-    logger.debug(
-        f"Generating summary using {summarizer.model_name} from {summarizer.provider}..."
-    )
-    logger.debug(f"Reading logs: {summarizer.tmux_log_path}, {summarizer.fs_log_path}")
-    logger.debug(f"Output will be saved to: {summarizer.output_file}")
-    summary = summarize(summarizer)
-    if summary is None:
-        logger.error("No summary generated to save.")
-        return
-    try:
-        with open(summarizer.output_file, "w", encoding="utf-8") as f:
-            f.write(summary)
-        logger.debug(f"Summary saved to {summarizer.output_file}")
-    except Exception as e:
-        logger.error(f"Failed to save summary: {e}")
+
+    while True:
+        now = datetime.now()
+        if now.time() >= summarizer.run_hour and now.date() > summarizer.last_run_day:
+            logger.debug(
+                f"Generating summary using {summarizer.model_name} from {summarizer.provider}..."
+            )
+            logger.debug(
+                f"Reading logs: {summarizer.tmux_log_path}, {summarizer.fs_log_path}"
+            )
+            logger.debug(f"Output will be saved to: {summarizer.output_file}")
+            summary = summarize(summarizer)
+            if summary is None:
+                logger.error("No summary generated to save.")
+                return
+            try:
+                with open(summarizer.output_file, "w", encoding="utf-8") as f:
+                    f.write(summary)
+                logger.debug(f"Summary saved to {summarizer.output_file}")
+            except Exception as e:
+                logger.error(f"Failed to save summary: {e}")
+
+            summarizer.last_run_day = now.date()
+            break

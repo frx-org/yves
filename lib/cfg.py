@@ -46,6 +46,7 @@ def default_config() -> ConfigParser:
     config["summarizer"] = {
         "output_file": "summary_output.txt",
         "token_limit": "1000000",
+        "at": "19:00",
     }
 
     return config
@@ -88,6 +89,8 @@ def parse_config(
         Dictionary contained in the config file
 
     """
+    from datetime import datetime
+
     if not os.path.exists(path):
         logger.debug(f"{path} does not exist, write default configuration file")
         write_default_config(path)
@@ -100,6 +103,8 @@ def parse_config(
             "int": lambda n: int(n),
             "float": lambda n: float(n),
             "bool": lambda b: b.lower() == "true",
+            "time": lambda t: datetime.strptime(t, "%H:%M").time(),
+            "date": lambda d: datetime.strptime(d, "%Y-%m-%d").date(),
         }
     )
     user_config.read(path)

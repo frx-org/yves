@@ -1,6 +1,7 @@
 def test_update_from_config(tmpdir):
     """Test `update_from_config` if it updates the current `LLMSummarizer` instance"""
     from configparser import ConfigParser
+    from datetime import datetime
     from uuid import uuid4
 
     from lib.llm_summarizer import LLMSummarizer, update_from_config
@@ -24,6 +25,7 @@ def test_update_from_config(tmpdir):
     config["summarizer"] = {
         "output_file": "summarized.txt",
         "token_limit": "154546",
+        "at": "15:49",
     }
     with open(abs_path, "w") as f:
         config.write(f)
@@ -38,4 +40,5 @@ def test_update_from_config(tmpdir):
         "fs_output_file.txt",
         "summarized.txt",
         154546,
+        datetime.strptime("15:49", "%H:%M").time(),
     )
