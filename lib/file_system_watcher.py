@@ -233,7 +233,7 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
 
     """
     from functools import partial
-    from glob import iglob
+    from glob import glob, iglob
     from time import time
 
     def exclude_filetypes_fn(path: str, exclude_filetypes: list[str]):
@@ -244,14 +244,26 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
     ):
         result = []
         for include_filetype in include_filetypes:
-            result += iglob(f"{parent_dir}/**/*{include_filetype}", recursive=True)
+            result_glob = glob(f"{parent_dir}/**/*{include_filetype}", recursive=True)
+            num_elements_found = len(result_glob)
+            if num_elements_found > 0:
+                logger.debug(
+                    f"Found {num_elements_found} {include_filetype} files in {parent_dir}"
+                )
+            else:
+                logger.debug(f"No {include_filetype} file in {parent_dir}")
+
+            result += result_glob
 
         if len(result) == 0:
             if len(include_filetypes) > 0:
                 return []
 
+            logger.debug(f"Listing any files in {parent_dir}")
             result = iglob(f"{parent_dir}/**/*", recursive=True)
+            logger.debug(f"Found {len(list(result))} elements in {parent_dir}")
 
+        logger.debug(f"Excluding filetypes in {parent_dir}")
         result = filter(
             partial(exclude_filetypes_fn, exclude_filetypes=exclude_filetypes),
             result,
