@@ -59,6 +59,9 @@ def merge_logs_by_timestamp(tmux_log_path: str, fs_log_path: str) -> str:
         list of dict
             List of event dicts from the log file.
         """
+        if not os.path.exists(path):
+            return []
+
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
