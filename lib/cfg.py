@@ -94,6 +94,8 @@ def parse_config(
     if not os.path.exists(path):
         logger.debug(f"{path} does not exist, write default configuration file")
         write_default_config(path)
+    else:
+        logger.debug(f"Loading configuration from {path}")
 
     user_config = ConfigParser(
         converters={
