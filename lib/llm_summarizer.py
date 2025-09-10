@@ -89,8 +89,9 @@ def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str | Non
         The combined summary, or None if any API call fails.
     """
     summary = summarize_one(summarizer, list_text[0], prompt="single")
+    num_chunks = len(list_text)
     for idx, text in enumerate(list_text[1:]):
-        logger.info(f"Summarizing chunk {idx + 1}/{len(list_text)}")
+        logger.info(f"Summarizing chunk {idx + 1}/{num_chunks}")
         summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
         if summary is None:
             logger.error("Failed to summarize one of the chunks.")
@@ -119,8 +120,9 @@ def summarize(summarizer: LLMSummarizer):
 
     text = merge_logs_by_timestamp(summarizer.tmux_log_path, summarizer.fs_log_path)
     list_text = split_json_by_token_limit(text, summarizer.token_limit)
-    if len(list_text) < 2:
-        if len(list_text) == 0:
+    num_chunks = len(list_text)
+    if num_chunks < 2:
+        if num_chunks == 0:
             logger.warning("No text to summarize.")
             return None
         return summarize_one(summarizer, list_text[0], prompt="single")
