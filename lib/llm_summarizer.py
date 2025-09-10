@@ -67,8 +67,8 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
 
     summarizer.model_name = cfg["llm"]["model_name"]
     summarizer.provider = cfg["llm"]["provider"]
-    summarizer.fs_log_path = cfg["filesystem"]["output_file"]
-    summarizer.tmux_log_path = cfg["tmux"]["output_file"]
+    summarizer.fs_log_path = os.path.expanduser(cfg["filesystem"]["output_file"])
+    summarizer.tmux_log_path = os.path.expanduser(cfg["tmux"]["output_file"])
     summarizer.output_dir = os.path.expanduser(cfg["summarizer"]["output_dir"])
     summarizer.token_limit = cfg.getint("summarizer", "token_limit")
     summarizer.run_hour = cfg.gettime("summarizer", "at")  # type: ignore
