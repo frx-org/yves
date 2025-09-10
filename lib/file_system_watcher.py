@@ -445,6 +445,10 @@ def write_changes_to_file(
         }
     )
 
+    output_dir = os.path.dirname(watcher.output_file)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
     # Write updated JSON back to file
     with open(watcher.output_file, "w", encoding="utf-8") as f:
         json.dump(all_events, f, ensure_ascii=False, indent=2)

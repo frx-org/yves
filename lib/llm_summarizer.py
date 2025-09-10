@@ -183,6 +183,9 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
         return
 
     today = date.today().strftime("%Y-%m-%d")
+    if not os.path.exists(summarizer.output_dir):
+        os.makedirs(summarizer.output_dir, exist_ok=True)
+
     while True:
         now = datetime.now()
         if now.time() >= summarizer.run_hour and now.date() > summarizer.last_run_day:
