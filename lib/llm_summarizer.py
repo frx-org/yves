@@ -35,6 +35,30 @@ class LLMSummarizer:
     token_limit: int = 1000000
 
 
+def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
+    """Read a config file and update `summarizer`.
+
+    Parameters
+    ----------
+    watcher : LLMSummarizer
+        Summarizer instance to be updated
+    config_path : str
+        Path to the configuration file
+
+    """
+    from lib.cfg import parse_config
+
+    cfg = parse_config(config_path)
+
+    summarizer.api_key = cfg["llm"]["api_key"]
+    summarizer.model_name = cfg["llm"]["model_name"]
+    summarizer.provider = cfg["llm"]["provider"]
+    summarizer.fs_log_path = cfg["filesystem"]["output_file"]
+    summarizer.tmux_log_path = cfg["tmux"]["output_file"]
+    summarizer.output_file = cfg["summarizer"]["output_file"]
+    summarizer.token_limit = cfg.getint("summarizer", "token_limit")
+
+
 def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | None:
     """
     Generate a summary for a single text chunk using the configured LLM via litellm.

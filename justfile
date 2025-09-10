@@ -13,6 +13,11 @@ py-check:
 py-format:
     @uv run ruff format
 
+# Run pytest
+[private]
+pytest:
+    @uv run pytest
+
 # Run checks on codebase
 [group("dev")]
 check:
@@ -23,3 +28,8 @@ check:
 format:
     @nix-shell {{ recapify }}/shell.nix --command "just py-format"
     @nix-shell {{ recapify }}/shell.nix --command "treefmt"
+
+# Run pytest
+[group("dev")]
+test:
+    @nix-shell {{ recapify }}/shell.nix --command "just pytest"
