@@ -154,10 +154,9 @@ def write_commands_to_file(
     with open(watcher.output_file, "w", encoding="utf-8") as f:
         json.dump(all_events, f, ensure_ascii=False, indent=2)
 
-    # Log info
-    logger.info(f"Captured {len(completed_commands)} completed commands")
+    logger.debug(f"Captured {len(completed_commands)} completed commands")
     for cmd in completed_commands:
-        logger.info(f"  [{cmd['pane']}] {cmd['command']}")
+        logger.debug(f"  [{cmd['pane']}] {cmd['command']}")
 
 
 def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
@@ -191,9 +190,9 @@ def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
     added = current_panes - previous_panes
     removed = previous_panes - current_panes
     if added:
-        logger.info(f"New panes detected: {added}")
+        logger.debug(f"New panes detected: {added}")
     if removed:
-        logger.info(f"Panes closed: {removed}")
+        logger.debug(f"Panes closed: {removed}")
     watcher.panes = list(current_panes)
     if len(watcher.panes) == 0:
         logger.warning("No active tmux panes detected.")
@@ -220,17 +219,16 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
 
     from time import sleep
 
+    logger.info("Start watching...")
     initial_panes = watcher.panes.copy()
     if initial_panes:
-        logger.info(f"Watching tmux panes: {', '.join(initial_panes)}")
+        logger.debug(f"Watching tmux panes: {', '.join(initial_panes)}")
     else:
-        logger.info("No specified panes to watch. Will monitor all tmux panes")
-    logger.info(f"Output file: {watcher.output_file}")
-    logger.info(
+        logger.debug("No specified panes to watch. Will monitor all tmux panes")
+    logger.debug(f"Output file: {watcher.output_file}")
+    logger.debug(
         f"Capture mode: {'Full output' if watcher.capture_full_output else 'Last command only'}"
     )
-    logger.info("Press Ctrl+C to stop watching...")
-    logger.info("-" * 50)
 
     while True:
         if not initial_panes:

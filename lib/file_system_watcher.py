@@ -262,6 +262,7 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
     t_start = time()
     files_to_watch = []
     for watch_dir in watcher.dirs:
+        logger.debug(f"Searching for files in {watch_dir}")
         for p in glob_fn(
             watcher.include_filetypes, watcher.exclude_filetypes, watch_dir
         ):
@@ -457,9 +458,9 @@ def write_changes_to_file(
         json.dump(all_events, f, ensure_ascii=False, indent=2)
 
     # Logging
-    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    logger.debug(f"Captured {len(changes)} file changes to {watcher.output_file}")
     for change in changes_list:
-        logger.info(f"  {change['status']}: {change['file']}")
+        logger.debug(f"  {change['status']}: {change['file']}")
 
 
 def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
@@ -477,18 +478,16 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
 
     from lib.file import get_content, get_md5, is_binary
 
-    logger.info(f"Watching {len(watcher.dirs)} directories:")
+    logger.debug(f"Watching {len(watcher.dirs)} directories:")
     for watch_dir in watcher.dirs:
-        logger.info(f"  - {watch_dir}")
-    logger.info(f"Output file: {watcher.output_file}")
+        logger.debug(watch_dir)
+    logger.debug(f"Output file: {watcher.output_file}")
     if watcher.include_filetypes:
-        logger.info(f"Watching filetypes: {watcher.include_filetypes}")
+        logger.debug(f"Watching filetypes: {watcher.include_filetypes}")
     if watcher.exclude_filetypes:
-        logger.info(f"Excluding filetypes: {watcher.exclude_filetypes}")
-    logger.info("Press Ctrl+C to stop watching...")
-    logger.info("-" * 50)
+        logger.debug(f"Excluding filetypes: {watcher.exclude_filetypes}")
 
-    logger.info("Initial scan...")
+    logger.debug("Initial scan...")
     file_paths = scan_files(watcher)
     for file_path in file_paths:
         current_hash = get_md5(file_path)

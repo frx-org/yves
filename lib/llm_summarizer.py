@@ -227,7 +227,7 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
             try:
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(summary)
-                logger.debug(f"Summary saved to {output_file}")
+                logger.info(f"Summary saved to {output_file}")
             except Exception as e:
                 logger.error(f"Failed to save summary: {e}")
 
