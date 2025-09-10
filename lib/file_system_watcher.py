@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from dataclasses import dataclass, field
+from threading import Event
 
 logger = logging.getLogger(__name__)
 
@@ -475,12 +476,15 @@ def write_changes_to_file(
         logger.debug(f"{change['status']}: {change['file']}")
 
 
-def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
+def watch(watcher: FileSystemWatcher, stop_event: Event, timeout: int = 1) -> None:
     """Start monitoring loop. Runs until Ctrl+C is pressed.
 
     Parameters
     ----------
     watcher : FileSystemWatcher
+        The watcher instance to monitor
+    stop_event : Event
+        Event sent to stop watching
     timeout : int
         Timeout in seconds in the while loop
 
@@ -523,7 +527,7 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
         logger.debug(file_snapshot)
 
     logger.info("Watching for changes...")
-    while True:
+    while not stop_event.is_set():
         changes = check_for_changes(watcher)
         if changes:
             logger.debug(f"Found {len(changes)} changes")

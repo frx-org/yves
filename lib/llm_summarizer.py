@@ -2,6 +2,7 @@ import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime
+from threading import Event
 
 import litellm
 
@@ -192,7 +193,9 @@ def summarize(summarizer: LLMSummarizer):
     return summarize_many(summarizer, list_text)
 
 
-def generate_summary(summarizer: LLMSummarizer, timeout: int = 1) -> None:
+def generate_summary(
+    summarizer: LLMSummarizer, stop_event: Event, timeout: int = 1
+) -> None:
     """
     Save the generated summary to the specified output file.
 
@@ -200,6 +203,8 @@ def generate_summary(summarizer: LLMSummarizer, timeout: int = 1) -> None:
     ----------
     summarizer : LLMSummarizer
         The summarizer instance.
+    stop_event : Event
+        Event sent to stop watching
     timeout : int
         Timeout in seconds in the while loop
     """
@@ -210,7 +215,7 @@ def generate_summary(summarizer: LLMSummarizer, timeout: int = 1) -> None:
     if not os.path.exists(summarizer.output_dir):
         os.makedirs(summarizer.output_dir, exist_ok=True)
 
-    while True:
+    while not stop_event.is_set():
         now = datetime.now()
         if now.time() >= summarizer.run_hour and now.date() > summarizer.last_run_day:
             logger.debug(

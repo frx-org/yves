@@ -4,6 +4,7 @@ import os
 import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
+from threading import Event
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +206,7 @@ def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
             sleep(timeout)
 
 
-def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
+def watch(watcher: TmuxWatcher, stop_event: Event, timeout: int = 1) -> None:
     """
     Start the main watching loop to monitor panes continuously.
 
@@ -213,6 +214,8 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
     ----------
     watcher : TmuxWatcher
         The watcher instance to monitor.
+    stop_event : Event
+        Event sent to stop watching
     timeout : int, optional
         Timeout in seconds between checks (default is 1).
     """
@@ -230,7 +233,7 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
         f"Capture mode: {'Full output' if watcher.capture_full_output else 'Last command only'}"
     )
 
-    while True:
+    while not stop_event.is_set():
         if not initial_panes:
             get_active_tmux_panes(watcher, timeout)
         completed_commands = check_for_completed_commands(watcher)
