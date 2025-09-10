@@ -156,7 +156,7 @@ def write_commands_to_file(
 
     logger.debug(f"Captured {len(completed_commands)} completed commands")
     for cmd in completed_commands:
-        logger.debug(f"  [{cmd['pane']}] {cmd['command']}")
+        logger.debug(f"[{cmd['pane']}] {cmd['command']}")
 
 
 def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):

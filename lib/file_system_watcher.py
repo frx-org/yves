@@ -389,7 +389,7 @@ def check_for_changes(
                 if diff:
                     changes.append({"type": "modified", "file": filepath, "diff": diff})
             else:
-                logger.debug(f"  Minor change ignored in: {repo_name}/{rel_path}")
+                logger.debug(f"Minor change ignored in: {repo_name}/{rel_path}")
 
             watcher.file_snapshots[filepath] = {
                 "hash": current_hash,
@@ -472,7 +472,7 @@ def write_changes_to_file(
     # Logging
     logger.debug(f"Captured {len(changes)} file changes to {watcher.output_file}")
     for change in changes_list:
-        logger.debug(f"  {change['status']}: {change['file']}")
+        logger.debug(f"{change['status']}: {change['file']}")
 
 
 def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
@@ -520,7 +520,7 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
 
     logger.debug(f"Monitoring {len(watcher.file_snapshots)} files")
     for file_snapshot in watcher.file_snapshots:
-        logger.debug(f" - {file_snapshot}")
+        logger.debug(file_snapshot)
 
     logger.info("Watching for changes...")
     while True:
