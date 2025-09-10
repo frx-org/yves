@@ -91,7 +91,7 @@ def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str | Non
     summary = summarize_one(summarizer, list_text[0], prompt="single")
     num_chunks = len(list_text)
     for idx, text in enumerate(list_text[1:]):
-        logger.info(f"Summarizing chunk {idx + 1}/{num_chunks}")
+        logger.debug(f"Summarizing chunk {idx + 1}/{num_chunks}")
         summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
         if summary is None:
             logger.error("Failed to summarize one of the chunks.")
