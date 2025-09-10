@@ -38,6 +38,15 @@ def default_config() -> ConfigParser:
         "output_file": "changes.txt",
         "capture_full_output": "False",
     }
+    config["llm"] = {
+        "api_key": "",
+        "model_name": "",
+        "provider": "",
+    }
+    config["summarizer"] = {
+        "output_file": "summary_output.txt",
+        "token_limit": "1000000",
+    }
 
     return config
 
