@@ -1,5 +1,6 @@
 def test_update_from_config(tmpdir):
     """Test `update_from_config` if it updates the current `FileSystemWatcher` instance"""
+    import os
     from configparser import ConfigParser
     from uuid import uuid4
 
@@ -25,7 +26,7 @@ def test_update_from_config(tmpdir):
     update_from_config(watcher, abs_path)
     assert default_watcher != watcher
     assert watcher == FileSystemWatcher(
-        ["~", ".", "/home/me"],
+        [os.path.expanduser("~"), ".", "/home/me"],
         "new_output_file.txt",
         [".py", ".nix", ".nu"],
         [".o"],

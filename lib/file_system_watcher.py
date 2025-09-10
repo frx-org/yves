@@ -49,7 +49,7 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
 
     cfg = parse_config(config_path)
 
-    watcher.dirs = cfg.getlist("filesystem", "dirs")  # type: ignore
+    watcher.dirs = [os.path.expanduser(p) for p in cfg.getlist("filesystem", "dirs")]  # type: ignore
     watcher.output_file = cfg["filesystem"]["output_file"]
     watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
     watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore
