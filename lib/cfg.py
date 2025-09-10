@@ -26,7 +26,7 @@ def default_config() -> ConfigParser:
     )
     config["filesystem"] = {
         "dirs": "",
-        "output_file": "changes.txt",
+        "output_file": "fs_changes.txt",
         "include_filetypes": "",
         "exclude_filetypes": "",
         "major_changes_only": "False",
@@ -35,7 +35,7 @@ def default_config() -> ConfigParser:
     }
     config["tmux"] = {
         "panes": "",
-        "output_file": "changes.txt",
+        "output_file": "tmux_changes.txt",
         "capture_full_output": "False",
     }
     config["llm"] = {
