@@ -8,8 +8,8 @@ def test_update_from_config(tmpdir):
 
     abs_path = tmpdir / f"{uuid4().hex}"
     summarize_output_dir = tmpdir / "summarize_dir"
-    default_summarizer = LLMSummarizer("", "", "", "", "")
-    summarizer = LLMSummarizer("", "", "", "", "")
+    default_summarizer = LLMSummarizer()
+    summarizer = LLMSummarizer()
 
     config = ConfigParser()
     config["filesystem"] = {

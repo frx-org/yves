@@ -22,7 +22,7 @@ class FileSystemWatcher:
     file_snapshots: Dictionary containing stats files to watch
     """
 
-    dirs: list[str]
+    dirs: list[str] = field(default_factory=list)
     output_file: str = "changes.json"
     include_filetypes: list[str] = field(default_factory=list)
     exclude_filetypes: list[str] = field(default_factory=list)
@@ -50,6 +50,9 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
     cfg = parse_config(config_path)
 
     watcher.dirs = [os.path.expanduser(p) for p in cfg.getlist("filesystem", "dirs")]  # type: ignore
+    if len(watcher.dirs) == 0:
+        logger.warning("No directory specified to watch")
+
     watcher.output_file = os.path.expanduser(cfg["filesystem"]["output_file"])
     watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
     watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore

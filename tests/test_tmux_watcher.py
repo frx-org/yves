@@ -6,8 +6,8 @@ def test_update_from_config(tmpdir):
     from lib.tmux_watcher import TmuxWatcher, update_from_config
 
     abs_path = tmpdir / f"{uuid4().hex}"
-    default_watcher = TmuxWatcher([])
-    watcher = TmuxWatcher([])
+    default_watcher = TmuxWatcher()
+    watcher = TmuxWatcher()
 
     config = ConfigParser()
     config["tmux"] = {

@@ -7,8 +7,8 @@ def test_update_from_config(tmpdir):
     from lib.file_system_watcher import FileSystemWatcher, update_from_config
 
     abs_path = tmpdir / f"{uuid4().hex}"
-    default_watcher = FileSystemWatcher([])
-    watcher = FileSystemWatcher([])
+    default_watcher = FileSystemWatcher()
+    watcher = FileSystemWatcher()
 
     config = ConfigParser()
     config["filesystem"] = {

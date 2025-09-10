@@ -35,11 +35,11 @@ class LLMSummarizer:
 
     from datetime import date, time
 
-    model_name: str
-    provider: str
-    tmux_log_path: str
-    fs_log_path: str
     api_key: str = ""
+    model_name: str = ""
+    provider: str = ""
+    tmux_log_path: str = ""
+    fs_log_path: str = ""
     output_dir: str = os.path.expanduser("~/.local/state/recapify")
     token_limit: int = 1000000
     run_hour: time = datetime.strptime("19:00", "%H:%M").time()
@@ -62,6 +62,9 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
     cfg = parse_config(config_path)
 
     summarizer.api_key = cfg["llm"]["api_key"]
+    if not summarizer.api_key:
+        logger.warning("No API key provided or empty string")
+
     summarizer.model_name = cfg["llm"]["model_name"]
     summarizer.provider = cfg["llm"]["provider"]
     summarizer.fs_log_path = cfg["filesystem"]["output_file"]
@@ -199,9 +202,6 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
         The summarizer instance.
     """
     from datetime import date
-
-    if not summarizer.api_key:
-        logger.warning("No API key provided or empty string")
 
     today = date.today().strftime("%Y-%m-%d")
     if not os.path.exists(summarizer.output_dir):
