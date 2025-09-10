@@ -35,11 +35,11 @@ class LLMSummarizer:
 
     from datetime import date, time
 
-    api_key: str
     model_name: str
     provider: str
     tmux_log_path: str
     fs_log_path: str
+    api_key: str = ""
     output_dir: str = os.path.expanduser("~/.local/state/recapify")
     token_limit: int = 1000000
     run_hour: time = datetime.strptime("19:00", "%H:%M").time()
@@ -177,10 +177,7 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
     from datetime import date
 
     if not summarizer.api_key:
-        logger.error(
-            "API key is required. Either set it using CLI argument or LLM_API_KEY environment variable."
-        )
-        return
+        logger.warning("No API key provided or empty string")
 
     today = date.today().strftime("%Y-%m-%d")
     if not os.path.exists(summarizer.output_dir):
