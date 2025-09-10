@@ -208,4 +208,10 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
                 logger.error(f"Failed to save summary: {e}")
 
             summarizer.last_run_day = now.date()
+
+            with open(summarizer.fs_log_path, "w") as f:
+                logger.debug(f"Emptying {summarizer.fs_log_path}")
+            with open(summarizer.tmux_log_path, "w") as f:
+                logger.debug(f"Emptying {summarizer.tmux_log_path}")
+
             break
