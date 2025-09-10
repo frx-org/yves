@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class FileSystemWatcher:
-    """File system monitor that captures changes as diffs from multiple repositories.
+    """File system monitor that captures changes as diffs from multiple directories.
 
     Attributes
     ----------
@@ -305,7 +305,7 @@ def check_for_changes(
         if current_hash is None:
             continue
 
-        # Find which repository this file belongs to
+        # Find which directory this file belongs to
         watch_dir = find_file_in_dirs(filepath, watcher.dirs)
         if watch_dir is None:
             continue
@@ -477,7 +477,7 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
 
     from lib.file import get_content, get_md5, is_binary
 
-    logger.info(f"Watching {len(watcher.dirs)} repositories:")
+    logger.info(f"Watching {len(watcher.dirs)} directories:")
     for watch_dir in watcher.dirs:
         logger.info(f"  - {watch_dir}")
     logger.info(f"Output file: {watcher.output_file}")
