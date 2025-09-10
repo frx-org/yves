@@ -1,10 +1,9 @@
-from dataclasses import dataclass, field
-import logging
-from types import FrameType
-from datetime import datetime
-import subprocess
-import os
 import json
+import logging
+import os
+import subprocess
+from dataclasses import dataclass, field
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -157,22 +156,6 @@ def write_commands_to_file(
         logger.info(f"  [{cmd['pane']}] {cmd['command']}")
 
 
-def signal_handler(signal: int, frame: FrameType | None):
-    """
-    Handle signal for clean exit (SIGTERM, SIGINT).
-
-    Parameters
-    ----------
-    signal : int
-        Signal number (from signal.signal).
-    frame : FrameType or None
-        Current stack frame (from signal.signal).
-    """
-    from sys import exit
-
-    exit(0)
-
-
 def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
     """
     Continuously monitor and update the list of all active tmux pane indices.
@@ -231,7 +214,6 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
         Timeout in seconds between checks (default is 1).
     """
 
-    from signal import SIGINT, SIGTERM, signal
     from time import sleep
 
     initial_panes = watcher.panes.copy()
@@ -245,9 +227,6 @@ def watch(watcher: TmuxWatcher, timeout: int = 1) -> None:
     )
     logger.info("Press Ctrl+C to stop watching...")
     logger.info("-" * 50)
-
-    signal(SIGTERM, signal_handler)
-    signal(SIGINT, signal_handler)
 
     while True:
         if not initial_panes:

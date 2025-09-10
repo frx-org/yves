@@ -1,8 +1,7 @@
+import json
 import logging
 import os
 from dataclasses import dataclass, field
-from types import FrameType
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -456,23 +455,6 @@ def write_changes_to_file(
         logger.info(f"  {change['status']}: {change['file']}")
 
 
-def signal_handler(signal: int, frame: FrameType | None):
-    """Handle signal. For now we suppose that we only catch SIGTERM and SIGINT to cleanly exit the program.
-    This function is supposed to be called with `signal.signal(SIG, signal_handler)`
-
-    Parameters
-    ----------
-    signal : int
-        First argument needed by `signal.signal`
-    frame : FrameType | None
-        Second argument needed by `signal.signal`
-
-    """
-    from sys import exit
-
-    exit(0)
-
-
 def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
     """Start monitoring loop. Runs until Ctrl+C is pressed.
 
@@ -484,7 +466,6 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
 
     """
 
-    from signal import SIGINT, SIGTERM, signal
     from time import sleep
 
     from lib.file import get_content, get_md5, is_binary
@@ -522,9 +503,6 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
     logger.debug(f"Monitoring {len(watcher.file_snapshots)} files")
     for file_snapshot in watcher.file_snapshots:
         logger.debug(f" - {file_snapshot}")
-
-    signal(SIGTERM, signal_handler)
-    signal(SIGINT, signal_handler)
 
     logging.info("Watching for changes...")
     while True:
