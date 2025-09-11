@@ -30,9 +30,9 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - [%(levelname)s] - %(message)s",
     )
 
-    fs_watcher = FileSystemWatcher([])
+    fs_watcher = FileSystemWatcher()
     tmux_watcher = TmuxWatcher()
-    summarizer = LLMSummarizer("", "", "", "", "")
+    summarizer = LLMSummarizer()
 
     config_path = os.path.expanduser(p_args.config)
 
