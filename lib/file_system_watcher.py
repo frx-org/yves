@@ -1,15 +1,15 @@
+import json
 import logging
 import os
 from dataclasses import dataclass, field
-from types import FrameType
-import json
+from threading import Event
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class FileSystemWatcher:
-    """File system monitor that captures changes as diffs from multiple repositories.
+    """File system monitor that captures changes as diffs from multiple directories.
 
     Attributes
     ----------
@@ -23,8 +23,8 @@ class FileSystemWatcher:
     file_snapshots: Dictionary containing stats files to watch
     """
 
-    dirs: list[str]
-    output_file: str = "changes.txt"
+    dirs: list[str] = field(default_factory=list)
+    output_file: str = "changes.json"
     include_filetypes: list[str] = field(default_factory=list)
     exclude_filetypes: list[str] = field(default_factory=list)
     major_changes_only: bool = False
@@ -50,8 +50,11 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
 
     cfg = parse_config(config_path)
 
-    watcher.dirs = cfg.getlist("filesystem", "dirs")  # type: ignore
-    watcher.output_file = cfg["filesystem"]["output_file"]
+    watcher.dirs = [os.path.expanduser(p) for p in cfg.getlist("filesystem", "dirs")]  # type: ignore
+    if len(watcher.dirs) == 0:
+        logger.warning("No directory specified to watch")
+
+    watcher.output_file = os.path.expanduser(cfg["filesystem"]["output_file"])
     watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
     watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore
     watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore
@@ -231,7 +234,7 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
 
     """
     from functools import partial
-    from glob import iglob
+    from glob import glob, iglob
     from time import time
 
     def exclude_filetypes_fn(path: str, exclude_filetypes: list[str]):
@@ -242,14 +245,26 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
     ):
         result = []
         for include_filetype in include_filetypes:
-            result += iglob(f"{parent_dir}/**/*{include_filetype}", recursive=True)
+            result_glob = glob(f"{parent_dir}/**/*{include_filetype}", recursive=True)
+            num_elements_found = len(result_glob)
+            if num_elements_found > 0:
+                logger.debug(
+                    f"Found {num_elements_found} {include_filetype} files in {parent_dir}"
+                )
+            else:
+                logger.debug(f"No {include_filetype} file in {parent_dir}")
+
+            result += result_glob
 
         if len(result) == 0:
             if len(include_filetypes) > 0:
                 return []
 
+            logger.debug(f"Listing any files in {parent_dir}")
             result = iglob(f"{parent_dir}/**/*", recursive=True)
+            logger.debug(f"Found {len(list(result))} elements in {parent_dir}")
 
+        logger.debug(f"Excluding filetypes in {parent_dir}")
         result = filter(
             partial(exclude_filetypes_fn, exclude_filetypes=exclude_filetypes),
             result,
@@ -260,6 +275,7 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
     t_start = time()
     files_to_watch = []
     for watch_dir in watcher.dirs:
+        logger.debug(f"Searching for files in {watch_dir}")
         for p in glob_fn(
             watcher.include_filetypes, watcher.exclude_filetypes, watch_dir
         ):
@@ -271,7 +287,7 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
             if not_output_file and os.path.isfile(p):
                 files_to_watch.append(p)
 
-    logging.debug(f"Scanning took {time() - t_start}s")
+    logger.debug(f"Scanning took {time() - t_start}s")
 
     return files_to_watch
 
@@ -303,7 +319,7 @@ def check_for_changes(
         if current_hash is None:
             continue
 
-        # Find which repository this file belongs to
+        # Find which directory this file belongs to
         watch_dir = find_file_in_dirs(filepath, watcher.dirs)
         if watch_dir is None:
             continue
@@ -374,7 +390,7 @@ def check_for_changes(
                 if diff:
                     changes.append({"type": "modified", "file": filepath, "diff": diff})
             else:
-                logger.debug(f"  Minor change ignored in: {repo_name}/{rel_path}")
+                logger.debug(f"Minor change ignored in: {repo_name}/{rel_path}")
 
             watcher.file_snapshots[filepath] = {
                 "hash": current_hash,
@@ -446,61 +462,48 @@ def write_changes_to_file(
         }
     )
 
+    output_dir = os.path.dirname(watcher.output_file)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
     # Write updated JSON back to file
     with open(watcher.output_file, "w", encoding="utf-8") as f:
         json.dump(all_events, f, ensure_ascii=False, indent=2)
 
     # Logging
-    logger.info(f"Captured {len(changes)} file changes to {watcher.output_file}")
+    logger.debug(f"Captured {len(changes)} file changes to {watcher.output_file}")
     for change in changes_list:
-        logger.info(f"  {change['status']}: {change['file']}")
+        logger.debug(f"{change['status']}: {change['file']}")
 
 
-def signal_handler(signal: int, frame: FrameType | None):
-    """Handle signal. For now we suppose that we only catch SIGTERM and SIGINT to cleanly exit the program.
-    This function is supposed to be called with `signal.signal(SIG, signal_handler)`
-
-    Parameters
-    ----------
-    signal : int
-        First argument needed by `signal.signal`
-    frame : FrameType | None
-        Second argument needed by `signal.signal`
-
-    """
-    from sys import exit
-
-    exit(0)
-
-
-def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
+def watch(watcher: FileSystemWatcher, stop_event: Event, timeout: int = 1) -> None:
     """Start monitoring loop. Runs until Ctrl+C is pressed.
 
     Parameters
     ----------
     watcher : FileSystemWatcher
+        The watcher instance to monitor
+    stop_event : Event
+        Event sent to stop watching
     timeout : int
         Timeout in seconds in the while loop
 
     """
 
-    from signal import SIGINT, SIGTERM, signal
     from time import sleep
 
     from lib.file import get_content, get_md5, is_binary
 
-    logger.info(f"Watching {len(watcher.dirs)} repositories:")
+    logger.debug(f"Watching {len(watcher.dirs)} directories:")
     for watch_dir in watcher.dirs:
-        logger.info(f"  - {watch_dir}")
-    logger.info(f"Output file: {watcher.output_file}")
+        logger.debug(watch_dir)
+    logger.debug(f"Output file: {watcher.output_file}")
     if watcher.include_filetypes:
-        logger.info(f"Watching filetypes: {watcher.include_filetypes}")
+        logger.debug(f"Watching filetypes: {watcher.include_filetypes}")
     if watcher.exclude_filetypes:
-        logger.info(f"Excluding filetypes: {watcher.exclude_filetypes}")
-    logger.info("Press Ctrl+C to stop watching...")
-    logger.info("-" * 50)
+        logger.debug(f"Excluding filetypes: {watcher.exclude_filetypes}")
 
-    logger.info("Initial scan...")
+    logger.debug("Initial scan...")
     file_paths = scan_files(watcher)
     for file_path in file_paths:
         current_hash = get_md5(file_path)
@@ -521,16 +524,13 @@ def watch(watcher: FileSystemWatcher, timeout: int = 1) -> None:
 
     logger.debug(f"Monitoring {len(watcher.file_snapshots)} files")
     for file_snapshot in watcher.file_snapshots:
-        logger.debug(f" - {file_snapshot}")
+        logger.debug(file_snapshot)
 
-    signal(SIGTERM, signal_handler)
-    signal(SIGINT, signal_handler)
-
-    logging.info("Watching for changes...")
-    while True:
+    logger.info("Watching for changes...")
+    while not stop_event.is_set():
         changes = check_for_changes(watcher)
         if changes:
-            logging.debug(f"Found {len(changes)} changes")
+            logger.debug(f"Found {len(changes)} changes")
             write_changes_to_file(watcher, changes)
 
         sleep(timeout)

@@ -59,6 +59,9 @@ def merge_logs_by_timestamp(tmux_log_path: str, fs_log_path: str) -> str:
         list of dict
             List of event dicts from the log file.
         """
+        if not os.path.exists(path):
+            return []
+
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -89,24 +92,39 @@ def split_json_by_token_limit(json_str: str, token_limit: int) -> list[str]:
     list of str
         List of JSON strings, each representing a sublist within the token limit.
     """
+    from math import ceil
+    from re import sub
+
+    def split_item(item, num_chars_limit):
+        num_chars_item = len(item)
+        return [
+            item[i : i + num_chars_limit]
+            for i in range(0, num_chars_item, num_chars_limit)
+        ]
+
     num_chars_per_token = 3.5
     try:
         items = json.loads(json_str)
     except json.JSONDecodeError:
         return []
     sublists = []
-    current = []
+    current = ""
     current_tokens = 0
+    num_chars_limit = ceil(token_limit * num_chars_per_token)
     for item in items:
         item_str = json.dumps(item, ensure_ascii=False)
-        item_tokens = len(item_str.split()) // num_chars_per_token
+        item_str = sub(r"\s+", " ", item_str).strip()
+        item_tokens = ceil(len(item_str) / num_chars_per_token)
         if current_tokens + item_tokens > token_limit:
-            sublists.append(json.dumps(current, ensure_ascii=False))
-            current = [item]
+            current = item_str
             current_tokens = item_tokens
         else:
-            current.append(item)
-            current_tokens += item_tokens
+            if len(item_str) >= num_chars_limit:
+                sublists += split_item(item_str, num_chars_limit)
+                current = ""
+            else:
+                current += item_str
+                current_tokens += item_tokens
     if current:
-        sublists.append(json.dumps(current, ensure_ascii=False))
+        sublists += split_item(current, num_chars_limit)
     return sublists

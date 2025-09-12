@@ -1,5 +1,9 @@
-from dataclasses import dataclass
 import logging
+import os
+from dataclasses import dataclass
+from datetime import datetime
+from threading import Event
+
 import litellm
 
 logger = logging.getLogger(__name__)
@@ -22,17 +26,25 @@ class LLMSummarizer:
         Path to the tmux log file.
     fs_log_path : str
         Path to the filesystem watcher log file.
-    output_file : str
-        Path to the output file for the summary.
+    output_dir : str
+        Path to the output directory for the summary.
+    run_hour: time
+        Hour to give the summary of the day
+    last_run_day: time
+        Last time we gave a summary
     """
 
-    api_key: str
-    model_name: str
-    provider: str
-    tmux_log_path: str
-    fs_log_path: str
-    output_file: str = "summary_output.txt"
+    from datetime import date, time
+
+    api_key: str = ""
+    model_name: str = ""
+    provider: str = ""
+    tmux_log_path: str = ""
+    fs_log_path: str = ""
+    output_dir: str = os.path.expanduser("~/.local/state/recapify")
     token_limit: int = 1000000
+    run_hour: time = datetime.strptime("19:00", "%H:%M").time()
+    last_run_day: date = datetime.strptime("0001-01-01", "%Y-%m-%d").date()
 
 
 def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
@@ -51,12 +63,39 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
     cfg = parse_config(config_path)
 
     summarizer.api_key = cfg["llm"]["api_key"]
+    if not summarizer.api_key:
+        logger.warning("No API key provided or empty string")
+
     summarizer.model_name = cfg["llm"]["model_name"]
     summarizer.provider = cfg["llm"]["provider"]
-    summarizer.fs_log_path = cfg["filesystem"]["output_file"]
-    summarizer.tmux_log_path = cfg["tmux"]["output_file"]
-    summarizer.output_file = cfg["summarizer"]["output_file"]
+    summarizer.fs_log_path = os.path.expanduser(cfg["filesystem"]["output_file"])
+    summarizer.tmux_log_path = os.path.expanduser(cfg["tmux"]["output_file"])
+    summarizer.output_dir = os.path.expanduser(cfg["summarizer"]["output_dir"])
     summarizer.token_limit = cfg.getint("summarizer", "token_limit")
+    summarizer.run_hour = cfg.gettime("summarizer", "at")  # type: ignore
+
+
+def get_extra_headers(provider: str) -> dict:
+    """Return `extra_headers` value for litellm `completion` function
+
+    Parameters
+    ----------
+    provider : str
+        Provider name used for LLM
+
+    Returns
+    -------
+    dict
+        Dictionary to be passed as argument to litellm `completion` function
+
+    """
+    if provider == "github_copilot":
+        return {
+            "editor-version": "vscode/1.85.1",
+            "Copilot-Integration-Id": "vscode-chat",
+        }
+    else:
+        return {}
 
 
 def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | None:
@@ -77,6 +116,8 @@ def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | No
     str or None
         The generated summary, or None if the API call fails.
     """
+    from litellm.files.main import ModelResponse
+
     from lib.llm import load_prompt
 
     system_prompt = load_prompt(prompt)
@@ -89,8 +130,13 @@ def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | No
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": text},
             ],
+            extra_headers=get_extra_headers(summarizer.provider),
         )
-        return response["choices"][0]["message"]["content"]
+        if isinstance(response, ModelResponse):
+            return response["choices"][0]["message"]["content"]
+        else:
+            logger.error("LLM response is not of type `ModelResponse`")
+            return ""
     except Exception as e:
         logger.error(f"LLM summarization failed: {e}")
         return None
@@ -116,10 +162,11 @@ def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str | Non
     num_chunks = len(list_text)
     for idx, text in enumerate(list_text[1:]):
         logger.debug(f"Summarizing chunk {idx + 1}/{num_chunks}")
-        summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
         if summary is None:
             logger.error("Failed to summarize one of the chunks.")
             return None
+
+        summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
     return summary
 
 
@@ -153,7 +200,9 @@ def summarize(summarizer: LLMSummarizer):
     return summarize_many(summarizer, list_text)
 
 
-def generate_summary(summarizer: LLMSummarizer) -> None:
+def generate_summary(
+    summarizer: LLMSummarizer, stop_event: Event, timeout: int = 1
+) -> None:
     """
     Save the generated summary to the specified output file.
 
@@ -161,24 +210,49 @@ def generate_summary(summarizer: LLMSummarizer) -> None:
     ----------
     summarizer : LLMSummarizer
         The summarizer instance.
+    stop_event : Event
+        Event sent to stop watching
+    timeout : int
+        Timeout in seconds in the while loop
     """
-    if not summarizer.api_key:
-        logger.error(
-            "API key is required. Either set it using CLI argument or LLM_API_KEY environment variable."
-        )
-        return
-    logger.debug(
-        f"Generating summary using {summarizer.model_name} from {summarizer.provider}..."
-    )
-    logger.debug(f"Reading logs: {summarizer.tmux_log_path}, {summarizer.fs_log_path}")
-    logger.debug(f"Output will be saved to: {summarizer.output_file}")
-    summary = summarize(summarizer)
-    if summary is None:
-        logger.error("No summary generated to save.")
-        return
-    try:
-        with open(summarizer.output_file, "w", encoding="utf-8") as f:
-            f.write(summary)
-        logger.debug(f"Summary saved to {summarizer.output_file}")
-    except Exception as e:
-        logger.error(f"Failed to save summary: {e}")
+    from datetime import date
+    from time import sleep
+
+    today = date.today().strftime("%Y-%m-%d")
+    if not os.path.exists(summarizer.output_dir):
+        os.makedirs(summarizer.output_dir, exist_ok=True)
+
+    while not stop_event.is_set():
+        now = datetime.now()
+        if now.time() >= summarizer.run_hour and now.date() > summarizer.last_run_day:
+            logger.debug(
+                f"Generating summary using {summarizer.model_name} from {summarizer.provider}..."
+            )
+            logger.debug(
+                f"Reading logs: {summarizer.tmux_log_path}, {summarizer.fs_log_path}"
+            )
+
+            output_file = os.path.join(summarizer.output_dir, f"{today}.md")
+
+            logger.debug(f"Output will be saved to: {output_file}")
+            summary = summarize(summarizer)
+            if summary is None:
+                logger.error("No summary generated to save.")
+                return
+            try:
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(summary)
+                logger.info(f"Summary saved to {output_file}")
+            except Exception as e:
+                logger.error(f"Failed to save summary: {e}")
+
+            summarizer.last_run_day = now.date()
+
+            with open(summarizer.fs_log_path, "w") as f:
+                logger.debug(f"Emptying {summarizer.fs_log_path}")
+            with open(summarizer.tmux_log_path, "w") as f:
+                logger.debug(f"Emptying {summarizer.tmux_log_path}")
+
+            break
+
+        sleep(timeout)

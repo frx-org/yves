@@ -1,20 +1,22 @@
 def test_update_from_config(tmpdir):
     """Test `update_from_config` if it updates the current `LLMSummarizer` instance"""
     from configparser import ConfigParser
+    from datetime import datetime
     from uuid import uuid4
 
     from lib.llm_summarizer import LLMSummarizer, update_from_config
 
     abs_path = tmpdir / f"{uuid4().hex}"
-    default_summarizer = LLMSummarizer("", "", "", "", "")
-    summarizer = LLMSummarizer("", "", "", "", "")
+    summarize_output_dir = tmpdir / "summarize_dir"
+    default_summarizer = LLMSummarizer()
+    summarizer = LLMSummarizer()
 
     config = ConfigParser()
     config["filesystem"] = {
-        "output_file": "fs_output_file.txt",
+        "output_file": "fs_output_file.json",
     }
     config["tmux"] = {
-        "output_file": "tmux_output_file.txt",
+        "output_file": "tmux_output_file.json",
     }
     config["llm"] = {
         "api_key": "this-is-my-api-secret",
@@ -22,8 +24,9 @@ def test_update_from_config(tmpdir):
         "provider": "openai",
     }
     config["summarizer"] = {
-        "output_file": "summarized.txt",
+        "output_dir": summarize_output_dir,
         "token_limit": "154546",
+        "at": "15:49",
     }
     with open(abs_path, "w") as f:
         config.write(f)
@@ -34,8 +37,9 @@ def test_update_from_config(tmpdir):
         "this-is-my-api-secret",
         "gpt-4o-mini",
         "openai",
-        "tmux_output_file.txt",
-        "fs_output_file.txt",
-        "summarized.txt",
+        "tmux_output_file.json",
+        "fs_output_file.json",
+        summarize_output_dir,
         154546,
+        datetime.strptime("15:49", "%H:%M").time(),
     )

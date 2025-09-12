@@ -26,7 +26,7 @@ def default_config() -> ConfigParser:
     )
     config["filesystem"] = {
         "dirs": "",
-        "output_file": "changes.txt",
+        "output_file": "~/.local/state/recapify/fs_changes.json",
         "include_filetypes": "",
         "exclude_filetypes": "",
         "major_changes_only": "False",
@@ -35,7 +35,7 @@ def default_config() -> ConfigParser:
     }
     config["tmux"] = {
         "panes": "",
-        "output_file": "changes.txt",
+        "output_file": "~/.local/state/recapify/tmux_changes.json",
         "capture_full_output": "False",
     }
     config["llm"] = {
@@ -44,8 +44,9 @@ def default_config() -> ConfigParser:
         "provider": "",
     }
     config["summarizer"] = {
-        "output_file": "summary_output.txt",
+        "output_dir": "~/.local/share/recapify",
         "token_limit": "1000000",
+        "at": "19:00",
     }
 
     return config
@@ -88,9 +89,13 @@ def parse_config(
         Dictionary contained in the config file
 
     """
+    from datetime import datetime
+
     if not os.path.exists(path):
         logger.debug(f"{path} does not exist, write default configuration file")
         write_default_config(path)
+    else:
+        logger.debug(f"Loading configuration from {path}")
 
     user_config = ConfigParser(
         converters={
@@ -100,6 +105,8 @@ def parse_config(
             "int": lambda n: int(n),
             "float": lambda n: float(n),
             "bool": lambda b: b.lower() == "true",
+            "time": lambda t: datetime.strptime(t, "%H:%M").time(),
+            "date": lambda d: datetime.strptime(d, "%Y-%m-%d").date(),
         }
     )
     user_config.read(path)
