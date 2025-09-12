@@ -113,6 +113,7 @@ def split_json_by_token_limit(json_str: str, token_limit: int) -> list[str]:
     num_chars_limit = ceil(token_limit * num_chars_per_token)
     for item in items:
         item_str = json.dumps(item, ensure_ascii=False)
+        item_str = sub(r"\s+", " ", item_str).strip()
         item_tokens = ceil(len(item_str) / num_chars_per_token)
         if current_tokens + item_tokens > token_limit:
             current = item_str
