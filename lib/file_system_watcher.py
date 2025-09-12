@@ -25,6 +25,8 @@ class FileSystemWatcher:
 
     dirs: list[str] = field(default_factory=list)
     output_file: str = "changes.json"
+    tmux_output_file: str = "tmux_changes.json"
+    summary_output_file: str = "summary.md"
     include_filetypes: list[str] = field(default_factory=list)
     exclude_filetypes: list[str] = field(default_factory=list)
     major_changes_only: bool = False
@@ -47,14 +49,19 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
 
     """
     from lib.cfg import parse_config
+    from datetime import date
 
     cfg = parse_config(config_path)
 
     watcher.dirs = [os.path.expanduser(p) for p in cfg.getlist("filesystem", "dirs")]  # type: ignore
     if len(watcher.dirs) == 0:
         logger.warning("No directory specified to watch")
-
+    today = date.today().strftime("%Y-%m-%d")
     watcher.output_file = os.path.expanduser(cfg["filesystem"]["output_file"])
+    watcher.tmux_output_file = os.path.expanduser(cfg["tmux"]["output_file"])
+    watcher.summary_output_file = os.path.expanduser(
+        os.path.join(cfg["summarizer"]["output_dir"], f"{today}.md")
+    )
     watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
     watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore
     watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore
@@ -281,10 +288,21 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
         ):
             # always exclude the output file to prevent infinite monitoring loops
             abs_output_path = os.path.abspath(watcher.output_file)
-            abs_p = os.path.abspath(p)
-            not_output_file = abs_p != abs_output_path
+            abs_tmux_output_path = os.path.abspath(watcher.tmux_output_file)
+            abs_summary_output_path = os.path.abspath(watcher.summary_output_file)
 
-            if not_output_file and os.path.isfile(p):
+            abs_p = os.path.abspath(p)
+
+            not_output_file = abs_p != abs_output_path
+            not_tmux_output_file = abs_p != abs_tmux_output_path
+            not_summary_output_file = abs_p != abs_summary_output_path
+
+            if (
+                not_output_file
+                and not_tmux_output_file
+                and not_summary_output_file
+                and os.path.isfile(p)
+            ):
                 files_to_watch.append(p)
 
     logger.debug(f"Scanning took {time() - t_start}s")
