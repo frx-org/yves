@@ -13,13 +13,14 @@ from lib.tmux_watcher import TmuxWatcher
 from lib.tmux_watcher import update_from_config as tmux_update_from_config
 from lib.tmux_watcher import watch as tmux_watch
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config",
         "-c",
         type=str,
-        default="~/.config/recapify/config",
+        default="~/.config/yves/config",
         help="Path to configuration file",
     )
     parser.add_argument("--debug", action="store_true", help="Debug logging")

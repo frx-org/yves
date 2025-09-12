@@ -1,4 +1,4 @@
-recapify := justfile_directory()
+yves := justfile_directory()
 
 [private]
 default:
@@ -21,15 +21,15 @@ pytest:
 # Run checks on codebase
 [group("dev")]
 check:
-    @nix-shell {{ recapify }}/shell.nix --command "just py-check"
+    @nix-shell {{ yves }}/shell.nix --command "just py-check"
 
 # Format codebase
 [group("dev")]
 format:
-    @nix-shell {{ recapify }}/shell.nix --command "just py-format"
-    @nix-shell {{ recapify }}/shell.nix --command "treefmt"
+    @nix-shell {{ yves }}/shell.nix --command "just py-format"
+    @nix-shell {{ yves }}/shell.nix --command "treefmt"
 
 # Run pytest
 [group("dev")]
 test:
-    @nix-shell {{ recapify }}/shell.nix --command "just pytest"
+    @nix-shell {{ yves }}/shell.nix --command "just pytest"

@@ -1,7 +1,7 @@
 [project]
-name = "recapify"
+name = "yves"
 version = "0.1.0"
-description = "Automatic work report every day"
+description = "Your Valuable Efficient Summarizer: automatic work report every day"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -19,7 +19,13 @@ select = ["E", "F", "W"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["src"]
 addopts = [
     "--import-mode=importlib",
 ]
+
+[project.scripts]
+yves = "yves.main:main"
+
+[tool.uv]
+package = true

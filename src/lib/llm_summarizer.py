@@ -41,7 +41,7 @@ class LLMSummarizer:
     provider: str = ""
     tmux_log_path: str = ""
     fs_log_path: str = ""
-    output_dir: str = os.path.expanduser("~/.local/state/recapify")
+    output_dir: str = os.path.expanduser("~/.local/state/yves")
     token_limit: int = 1000000
     run_hour: time = datetime.strptime("19:00", "%H:%M").time()
     last_run_day: date = datetime.strptime("0001-01-01", "%Y-%m-%d").date()
