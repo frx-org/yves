@@ -16,7 +16,7 @@ class FileSystemWatcher:
     dirs: List of directories to monitor
     output_file: Output file for diffs
     tmux_output_file: Output file for tmux diffs
-    summary_output_file: Output file for daily summaries
+    summary_output_dir: Output directory for daily summaries
     include_filetypes: Include filetypes (e.g., ['.py', '.js'])
     exclude_filetypes: Exclude filetypes (e.g., ['.pyc'])
     major_changes_only: Filter out minor changes
@@ -28,7 +28,7 @@ class FileSystemWatcher:
     dirs: list[str] = field(default_factory=list)
     output_file: str = "changes.json"
     tmux_output_file: str = "tmux_changes.json"
-    summary_output_file: str = "summary.md"
+    summary_output_dir: str = os.path.expanduser("~/.local/state/recapify")
     include_filetypes: list[str] = field(default_factory=list)
     exclude_filetypes: list[str] = field(default_factory=list)
     major_changes_only: bool = False
@@ -60,7 +60,7 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
 
     watcher.output_file = os.path.expanduser(cfg["filesystem"]["output_file"])
     watcher.tmux_output_file = os.path.expanduser(cfg["tmux"]["output_file"])
-    watcher.summary_output_file = os.path.expanduser(cfg["summarizer"]["output_dir"])
+    watcher.summary_output_dir = os.path.expanduser(cfg["summarizer"]["output_dir"])
     watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
     watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore
     watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore
@@ -291,20 +291,20 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
             # always exclude the output file to prevent infinite monitoring loops
             abs_output_path = os.path.abspath(watcher.output_file)
             abs_tmux_output_path = os.path.abspath(watcher.tmux_output_file)
-            abs_summary_output_path = os.path.abspath(
-                os.path.join(watcher.summary_output_file, f"{today}.md")
+            abs_summary_output_dir = os.path.abspath(
+                os.path.join(watcher.summary_output_dir, f"{today}.md")
             )
 
             abs_p = os.path.abspath(p)
 
             not_output_file = abs_p != abs_output_path
             not_tmux_output_file = abs_p != abs_tmux_output_path
-            not_summary_output_file = abs_p != abs_summary_output_path
+            not_summary_output_dir = abs_p != abs_summary_output_dir
 
             if (
                 not_output_file
                 and not_tmux_output_file
-                and not_summary_output_file
+                and not_summary_output_dir
                 and os.path.isfile(p)
             ):
                 files_to_watch.append(p)
