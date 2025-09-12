@@ -116,6 +116,8 @@ def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | No
     str or None
         The generated summary, or None if the API call fails.
     """
+    from litellm.files.main import ModelResponse
+
     from lib.llm import load_prompt
 
     system_prompt = load_prompt(prompt)
@@ -130,7 +132,11 @@ def summarize_one(summarizer: LLMSummarizer, text: str, prompt: str) -> str | No
             ],
             extra_headers=get_extra_headers(summarizer.provider),
         )
-        return response["choices"][0]["message"]["content"]
+        if isinstance(response, ModelResponse):
+            return response["choices"][0]["message"]["content"]
+        else:
+            logger.error("LLM response is not of type `ModelResponse`")
+            return ""
     except Exception as e:
         logger.error(f"LLM summarization failed: {e}")
         return None
@@ -156,10 +162,11 @@ def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str | Non
     num_chunks = len(list_text)
     for idx, text in enumerate(list_text[1:]):
         logger.debug(f"Summarizing chunk {idx + 1}/{num_chunks}")
-        summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
         if summary is None:
             logger.error("Failed to summarize one of the chunks.")
             return None
+
+        summary = summarize_one(summarizer, summary + "\n\n" + text, prompt="many")
     return summary
 
 
