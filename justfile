@@ -18,6 +18,16 @@ py-format:
 pytest:
     @uv run pytest
 
+# Build yves with uv
+[group("yves")]
+build:
+    @uv build {{ yves }}
+
+# Build yves with nix
+[group("nix")]
+nix-build:
+    @nix-build {{ yves }} -A yves
+
 # Run checks on codebase
 [group("dev")]
 check:
@@ -33,3 +43,8 @@ format:
 [group("dev")]
 test:
     @nix-shell {{ yves }}/shell.nix --command "just pytest"
+
+# Clean directory
+[group("utils")]
+clean:
+    @rm -rf {{ yves }}/dist {{ yves }}/src/yves.egg-info {{ yves }}/result
