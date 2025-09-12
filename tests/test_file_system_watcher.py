@@ -7,6 +7,7 @@ def test_update_from_config(tmpdir):
     from lib.file_system_watcher import FileSystemWatcher, update_from_config
 
     abs_path = tmpdir / f"{uuid4().hex}"
+    summarize_output_dir = tmpdir / "summarize_dir"
     default_watcher = FileSystemWatcher()
     watcher = FileSystemWatcher()
 
@@ -20,6 +21,12 @@ def test_update_from_config(tmpdir):
         "min_lines_changed": "6",
         "similarity_threshold": "0.4",
     }
+    config["tmux"] = {
+        "output_file": "tmux_output_file.json",
+    }
+    config["summarizer"] = {
+        "output_dir": summarize_output_dir,
+    }
     with open(abs_path, "w") as f:
         config.write(f)
 
@@ -28,6 +35,8 @@ def test_update_from_config(tmpdir):
     assert watcher == FileSystemWatcher(
         [os.path.expanduser("~"), ".", "/home/me"],
         "new_output_file.json",
+        "tmux_output_file.json",
+        summarize_output_dir,
         [".py", ".nix", ".nu"],
         [".o"],
         True,
