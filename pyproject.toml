@@ -29,3 +29,9 @@ yves = "yves.main:main"
 
 [tool.uv]
 package = true
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.data-files]
+"yves.prompts" = ["*.txt"]

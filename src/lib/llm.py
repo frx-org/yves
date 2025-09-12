@@ -17,15 +17,13 @@ def load_prompt(prompt_name: str) -> str:
         The content of the prompt file.
 
     """
-    # Get the root directory of the project
-    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    prompt_file = os.path.join(root_dir, "prompts", f"{prompt_name}_system_prompt.txt")
+    from importlib.resources import files
 
-    if not os.path.exists(prompt_file):
+    prompt_file = files("yves.prompts") / f"{prompt_name}_system_prompt.txt"
+    if not prompt_file.is_file():
         raise FileNotFoundError(f"Prompt file not found: {prompt_file}")
 
-    with open(prompt_file, "r", encoding="utf-8") as f:
-        return f.read().strip()
+    return prompt_file.read_text()
 
 
 def merge_logs_by_timestamp(tmux_log_path: str, fs_log_path: str) -> str:

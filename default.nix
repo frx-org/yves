@@ -28,7 +28,6 @@ let
         ./pyproject.toml
         ./uv.lock
         ./src
-        ./prompts
       ];
     };
   };
