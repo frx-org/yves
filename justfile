@@ -1,4 +1,4 @@
-recapify := justfile_directory()
+yves := justfile_directory()
 
 [private]
 default:
@@ -18,18 +18,33 @@ py-format:
 pytest:
     @uv run pytest
 
+# Build yves with uv
+[group("yves")]
+build:
+    @uv build {{ yves }}
+
+# Build yves with nix
+[group("nix")]
+nix-build:
+    @nix-build {{ yves }} -A yves
+
 # Run checks on codebase
 [group("dev")]
 check:
-    @nix-shell {{ recapify }}/shell.nix --command "just py-check"
+    @nix-shell {{ yves }}/shell.nix --command "just py-check"
 
 # Format codebase
 [group("dev")]
 format:
-    @nix-shell {{ recapify }}/shell.nix --command "just py-format"
-    @nix-shell {{ recapify }}/shell.nix --command "treefmt"
+    @nix-shell {{ yves }}/shell.nix --command "just py-format"
+    @nix-shell {{ yves }}/shell.nix --command "treefmt"
 
 # Run pytest
 [group("dev")]
 test:
-    @nix-shell {{ recapify }}/shell.nix --command "just pytest"
+    @nix-shell {{ yves }}/shell.nix --command "just pytest"
+
+# Clean directory
+[group("utils")]
+clean:
+    @rm -rf {{ yves }}/dist {{ yves }}/src/yves.egg-info {{ yves }}/result

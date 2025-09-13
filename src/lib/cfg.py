@@ -26,7 +26,7 @@ def default_config() -> ConfigParser:
     )
     config["filesystem"] = {
         "dirs": "",
-        "output_file": "~/.local/state/recapify/fs_changes.json",
+        "output_file": "~/.local/state/yves/fs_changes.json",
         "include_filetypes": "",
         "exclude_filetypes": "",
         "major_changes_only": "False",
@@ -35,7 +35,7 @@ def default_config() -> ConfigParser:
     }
     config["tmux"] = {
         "panes": "",
-        "output_file": "~/.local/state/recapify/tmux_changes.json",
+        "output_file": "~/.local/state/yves/tmux_changes.json",
         "capture_full_output": "False",
     }
     config["llm"] = {
@@ -44,7 +44,7 @@ def default_config() -> ConfigParser:
         "provider": "",
     }
     config["summarizer"] = {
-        "output_dir": "~/.local/share/recapify",
+        "output_dir": "~/.local/share/yves",
         "token_limit": "1000000",
         "at": "19:00",
     }
@@ -73,7 +73,7 @@ def write_default_config(path: str):
 
 
 def parse_config(
-    path: str = os.path.join(os.path.expanduser("~"), ".config/recapify/config"),
+    path: str = os.path.join(os.path.expanduser("~"), ".config/yves/config"),
 ) -> ConfigParser:
     """Read a config file as input and return the dictionary containing these values.
     If the configuration file does not exist, we create the default configuration.

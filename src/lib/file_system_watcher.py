@@ -28,7 +28,7 @@ class FileSystemWatcher:
     dirs: list[str] = field(default_factory=list)
     output_file: str = "changes.json"
     tmux_output_file: str = "tmux_changes.json"
-    summary_output_dir: str = os.path.expanduser("~/.local/state/recapify")
+    summary_output_dir: str = os.path.expanduser("~/.local/state/yves")
     include_filetypes: list[str] = field(default_factory=list)
     exclude_filetypes: list[str] = field(default_factory=list)
     major_changes_only: bool = False
@@ -239,10 +239,10 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
         List of files to watch
 
     """
+    from datetime import date
     from functools import partial
     from glob import glob, iglob
     from time import time
-    from datetime import date
 
     today = date.today().strftime("%Y-%m-%d")
 
