@@ -31,7 +31,13 @@ let
 in
 {
   inherit yves;
+
   default = yves;
+
+  homeModules = {
+    default = ./modules/home-manager.nix;
+  };
+
   shell = pkgs.mkShellNoCC {
     packages = with pkgs; [
       just
