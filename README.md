@@ -142,8 +142,32 @@ provider = openai
 Yves will write a report for you everyday and only once (_i.e._ you cannot arbitrarily choose specific days or multiple time reports per day).
 You can provide the summary time with the field `at` with the following format `%H:%M` (_i.e._ 24-hour format).
 
-## Development
+## Bugs reports and questions
 
-This project is written in Python and use [uv](https://docs.astral.sh/uv/) for package management.
+If you see a bug, please open an [issue](https://github.com/rxfremk/yves/issues/new/choose).
+If you have any question regarding the project or its usage you can also post an issue.
+We will open GitHub discussions later when the community will be bigger but for now we consider issues are enough.
 
-To improve reproducibility, we use Nix where `shell.nix` exposes the packages we use for development.
+> [!IMPORTANT]
+> If you find a bug with an AI assistance, please disclose it in the issue.
+
+## Contributing
+
+If you have write permission in this repository you are welcomed to contribute.
+
+We use `uv` to manage dependencies.
+So please use it to make sure we have the same working environment.
+
+> [!IMPORTANT]
+> If you contribute with an AI assistance, please disclose it in the pull request.
+
+### Formatting and linting
+
+We use `ruff` for formatting and linting in the CI.
+Your code must respect that or else CI will fail.
+For the documentation, we use [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) style.
+
+### Testing
+
+We use `pytest` to run unit tests in the CI.
+You are invited to write tests for your code as often as possible.
