@@ -15,9 +15,9 @@ Meet Yves (also known as "**Y**our **V**aluable **E**fficient **S**ummarizer"), 
 > [!CAUTION]
 > This is a private repository: if we gave you an access it means that we trust you so do not steal or leak the code and be respectful with everyone.
 > Remember that it is a **hobby project** and it first aims to solve _our_ problems.
-> If submitted feature requests are considered relevant (which is purely subjective), we will make our best to implement them but note that we will take our time since we are definitely not paid.
+> If submitted feature requests are considered relevant (which is purely subjective), we will make our best to implement them but note that we will take our time since we are definitely not paid for this.
 >
-> We will revoke access if we see disrespectful behaviors regarding the project and its users.
+> We will revoke access if we see disrespectful behaviors regarding the project or its users.
 
 ## Usage
 
@@ -36,6 +36,9 @@ And will send these to a LLM that will write the report.
 
 - `tmux` is optional but is recommended to give more insights to the LLM
 - LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, ...)
+- One of the following to build the binary
+  - UV
+  - Nix
 
 ### Build
 
@@ -120,7 +123,7 @@ You can specify specific panes you want to watch with `panes` (split by commas) 
 We use [LiteLLM](https://docs.litellm.ai/) to support LLM providers.
 If it is supported by this, it will probably be supported by Yves.
 
-LiteLLM follows the following format `{provider}/{model_name}`.
+LiteLLM uses the following format `{provider}/{model_name}`.
 So if you take [OpenAI](https://docs.litellm.ai/docs/providers/openai) example, your configuration should look like this
 
 ```
