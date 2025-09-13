@@ -20,40 +20,14 @@
 }:
 
 let
-  inherit (pkgs) lib;
-  workspace = uv2nix.lib.workspace.loadWorkspace {
-    workspaceRoot = lib.fileset.toSource {
-      root = ./.;
-      fileset = lib.fileset.unions [
-        ./pyproject.toml
-        ./uv.lock
-        ./src
-      ];
-    };
+  yves = import ./pkgs/yves.nix {
+    inherit
+      pkgs
+      pyproject-nix
+      uv2nix
+      pyproject-build-systems
+      ;
   };
-  python = pkgs.python3;
-  overlay = workspace.mkPyprojectOverlay {
-    sourcePreference = "wheel";
-  };
-  baseSet = pkgs.callPackage pyproject-nix.build.packages {
-    inherit python;
-  };
-  pythonSet = baseSet.overrideScope (
-    pkgs.lib.composeManyExtensions [
-      pyproject-build-systems.default
-      overlay
-    ]
-  );
-  yves-venv = pythonSet.mkVirtualEnv "yves-venv" workspace.deps.all;
-  yves =
-    pkgs.runCommandNoCC "yves"
-      {
-        buildInputs = [ yves-venv ];
-      }
-      ''
-        mkdir -p $out/bin
-        ln -s ${yves-venv}/bin/yves $out/bin
-      '';
 in
 {
   inherit yves;
