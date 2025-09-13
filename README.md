@@ -54,6 +54,8 @@ which will produce the `yves` binary that will be added into your `$PATH`.
 
 #### Using `nix`
 
+##### Using binary
+
 We use [uv2nix](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
 
 ```bash
@@ -61,6 +63,24 @@ nix-build
 ```
 
 which will produce the `yves` binary in `result/bin/yves`.
+
+##### Using `home-manager` module
+
+If you use [home-manager](https://github.com/nix-community/home-manager), we provide a module for you to load it.
+
+###### Vanilla `nix`
+
+```nix
+{ pkgs, ...}:
+
+{
+    imports = [ (import "${./path/to/yves/src}/default.nix" { inherit pkgs; }).homeModules.default ]
+
+    services.yves = {
+      enable = true;
+    };
+}
+```
 
 ### Run
 
