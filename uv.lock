@@ -1675,7 +1675,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "litellm" },
+    { name = "litellm", specifier = ">=1.77.0" },
     { name = "questionary", specifier = ">=2.1.1" },
 ]
 
