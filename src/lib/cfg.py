@@ -52,6 +52,28 @@ def default_config() -> ConfigParser:
     return config
 
 
+def write_config(cfg: ConfigParser, path: str):
+    """Write a configuration `cfg` into a file in `path`.
+
+    Parameters
+    ----------
+    cfg : ConfigParser
+        Configuration instance
+    path : str
+        Path to write the configuration file
+
+    """
+
+    expand_path = os.path.expanduser(path)
+    parent_dir = os.path.dirname(expand_path)
+    if not os.path.exists(parent_dir):
+        os.makedirs(parent_dir, exist_ok=True)
+
+    with open(expand_path, "w") as f:
+        cfg.write(f)
+        logger.debug(f"Configuration file {path} updated")
+
+
 def write_default_config(path: str):
     """Write default configuration to a file.
 
@@ -62,14 +84,8 @@ def write_default_config(path: str):
 
     """
 
-    parent_dir = os.path.dirname(path)
-    if not os.path.exists(parent_dir):
-        os.makedirs(parent_dir, exist_ok=True)
-
     default_cfg = default_config()
-    with open(path, "w") as f:
-        default_cfg.write(f)
-        logger.debug(f"Configuration file {path} updated")
+    write_config(default_cfg, path)
 
 
 def parse_config(
