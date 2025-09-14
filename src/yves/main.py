@@ -24,6 +24,9 @@ def main():
         help="Path to configuration file",
     )
     parser.add_argument("--debug", action="store_true", help="Debug logging")
+
+    sub_parsers = parser.add_subparsers(dest="command")
+    sub_parsers.add_parser("init", help="Initialize Yves")
     p_args = parser.parse_args()
 
     logging.basicConfig(
@@ -31,31 +34,35 @@ def main():
         format="%(asctime)s - %(name)s - [%(levelname)s] - %(message)s",
     )
 
-    fs_watcher = FileSystemWatcher()
-    tmux_watcher = TmuxWatcher()
-    summarizer = LLMSummarizer()
+    if p_args.command == "init":
+        from lib.interactive import configure_interactively
 
-    config_path = os.path.expanduser(p_args.config)
+        configure_interactively()
+    else:
+        config_path = os.path.expanduser(p_args.config)
 
-    fs_update_from_config(fs_watcher, config_path)
-    tmux_update_from_config(tmux_watcher, config_path)
-    llm_update_from_config(summarizer, config_path)
+        fs_watcher = FileSystemWatcher()
+        tmux_watcher = TmuxWatcher()
+        summarizer = LLMSummarizer()
+        llm_update_from_config(summarizer, config_path)
 
-    stop_event = Event()
-    setup_signal_handler(stop_event)
+        stop_event = Event()
+        setup_signal_handler(stop_event)
 
-    threads = [
-        Thread(target=generate_summary, args=(summarizer, stop_event)),
-    ]
+        threads = [
+            Thread(target=generate_summary, args=(summarizer, stop_event)),
+        ]
 
-    if fs_watcher.enable:
-        threads.append(Thread(target=fs_watch, args=(fs_watcher, stop_event)))
+        if fs_watcher.enable:
+            fs_update_from_config(fs_watcher, config_path)
+            threads.append(Thread(target=fs_watch, args=(fs_watcher, stop_event)))
 
-    if tmux_watcher.enable:
-        threads.append(Thread(target=tmux_watch, args=(tmux_watcher, stop_event)))
+        if tmux_watcher.enable:
+            tmux_update_from_config(tmux_watcher, config_path)
+            threads.append(Thread(target=tmux_watch, args=(tmux_watcher, stop_event)))
 
-    for thread in threads:
-        thread.start()
+        for thread in threads:
+            thread.start()
 
-    for thread in threads:
-        thread.join()
+        for thread in threads:
+            thread.join()
