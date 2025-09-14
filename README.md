@@ -64,7 +64,19 @@ which will produce the `yves` binary in `result/bin/yves`.
 
 ### Run
 
+In general, you can call your favorite assistant by calling their name _i.e._
+
+```bash
+yves
+```
+
+By default if you just call Yves, they will provide you information about how to work with them (_i.e._ documentation).
+You can give directives to them for your specific needs (_i.e._ subcommands).
+
 #### Initialize configuration file
+
+> [!TIP]
+> This is recommended when you first use Yves!
 
 Run
 
@@ -75,9 +87,9 @@ yves init
 to interactively configure your personal assistant.
 After that you can finetune your configuration file (see [Configuration](#configuration)).
 
-#### Watch
+#### Watch and summarize
 
-Call your personal assistant
+Call your personal assistant to record your steps (this is the main subcommand).
 
 ```bash
 yves record
