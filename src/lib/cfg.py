@@ -130,3 +130,20 @@ def parse_config(
     user_config.read(path)
 
     return user_config
+
+
+def print_config(cfg: ConfigParser):
+    """Print the current configuration `cfg`
+
+    Parameters
+    ----------
+    cfg : ConfigParser
+        Configuration instance to print
+
+    """
+
+    for section in cfg.sections():
+        print(f"[{section}]")
+        for key, value in cfg[section].items():
+            print(f"{key} = {value}")
+        print()

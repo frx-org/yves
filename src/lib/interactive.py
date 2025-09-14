@@ -239,7 +239,7 @@ def configure_interactively() -> None:
 
     from textwrap import dedent
 
-    from lib.cfg import default_config, write_config
+    from lib.cfg import default_config, print_config, write_config
 
     cfg = default_config()
 
@@ -262,3 +262,6 @@ def configure_interactively() -> None:
     ask_and_update_summarizer(cfg)
 
     write_config(cfg, cfg_path)
+
+    print(f"\nThis is your current configuration stored in {cfg_path}\n")
+    print_config(cfg)
