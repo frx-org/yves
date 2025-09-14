@@ -80,7 +80,7 @@ After that you can finetune your configuration file (see [Configuration](#config
 Call your personal assistant
 
 ```bash
-yves
+yves record
 ```
 
 ### Global arguments
