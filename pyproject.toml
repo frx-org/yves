@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "litellm",
+    "questionary>=2.1.1",
 ]
 
 [dependency-groups]
