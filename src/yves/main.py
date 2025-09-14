@@ -45,10 +45,14 @@ def main():
     setup_signal_handler(stop_event)
 
     threads = [
-        Thread(target=fs_watch, args=(fs_watcher, stop_event)),
-        Thread(target=tmux_watch, args=(tmux_watcher, stop_event)),
         Thread(target=generate_summary, args=(summarizer, stop_event)),
     ]
+
+    if fs_watcher.enable:
+        threads.append(Thread(target=fs_watch, args=(fs_watcher, stop_event)))
+
+    if tmux_watcher.enable:
+        threads.append(Thread(target=tmux_watch, args=(tmux_watcher, stop_event)))
 
     for thread in threads:
         thread.start()

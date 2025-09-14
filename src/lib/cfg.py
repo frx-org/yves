@@ -25,6 +25,7 @@ def default_config() -> ConfigParser:
         }
     )
     config["filesystem"] = {
+        "enable": "True",
         "dirs": "",
         "output_file": "~/.local/state/yves/fs_changes.json",
         "include_filetypes": "",
@@ -34,6 +35,7 @@ def default_config() -> ConfigParser:
         "similarity_threshold": "0.7",
     }
     config["tmux"] = {
+        "enable": "True",
         "panes": "",
         "output_file": "~/.local/state/yves/tmux_changes.json",
         "capture_full_output": "False",

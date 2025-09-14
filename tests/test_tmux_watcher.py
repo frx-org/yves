@@ -11,6 +11,7 @@ def test_update_from_config(tmpdir):
 
     config = ConfigParser()
     config["tmux"] = {
+        "enable": "false",
         "panes": "0 , 1,my_session:my_window.1",
         "output_file": "new_output_file.json",
         "capture_full_output": "True",
@@ -21,6 +22,7 @@ def test_update_from_config(tmpdir):
     update_from_config(watcher, abs_path)
     assert default_watcher != watcher
     assert watcher == TmuxWatcher(
+        False,
         ["0", "1", "my_session:my_window.1"],
         "new_output_file.json",
         True,
