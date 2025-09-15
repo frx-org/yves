@@ -213,7 +213,7 @@ def ask_and_update_summarizer(cfg: ConfigParser) -> None:
     """
 
     summary_path = questionary.text(
-        "Where do you want to store every summaries (give a directory)?",
+        "Where do you want to store all summaries (give a directory)?",
         default="~/.local/share/yves",
     ).ask()
     logger.debug(f"Summary output directory: {summary_path}")
