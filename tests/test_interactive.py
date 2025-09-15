@@ -1,10 +1,12 @@
+"""Test lib/interactive.py."""
+
 import os
 
 import questionary
 
 
 def test_ask_config_path(tmpdir, monkeypatch):
-    """Test `ask_config_path` if it creates the directory and return the right answer"""
+    """Test `ask_config_path` if it creates the directory and return the right answer."""
     from uuid import uuid4
 
     from lib.interactive import ask_config_path
@@ -22,8 +24,7 @@ def test_ask_config_path(tmpdir, monkeypatch):
 
 
 def test_ask_and_update_fs_enable(monkeypatch):
-    """Test `ask_and_update_fs_enable`"""
-
+    """Test `ask_and_update_fs_enable`."""
     from lib.cfg import ConfigParser
     from lib.interactive import ask_and_update_fs_enable
 
@@ -42,8 +43,7 @@ def test_ask_and_update_fs_enable(monkeypatch):
 
 
 def test_ask_and_update_fs_dirs(monkeypatch):
-    """Test `ask_and_update_fs_dirs`"""
-
+    """Test `ask_and_update_fs_dirs`."""
     from lib.cfg import ConfigParser
     from lib.interactive import ask_and_update_fs_dirs
 
@@ -59,8 +59,7 @@ def test_ask_and_update_fs_dirs(monkeypatch):
 
 
 def test_ask_and_update_fs_exclude(monkeypatch):
-    """Test `ask_and_update_fs_exclude`"""
-
+    """Test `ask_and_update_fs_exclude`."""
     from lib.cfg import ConfigParser
     from lib.interactive import ask_and_update_fs_exclude
 
@@ -76,8 +75,7 @@ def test_ask_and_update_fs_exclude(monkeypatch):
 
 
 def test_ask_and_update_tmux_enable(monkeypatch):
-    """Test `ask_and_update_tmux_enable`"""
-
+    """Test `ask_and_update_tmux_enable`."""
     from lib.cfg import ConfigParser
     from lib.interactive import ask_and_update_tmux_enable
 
@@ -96,8 +94,7 @@ def test_ask_and_update_tmux_enable(monkeypatch):
 
 
 def test_ask_and_update_llm_provider(monkeypatch):
-    """Test `ask_and_update_llm_provider`"""
-
+    """Test `ask_and_update_llm_provider`."""
     from lib.cfg import ConfigParser
     from lib.interactive import ask_and_update_llm_provider
 
@@ -117,8 +114,7 @@ def test_ask_and_update_llm_provider(monkeypatch):
 
 
 def test_is_valid_hour():
-    """Test `is_valid_hour`"""
-
+    """Test `is_valid_hour`."""
     from lib.interactive import is_valid_hour
 
     assert is_valid_hour("19:00")
@@ -132,8 +128,7 @@ def test_is_valid_hour():
 
 
 def test_ask_and_update_summarizer(tmpdir, monkeypatch):
-    """Test `ask_and_update_summarizer` by also creating the directory if it does not exist yet"""
-
+    """Test `ask_and_update_summarizer` by also creating the directory if it does not exist yet."""
     from uuid import uuid4
 
     from lib.cfg import ConfigParser

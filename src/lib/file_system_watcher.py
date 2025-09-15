@@ -1,3 +1,5 @@
+"""File system watcher library."""
+
 import json
 import logging
 import os
@@ -230,7 +232,7 @@ def is_major_change(
 
 
 def scan_files(watcher: FileSystemWatcher) -> list[str]:
-    """Recursively scan all directories for files matching filetypes
+    """Recursively scan all directories for files matching filetypes.
 
     Parameters
     ----------
@@ -514,7 +516,6 @@ def watch(watcher: FileSystemWatcher, stop_event: Event, timeout: int = 1) -> No
         Timeout in seconds in the while loop
 
     """
-
     from time import sleep
 
     from lib.file import get_content, get_md5, is_binary

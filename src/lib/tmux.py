@@ -1,8 +1,10 @@
+"""Tmux library."""
+
 import re
 import subprocess
 
 
-def get_tmux_pane_content(pane: str) -> str:
+def get_tmux_pane_content(pane: str) -> str | None:
     """
     Capture and return the content of a specific tmux pane.
 
@@ -49,7 +51,6 @@ def get_command_from_content(pane_content: str) -> str:
     str
         The extracted command, or an empty string if no command is found.
     """
-
     if not is_command_finished(pane_content):
         return ""
 
