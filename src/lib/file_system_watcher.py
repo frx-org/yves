@@ -13,6 +13,7 @@ class FileSystemWatcher:
 
     Attributes
     ----------
+    enable: Enable the watcher or not
     dirs: List of directories to monitor
     output_file: Output file for diffs
     tmux_output_file: Output file for tmux diffs
@@ -25,6 +26,7 @@ class FileSystemWatcher:
     file_snapshots: Dictionary containing stats files to watch
     """
 
+    enable: bool = True
     dirs: list[str] = field(default_factory=list)
     output_file: str = "changes.json"
     tmux_output_file: str = "tmux_changes.json"
@@ -54,6 +56,7 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
 
     cfg = parse_config(config_path)
 
+    watcher.enable = cfg.getbool("filesystem", "enable")  # type: ignore
     watcher.dirs = [os.path.expanduser(p) for p in cfg.getlist("filesystem", "dirs")]  # type: ignore
     if len(watcher.dirs) == 0:
         logger.warning("No directory specified to watch")

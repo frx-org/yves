@@ -64,7 +64,40 @@ which will produce the `yves` binary in `result/bin/yves`.
 
 ### Run
 
-Just call your favorite assistant with `yves`
+In general, you can call your favorite assistant by calling their name _i.e._
+
+```bash
+yves
+```
+
+By default if you just call Yves, they will provide you information about how to work with them (_i.e._ documentation).
+You can give directives to them for your specific needs (_i.e._ subcommands).
+
+#### Initialize configuration file
+
+> [!TIP]
+> This is recommended when you first use Yves!
+
+Run
+
+```bash
+yves init
+```
+
+to interactively configure your personal assistant.
+After that you can finetune your configuration file (see [Configuration](#configuration)).
+
+#### Watch and summarize
+
+Call your personal assistant to record your steps (this is the main subcommand).
+
+```bash
+yves record
+```
+
+### Global arguments
+
+These flags can be used for any subcommands.
 
 | Argument        | Type   | Default                 | Description                |
 | --------------- | ------ | ----------------------- | -------------------------- |
@@ -76,14 +109,14 @@ Just call your favorite assistant with `yves`
 You can configure your assistant with the configuration file (default path is `~/.config/yves/config`).
 It will be automatically created when you first call Yves.
 
-This is the default configuration
+This is an example configuration
 
 ```
 [filesystem]
-dirs =
+dirs = ~/work/yves, /persist/my/other/project
 output_file = ~/.local/state/yves/fs_changes.json
-include_filetypes =
-exclude_filetypes =
+include_filetypes = .py, .nix
+exclude_filetypes = .pyc, .git
 major_changes_only = False
 min_lines_changed = 3
 similarity_threshold = 0.7
@@ -95,13 +128,13 @@ capture_full_output = False
 
 [llm]
 api_key =
-model_name = # mandatory
-provider = # mandatory
+model_name = gpt-4
+provider = github_copilot
 
 [summarizer]
 output_dir = ~/.local/share/yves
 token_limit = 30000
-at = 19:00
+at = 17:00
 ```
 
 ### File system

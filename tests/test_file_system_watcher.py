@@ -13,6 +13,7 @@ def test_update_from_config(tmpdir):
 
     config = ConfigParser()
     config["filesystem"] = {
+        "enable": "false",
         "dirs": "~, . ,/home/me",
         "output_file": "new_output_file.json",
         "include_filetypes": ".py ,.nix,.nu",
@@ -33,6 +34,7 @@ def test_update_from_config(tmpdir):
     update_from_config(watcher, abs_path)
     assert default_watcher != watcher
     assert watcher == FileSystemWatcher(
+        False,
         [os.path.expanduser("~"), ".", "/home/me"],
         "new_output_file.json",
         "tmux_output_file.json",

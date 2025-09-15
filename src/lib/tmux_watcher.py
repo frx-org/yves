@@ -12,14 +12,17 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TmuxWatcher:
     """Tmux pane monitor that captures tmux pane commands and outputs.
+
     Attributes
     ----------
+    enable: Enable the watcher or not
     panes: List of tmux panes to monitor
     output_file: Output file for command outputs
     capture_full_output: If True, capture full pane content instead of just last command
     pane_states: Dictionary to hold the state of each tmux pane
     """
 
+    enable: bool = True
     panes: list[str] = field(default_factory=list)
     output_file: str = "changes.json"
     capture_full_output: bool = False
@@ -41,6 +44,7 @@ def update_from_config(watcher: TmuxWatcher, config_path: str) -> None:
 
     cfg = parse_config(config_path)
 
+    watcher.enable = cfg.getbool("tmux", "enable")  # type: ignore
     watcher.panes = cfg.getlist("tmux", "panes")  # type: ignore
     watcher.output_file = os.path.expanduser(cfg["tmux"]["output_file"])
     watcher.capture_full_output = cfg.getbool("tmux", "capture_full_output")  # type: ignore
@@ -62,9 +66,9 @@ def check_for_completed_commands(watcher: TmuxWatcher) -> list[dict[str, object]
     """
     from lib.tmux import (
         extract_last_command_output,
-        is_command_finished,
         get_command_from_content,
         get_tmux_pane_content,
+        is_command_finished,
     )
 
     completed_commands = []
