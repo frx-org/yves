@@ -1,14 +1,14 @@
 """Test lib/tmux_watcher.py."""
 
 
-def test_update_from_config(tmpdir):
+def test_update_from_config(tmp_path):
     """Test `update_from_config` if it updates the current `TmuxWatcher` instance."""
     from configparser import ConfigParser
     from uuid import uuid4
 
     from lib.tmux_watcher import TmuxWatcher, update_from_config
 
-    abs_path = tmpdir / f"{uuid4().hex}"
+    abs_path = tmp_path / f"{uuid4().hex}"
     default_watcher = TmuxWatcher()
     watcher = TmuxWatcher()
 

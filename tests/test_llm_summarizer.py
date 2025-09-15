@@ -1,7 +1,7 @@
 """Test lib/llm_summarizer.py."""
 
 
-def test_update_from_config(tmpdir):
+def test_update_from_config(tmp_path):
     """Test `update_from_config` if it updates the current `LLMSummarizer` instance."""
     from configparser import ConfigParser
     from datetime import datetime
@@ -9,8 +9,8 @@ def test_update_from_config(tmpdir):
 
     from lib.llm_summarizer import LLMSummarizer, update_from_config
 
-    abs_path = tmpdir / f"{uuid4().hex}"
-    summarize_output_dir = tmpdir / "summarize_dir"
+    abs_path = tmp_path / f"{uuid4().hex}"
+    summarize_output_dir = tmp_path / "summarize_dir"
     default_summarizer = LLMSummarizer()
     summarizer = LLMSummarizer()
 
@@ -42,7 +42,7 @@ def test_update_from_config(tmpdir):
         "openai",
         "tmux_output_file.json",
         "fs_output_file.json",
-        summarize_output_dir,
+        str(summarize_output_dir),
         154546,
         datetime.strptime("15:49", "%H:%M").time(),
     )
