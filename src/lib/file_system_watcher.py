@@ -336,13 +336,13 @@ def check_for_changes(
         Returns list of changes with 'type', 'file', and 'diff' keys.
 
     """
-    from lib.file import find_file_in_dirs, get_content, get_md5, is_binary
+    from lib.file import find_file_in_dirs, get_blake3, get_content, is_binary
 
     changes = []
     files = scan_files(watcher)
 
     for filepath in files:
-        current_hash = get_md5(filepath)
+        current_hash = get_blake3(filepath)
         if current_hash is None:
             continue
 
@@ -518,7 +518,7 @@ def watch(watcher: FileSystemWatcher, stop_event: Event, timeout: int = 1) -> No
     """
     from time import sleep
 
-    from lib.file import get_content, get_md5, is_binary
+    from lib.file import get_blake3, get_content, is_binary
 
     logger.debug(f"Watching {len(watcher.dirs)} directories:")
     for watch_dir in watcher.dirs:
@@ -533,7 +533,7 @@ def watch(watcher: FileSystemWatcher, stop_event: Event, timeout: int = 1) -> No
     file_paths = scan_files(watcher)
     for file_path in file_paths:
         logger.debug(f"Processing from initial scan {file_path}")
-        current_hash = get_md5(file_path)
+        current_hash = get_blake3(file_path)
         if is_binary(file_path):
             watcher.file_snapshots[file_path] = {
                 "hash": current_hash,

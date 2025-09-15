@@ -35,6 +35,32 @@ def test_get_md5(tmp_path):
     assert get_md5(binary_file) == "d05374dc381d9b52806446a71c8e79b1"
 
 
+def test_get_blake3(tmp_path):
+    """Test `get_blake3`."""
+    from lib.file import get_blake3
+
+    empty_file = tmp_path / "empty.txt"
+    empty_file.write_text("")
+    assert (
+        get_blake3(empty_file)
+        == "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    )
+
+    text_file = tmp_path / "text.txt"
+    text_file.write_text("Hello, I am Yves.")
+    assert (
+        get_blake3(text_file)
+        == "05461be1cdd26fa8a3b3b4d1ef03fea9e34254279f8ef7f2db1e8cc458ca9ae0"
+    )
+
+    binary_file = tmp_path / "example.bin"
+    binary_file.write_bytes(b"\x00\x01\x02\x03\x04")
+    assert (
+        get_blake3(binary_file)
+        == "b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2"
+    )
+
+
 def test_find_file_in_dirs(tmp_path):
     """Test `find_file_in_dirs`."""
     from random import choice

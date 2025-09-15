@@ -52,6 +52,32 @@ def get_md5(file_path: str, chunksize: int = 1024 * 1024) -> str:
     return m.hexdigest()
 
 
+def get_blake3(file_path: str, chunksize: int = 1024 * 1024) -> str:
+    """Generate blake3 hash for a file.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the file to generate MD5 hash.
+    chunksize : int
+        Chunk size to read
+
+    Returns
+    -------
+    str
+        blake3 hash.
+
+    """
+    from blake3 import blake3
+
+    m = blake3()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(chunksize):
+            m.update(chunk)
+
+    return m.hexdigest()
+
+
 def get_content(file_path: str) -> list[str] | None:
     """Read text file as list of lines with UTF-8 encoding.
 
