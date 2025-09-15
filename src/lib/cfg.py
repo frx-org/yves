@@ -145,5 +145,9 @@ def print_config(cfg: ConfigParser):
     for section in cfg.sections():
         print(f"[{section}]")
         for key, value in cfg[section].items():
-            print(f"{key} = {value}")
+            if key == "api_key" and value:
+                print(f"{key} = {'*' * 20}")
+            else:
+                print(f"{key} = {value}")
+
         print()
