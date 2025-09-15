@@ -246,7 +246,7 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
     """
     from datetime import date
     from functools import partial
-    from glob import glob, iglob
+    from glob import glob
     from time import time
 
     today = date.today().strftime("%Y-%m-%d")
@@ -275,8 +275,8 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
                 return []
 
             logger.debug(f"Listing any files in {parent_dir}")
-            result = iglob(f"{parent_dir}/**/*", recursive=True)
-            logger.debug(f"Found {len(list(result))} elements in {parent_dir}")
+            result = glob(f"{parent_dir}/**/*", recursive=True)
+            logger.debug(f"Found {len(result)} elements in {parent_dir}")
 
         logger.debug(f"Excluding filetypes in {parent_dir}")
         result = filter(
