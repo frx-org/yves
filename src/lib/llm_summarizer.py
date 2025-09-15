@@ -1,3 +1,5 @@
+"""Summarizer library using LLM."""
+
 import logging
 import os
 from dataclasses import dataclass
@@ -76,7 +78,7 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
 
 
 def get_extra_headers(provider: str) -> dict:
-    """Return `extra_headers` value for litellm `completion` function
+    """Return `extra_headers` value for litellm `completion` function.
 
     Parameters
     ----------

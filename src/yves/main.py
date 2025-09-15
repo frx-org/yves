@@ -1,9 +1,12 @@
+"""Main script that will be called with `yves`."""
+
 import argparse
 import logging
 import os
 
 
 def main():
+    """Execute main function."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config",

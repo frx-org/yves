@@ -1,3 +1,5 @@
+"""Configuration file library."""
+
 import logging
 import os
 from configparser import ConfigParser
@@ -65,7 +67,6 @@ def write_config(cfg: ConfigParser, path: str):
         Path to write the configuration file
 
     """
-
     expand_path = os.path.expanduser(path)
     parent_dir = os.path.dirname(expand_path)
     if not os.path.exists(parent_dir):
@@ -85,7 +86,6 @@ def write_default_config(path: str):
         Path to write the default configuration file
 
     """
-
     default_cfg = default_config()
     write_config(default_cfg, path)
 
@@ -93,8 +93,7 @@ def write_default_config(path: str):
 def parse_config(
     path: str = os.path.join(os.path.expanduser("~"), ".config/yves/config"),
 ) -> ConfigParser:
-    """Read a config file as input and return the dictionary containing these values.
-    If the configuration file does not exist, we create the default configuration.
+    """Read a config file as input and return the dictionary containing these values. If the configuration file does not exist, we create the default configuration.
 
     Parameters
     ----------
@@ -133,7 +132,7 @@ def parse_config(
 
 
 def print_config(cfg: ConfigParser):
-    """Print the current configuration `cfg`
+    """Print the current configuration `cfg`.
 
     Parameters
     ----------
@@ -141,7 +140,6 @@ def print_config(cfg: ConfigParser):
         Configuration instance to print
 
     """
-
     for section in cfg.sections():
         print(f"[{section}]")
         for key, value in cfg[section].items():

@@ -1,8 +1,10 @@
+"""Test lib/cfg.py."""
+
 from configparser import ConfigParser
 
 
 def test_parse_config(tmpdir):
-    """Test `parse_config` if it creates a default configuration file"""
+    """Test `parse_config` if it creates a default configuration file."""
     import os
     from uuid import uuid4
 

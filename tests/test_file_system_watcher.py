@@ -1,5 +1,8 @@
+"""Test lib/file_system_watcher.py."""
+
+
 def test_update_from_config(tmpdir):
-    """Test `update_from_config` if it updates the current `FileSystemWatcher` instance"""
+    """Test `update_from_config` if it updates the current `FileSystemWatcher` instance."""
     import os
     from configparser import ConfigParser
     from uuid import uuid4

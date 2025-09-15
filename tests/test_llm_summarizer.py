@@ -1,5 +1,8 @@
+"""Test lib/llm_summarizer.py."""
+
+
 def test_update_from_config(tmpdir):
-    """Test `update_from_config` if it updates the current `LLMSummarizer` instance"""
+    """Test `update_from_config` if it updates the current `LLMSummarizer` instance."""
     from configparser import ConfigParser
     from datetime import datetime
     from uuid import uuid4

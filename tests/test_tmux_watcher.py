@@ -1,5 +1,8 @@
+"""Test lib/tmux_watcher.py."""
+
+
 def test_update_from_config(tmpdir):
-    """Test `update_from_config` if it updates the current `TmuxWatcher` instance"""
+    """Test `update_from_config` if it updates the current `TmuxWatcher` instance."""
     from configparser import ConfigParser
     from uuid import uuid4
 

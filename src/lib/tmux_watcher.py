@@ -1,3 +1,5 @@
+"""Tmux watcher library."""
+
 import json
 import logging
 import os
@@ -165,9 +167,7 @@ def write_commands_to_file(
 
 
 def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
-    """
-    Continuously monitor and update the list of all active tmux pane indices.
-    Prints added and removed panes, including when all panes are closed.
+    """Continuously monitor and update the list of all active tmux pane indices. Prints added and removed panes, including when all panes are closed.
 
     Parameters
     ----------
@@ -223,7 +223,6 @@ def watch(watcher: TmuxWatcher, stop_event: Event, timeout: int = 1) -> None:
     timeout : int, optional
         Timeout in seconds between checks (default is 1).
     """
-
     from time import sleep
 
     logger.info("Start watching...")

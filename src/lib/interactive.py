@@ -1,3 +1,5 @@
+"""Interactive asking library."""
+
 import logging
 import os
 from configparser import ConfigParser
@@ -8,8 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def ask_config_path() -> str:
-    """Ask the user where do they want to store their configuration file.
-    If the parent directory does not exist, we create it.
+    """Ask the user where do they want to store their configuration file. If the parent directory does not exist, we create it.
 
     Returns
     -------
@@ -17,7 +18,6 @@ def ask_config_path() -> str:
         Path to the configuration file
 
     """
-
     cfg_path = questionary.text(
         "Where do you want to store the configuration file?",
         default="~/.config/yves/config",
@@ -46,7 +46,6 @@ def ask_and_update_fs_enable(cfg: ConfigParser) -> bool:
         User answer
 
     """
-
     enable = questionary.confirm(
         "Would you want to enable the watcher on the filesystem?"
     ).ask()
@@ -70,7 +69,6 @@ def ask_and_update_fs_dirs(cfg: ConfigParser) -> None:
         Configuration instance to update
 
     """
-
     str_fs_dirs = ""
     while True:
         d = questionary.path(
@@ -99,7 +97,6 @@ def ask_and_update_fs_exclude(cfg: ConfigParser) -> None:
         Configuration instance to update
 
     """
-
     exclude_filetypes = questionary.checkbox(
         "I suggest you to exclude some filetypes/directories to search faster, please select them:",
         choices=[
@@ -132,7 +129,6 @@ def ask_and_update_tmux_enable(cfg: ConfigParser) -> bool:
         User answer
 
     """
-
     enable = questionary.confirm(
         "Would you want to enable the watcher on tmux panes?"
     ).ask()
@@ -156,7 +152,6 @@ def ask_and_update_llm_provider(cfg: ConfigParser) -> None:
         Configuration instance to update
 
     """
-
     provider = questionary.text(
         "Which LLM provider do you want to use (refer to https://docs.litellm.ai/docs/providers)?",
         default="openai",
@@ -179,7 +174,7 @@ def ask_and_update_llm_provider(cfg: ConfigParser) -> None:
 
 
 def is_valid_hour(hour: str) -> bool:
-    """Test if the string `hour` follows the correct date format
+    """Test if the string `hour` follows the correct date format.
 
     Parameters
     ----------
@@ -192,7 +187,6 @@ def is_valid_hour(hour: str) -> bool:
         Returns `True` if format is correct, else `False`
 
     """
-
     from datetime import datetime
 
     try:
@@ -203,7 +197,7 @@ def is_valid_hour(hour: str) -> bool:
 
 
 def ask_and_update_summarizer(cfg: ConfigParser) -> None:
-    """Ask the user how they want to get the summary
+    """Ask the user how they want to get the summary.
 
     Parameters
     ----------
@@ -211,7 +205,6 @@ def ask_and_update_summarizer(cfg: ConfigParser) -> None:
         Configure instance to update
 
     """
-
     summary_path = questionary.text(
         "Where do you want to store all summaries (give a directory)?",
         default="~/.local/share/yves",
@@ -235,8 +228,7 @@ def ask_and_update_summarizer(cfg: ConfigParser) -> None:
 
 
 def configure_interactively() -> None:
-    """Function to interactively configure Yves with the user"""
-
+    """Interactively configure Yves with the user."""
     from textwrap import dedent
 
     from lib.cfg import default_config, print_config, write_config

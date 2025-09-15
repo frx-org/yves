@@ -1,3 +1,5 @@
+"""Generic LLM library."""
+
 import json
 import os
 

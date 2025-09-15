@@ -1,3 +1,5 @@
+"""File system library."""
+
 import os
 
 
@@ -15,7 +17,6 @@ def is_binary(file_path: str) -> bool:
         `True` if binary else `False`
 
     """
-
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             for _ in f:
@@ -39,7 +40,6 @@ def get_md5(file_path: str) -> str:
         MD5 hash.
 
     """
-
     from hashlib import md5
 
     with open(file_path, "rb") as f:
@@ -61,7 +61,6 @@ def get_content(file_path: str) -> list[str] | None:
         Content of the file.
 
     """
-
     try:
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             return f.readlines()
@@ -70,7 +69,7 @@ def get_content(file_path: str) -> list[str] | None:
 
 
 def find_file_in_dirs(file_path: str, dirs_path: list[str]) -> str | None:
-    """Find which directory among `dirs_path` contains `file_path`
+    """Find which directory among `dirs_path` contains `file_path`.
 
     Parameters
     ----------
