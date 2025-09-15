@@ -532,6 +532,7 @@ def watch(watcher: FileSystemWatcher, stop_event: Event, timeout: int = 1) -> No
     logger.debug("Initial scan...")
     file_paths = scan_files(watcher)
     for file_path in file_paths:
+        logger.debug(f"Processing from initial scan {file_path}")
         current_hash = get_md5(file_path)
         if is_binary(file_path):
             watcher.file_snapshots[file_path] = {
