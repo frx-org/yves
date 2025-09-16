@@ -20,8 +20,8 @@ class FileSystemWatcher:
     output_file: Output file for diffs
     tmux_output_file: Output file for tmux diffs
     summary_output_dir: Output directory for daily summaries
-    include_filetypes: Include filetypes (e.g., ['.py', '.js'])
-    exclude_filetypes: Exclude filetypes (e.g., ['.pyc'])
+    include_filetypes: Include filetypes (e.g., {'.py', '.js'})
+    exclude_filetypes: Exclude filetypes (e.g., {'.pyc'})
     major_changes_only: Filter out minor changes
     min_lines_changed: Minimum lines for major change
     similarity_threshold: Minimum similarity ratio [0.0-1.0] for major change detection
@@ -33,8 +33,8 @@ class FileSystemWatcher:
     output_file: str = "changes.json"
     tmux_output_file: str = "tmux_changes.json"
     summary_output_dir: str = os.path.expanduser("~/.local/state/yves")
-    include_filetypes: list[str] = field(default_factory=list)
-    exclude_filetypes: list[str] = field(default_factory=list)
+    include_filetypes: set[str] = field(default_factory=set)
+    exclude_filetypes: set[str] = field(default_factory=set)
     major_changes_only: bool = False
     min_lines_changed: int = 3
     similarity_threshold: float = 0.7
@@ -66,8 +66,8 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
     watcher.output_file = os.path.expanduser(cfg["filesystem"]["output_file"])
     watcher.tmux_output_file = os.path.expanduser(cfg["tmux"]["output_file"])
     watcher.summary_output_dir = os.path.expanduser(cfg["summarizer"]["output_dir"])
-    watcher.include_filetypes = cfg.getlist("filesystem", "include_filetypes")  # type: ignore
-    watcher.exclude_filetypes = cfg.getlist("filesystem", "exclude_filetypes")  # type: ignore
+    watcher.include_filetypes = cfg.getset("filesystem", "include_filetypes")  # type: ignore
+    watcher.exclude_filetypes = cfg.getset("filesystem", "exclude_filetypes")  # type: ignore
     watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore
     watcher.min_lines_changed = cfg.getint("filesystem", "min_lines_changed")
     watcher.similarity_threshold = cfg.getfloat("filesystem", "similarity_threshold")

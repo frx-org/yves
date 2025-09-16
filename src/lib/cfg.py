@@ -21,6 +21,9 @@ def default_config() -> ConfigParser:
             "list": lambda vs: []
             if not vs.strip()
             else [v.strip() for v in vs.split(",")],
+            "set": lambda vs: {}
+            if not vs.strip()
+            else {v.strip() for v in vs.split(",")},
             "int": lambda n: int(n),
             "float": lambda n: float(n),
             "bool": lambda b: b.lower() == "true",
@@ -119,6 +122,9 @@ def parse_config(
             "list": lambda vs: []
             if not vs.strip()
             else [v.strip() for v in vs.split(",")],
+            "set": lambda vs: {}
+            if not vs.strip()
+            else {v.strip() for v in vs.split(",")},
             "int": lambda n: int(n),
             "float": lambda n: float(n),
             "bool": lambda b: b.lower() == "true",
