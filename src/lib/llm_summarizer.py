@@ -172,7 +172,7 @@ def summarize_many(summarizer: LLMSummarizer, list_text: list[str]) -> str | Non
     return summary
 
 
-def summarize(summarizer: LLMSummarizer):
+def summarize(summarizer: LLMSummarizer, text: str):
     """
     Generate a summary for the given text using the configured LLM via litellm.
 
@@ -189,9 +189,8 @@ def summarize(summarizer: LLMSummarizer):
         The generated summary, or None if the API call fails.
 
     """
-    from lib.llm import merge_logs_by_timestamp, split_json_by_token_limit
+    from lib.llm import split_json_by_token_limit
 
-    text = merge_logs_by_timestamp(summarizer.tmux_log_path, summarizer.fs_log_path)
     list_text = split_json_by_token_limit(text, summarizer.token_limit)
     num_chunks = len(list_text)
     if num_chunks < 2:
@@ -220,6 +219,8 @@ def generate_summary(
     from datetime import date
     from time import sleep
 
+    from lib.llm import merge_logs_by_timestamp
+
     today = date.today().strftime("%Y-%m-%d")
     if not os.path.exists(summarizer.output_dir):
         os.makedirs(summarizer.output_dir, exist_ok=True)
@@ -236,8 +237,16 @@ def generate_summary(
 
             output_file = os.path.join(summarizer.output_dir, f"{today}.md")
 
+            logger.debug(
+                f"Merge {summarizer.tmux_log_path} and {summarizer.fs_log_path}"
+            )
+            text = merge_logs_by_timestamp(
+                summarizer.tmux_log_path, summarizer.fs_log_path
+            )
+
             logger.debug(f"Output will be saved to: {output_file}")
-            summary = summarize(summarizer)
+            summary = summarize(summarizer, text)
+
             if summary is None:
                 logger.error("No summary generated to save.")
                 return
@@ -258,3 +267,30 @@ def generate_summary(
             break
 
         sleep(timeout)
+
+
+def check(summarizer: LLMSummarizer):
+    """Check if the LLM provider works as intended.
+
+    Parameters
+    ----------
+    summarizer : LLMSummarizer
+        Summarizer instance to be updated
+
+    """
+    from json import dumps
+
+    from lib.llm import load_prompt
+
+    logger.info(
+        "We are going to check if you can communicate with your LLM provider. If everything works as intended, you shouldn't see any error messages."
+    )
+    logger.info(f"Checking {summarizer.model_name} from {summarizer.provider}...")
+
+    long_json = dumps("\n".join([load_prompt("single") for _ in range(1000)]))
+    ret = summarize(summarizer, long_json)
+
+    if ret:
+        logger.info("✅ Everything seems fine!")
+    else:
+        logger.error("🛑 Error(s) encountered... Please fix them before calling Yves.")
