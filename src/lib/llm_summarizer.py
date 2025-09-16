@@ -54,7 +54,7 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
 
     Parameters
     ----------
-    watcher : LLMSummarizer
+    summarizer : LLMSummarizer
         Summarizer instance to be updated
     config_path : str
         Path to the configuration file
