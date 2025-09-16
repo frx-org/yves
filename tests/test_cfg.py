@@ -3,7 +3,7 @@
 from configparser import ConfigParser
 
 
-def test_parse_config(tmpdir):
+def test_parse_config(tmp_path):
     """Test `parse_config` if it creates a default configuration file."""
     import os
     from uuid import uuid4
@@ -13,7 +13,7 @@ def test_parse_config(tmpdir):
     def config_to_dict(cfg: ConfigParser) -> dict[str, dict[str, str]]:
         return {section: dict(cfg.items(section)) for section in cfg.sections()}
 
-    abs_path = tmpdir / f"{uuid4().hex}"
+    abs_path = tmp_path / f"{uuid4().hex}"
     default_cfg = default_config()
 
     cfg = parse_config(abs_path)

@@ -5,13 +5,13 @@ import os
 import questionary
 
 
-def test_ask_config_path(tmpdir, monkeypatch):
+def test_ask_config_path(tmp_path, monkeypatch):
     """Test `ask_config_path` if it creates the directory and return the right answer."""
     from uuid import uuid4
 
     from lib.interactive import ask_config_path
 
-    dir_cfg_path = tmpdir / f"{uuid4().hex}"
+    dir_cfg_path = tmp_path / f"{uuid4().hex}"
     cfg_path = dir_cfg_path / "config"
     assert not os.path.exists(cfg_path)
     assert not dir_cfg_path.exists()
@@ -19,7 +19,7 @@ def test_ask_config_path(tmpdir, monkeypatch):
     monkeypatch.setattr("questionary.Question.ask", lambda _: str(cfg_path))
     result = ask_config_path()
 
-    assert result == cfg_path
+    assert result == str(cfg_path)
     assert dir_cfg_path.exists()
 
 
@@ -127,14 +127,14 @@ def test_is_valid_hour():
     assert not is_valid_hour("-10:01")
 
 
-def test_ask_and_update_summarizer(tmpdir, monkeypatch):
+def test_ask_and_update_summarizer(tmp_path, monkeypatch):
     """Test `ask_and_update_summarizer` by also creating the directory if it does not exist yet."""
     from uuid import uuid4
 
     from lib.cfg import ConfigParser
     from lib.interactive import ask_and_update_summarizer
 
-    summary_dir = tmpdir / f"{uuid4().hex}" / "summaries"
+    summary_dir = tmp_path / f"{uuid4().hex}" / "summaries"
     assert not summary_dir.exists()
 
     answers = iter([str(summary_dir), "19:30"])

@@ -3,13 +3,15 @@
 import os
 
 
-def is_binary(file_path: str) -> bool:
-    """Check if `file_path` is binary by attemptint to decode as UTF-8.
+def is_binary(file_path: str, block_size: int = 4096) -> bool:
+    """Check if `file_path` is binary.
 
     Parameters
     ----------
     file_path : str
         Path to the file to analyze.
+    block_size : int
+        Chunk to read
 
     Returns
     -------
@@ -17,22 +19,22 @@ def is_binary(file_path: str) -> bool:
         `True` if binary else `False`
 
     """
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            for _ in f:
-                continue
-        return False
-    except (OSError, UnicodeDecodeError):
-        return True
+    # https://stackoverflow.com/a/7392391
+    textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7F})
+
+    with open(file_path, "rb") as f:
+        return bool(f.read(block_size).translate(None, textchars))
 
 
-def get_md5(file_path: str) -> str:
+def get_md5(file_path: str, chunksize: int = 1024 * 1024) -> str:
     """Generate MD5 hash for a file.
 
     Parameters
     ----------
     file_path : str
         Path to the file to generate MD5 hash.
+    chunksize : int
+        Chunk size to read
 
     Returns
     -------
@@ -42,9 +44,38 @@ def get_md5(file_path: str) -> str:
     """
     from hashlib import md5
 
+    m = md5()
     with open(file_path, "rb") as f:
-        content = f.read()
-        return md5(content).hexdigest()
+        while chunk := f.read(chunksize):
+            m.update(chunk)
+
+    return m.hexdigest()
+
+
+def get_blake3(file_path: str, chunksize: int = 1024 * 1024) -> str:
+    """Generate blake3 hash for a file.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the file to generate MD5 hash.
+    chunksize : int
+        Chunk size to read
+
+    Returns
+    -------
+    str
+        blake3 hash.
+
+    """
+    from blake3 import blake3
+
+    m = blake3()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(chunksize):
+            m.update(chunk)
+
+    return m.hexdigest()
 
 
 def get_content(file_path: str) -> list[str] | None:

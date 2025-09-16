@@ -1,7 +1,7 @@
 """Test lib/file_system_watcher.py."""
 
 
-def test_update_from_config(tmpdir):
+def test_update_from_config(tmp_path):
     """Test `update_from_config` if it updates the current `FileSystemWatcher` instance."""
     import os
     from configparser import ConfigParser
@@ -9,8 +9,8 @@ def test_update_from_config(tmpdir):
 
     from lib.file_system_watcher import FileSystemWatcher, update_from_config
 
-    abs_path = tmpdir / f"{uuid4().hex}"
-    summarize_output_dir = tmpdir / "summarize_dir"
+    abs_path = tmp_path / f"{uuid4().hex}"
+    summarize_output_dir = tmp_path / "summarize_dir"
     default_watcher = FileSystemWatcher()
     watcher = FileSystemWatcher()
 
@@ -41,9 +41,9 @@ def test_update_from_config(tmpdir):
         [os.path.expanduser("~"), ".", "/home/me"],
         "new_output_file.json",
         "tmux_output_file.json",
-        summarize_output_dir,
-        [".py", ".nix", ".nu"],
-        [".o"],
+        str(summarize_output_dir),
+        {".py", ".nix", ".nu"},
+        {".o"},
         True,
         6,
         0.4,

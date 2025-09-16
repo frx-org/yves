@@ -5,6 +5,7 @@ description = "Your Valuable Efficient Summarizer: automatic work report every d
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "blake3>=1.0.5",
     "litellm>=1.77.0",
     "questionary>=2.1.1",
 ]
