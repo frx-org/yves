@@ -4,6 +4,9 @@ import argparse
 import logging
 import os
 
+from lib.llm_summarizer import LLMSummarizer, generate_summary
+from lib.llm_summarizer import update_from_config as llm_update_from_config
+
 
 def main():
     """Execute main function."""
@@ -19,6 +22,7 @@ def main():
 
     sub_parsers = parser.add_subparsers(dest="command")
     sub_parsers.add_parser("init", help="Initialize Yves")
+    sub_parsers.add_parser("check", help="Check if LLM works")
     sub_parsers.add_parser("record", help="Watch and summarize")
     sub_parsers.add_parser("describe", help="Show configuration")
     p_args = parser.parse_args()
@@ -39,6 +43,14 @@ def main():
         from lib.interactive import configure_interactively
 
         configure_interactively()
+    if p_args.command == "check":
+        from lib.llm_summarizer import check
+
+        config_path = os.path.expanduser(p_args.config)
+        summarizer = LLMSummarizer()
+        llm_update_from_config(summarizer, config_path)
+
+        check(summarizer)
     elif p_args.command == "describe":
         from lib.cfg import parse_config, print_config
 
@@ -51,8 +63,6 @@ def main():
         from lib.file_system_watcher import FileSystemWatcher
         from lib.file_system_watcher import update_from_config as fs_update_from_config
         from lib.file_system_watcher import watch as fs_watch
-        from lib.llm_summarizer import LLMSummarizer, generate_summary
-        from lib.llm_summarizer import update_from_config as llm_update_from_config
         from lib.signal import setup_signal_handler
         from lib.tmux_watcher import TmuxWatcher
         from lib.tmux_watcher import update_from_config as tmux_update_from_config

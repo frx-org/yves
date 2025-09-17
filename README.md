@@ -87,6 +87,19 @@ yves init
 to interactively configure your personal assistant.
 After that you can finetune your configuration file (see [Configuration](#configuration)).
 
+#### Check everything is correctly set
+
+> [!TIP]
+> This is recommended just after you initialized your configuration file!
+
+Run
+
+```bash
+yves check
+```
+
+If you don't see any errors, you are good to go!
+
 #### Watch and summarize
 
 Call your personal assistant to record your steps (this is the main subcommand).
