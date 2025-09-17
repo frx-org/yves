@@ -58,6 +58,8 @@ def get_command_from_content(pane_content: str) -> str:
     if len(lines) < 2:
         return ""
 
+    # last line is the prompt which is unnecessary to check
+    # TODO: find a more general way to ignore prompt
     for i in range(len(lines) - 2, -1, -1):
         line = lines[i].strip()
         if not line:
@@ -77,6 +79,7 @@ def get_command_from_content(pane_content: str) -> str:
                     if is_valid_command(cmd):
                         return cmd
 
+        # TODO: to remove https://github.com/rxfremk/yves/pull/19#discussion_r2310915036
         if line.startswith(">>> ") and len(line) > 4:
             cmd = line[4:].strip()
             if is_valid_command(cmd):
@@ -146,7 +149,7 @@ def extract_last_command_output(pane_content: str) -> str:
     return "\n".join(result_lines)
 
 
-def is_valid_command(cmd: str) -> bool:
+def is_valid_command(cmd: str, max_length: int = 10) -> bool:
     """
     Filter out basic/uninteresting commands to reduce noise.
 
@@ -154,6 +157,8 @@ def is_valid_command(cmd: str) -> bool:
     ----------
     cmd : str
         The command string to validate.
+    max_length: int
+        Maximum length for a command
 
     Returns
     -------
@@ -163,7 +168,7 @@ def is_valid_command(cmd: str) -> bool:
     if not cmd:
         return False
 
-    if len(cmd.split()) > 10:
+    if len(cmd.split()) > max_length:
         return False
 
     basic_commands = ["ls", "cd", "pwd", "echo", "cat", "clear", "history"]
