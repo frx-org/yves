@@ -48,3 +48,25 @@ def test_update_from_config(tmp_path):
         6,
         0.4,
     )
+
+
+def test_normalize_line():
+    """Test `normalize_line`."""
+    from lib.file_system_watcher import FileSystemWatcher, normalize_line
+
+    watcher = FileSystemWatcher()
+    inputs = [
+        "This is a normal line.",
+        "#This is a comment",
+        "//   This is another    comment",
+        "   This  is    a line   with lots of       spaces",
+    ]
+    outputs = ["This is a normal line.", "", "", "This is a line with lots of spaces"]
+
+    watcher.major_changes_only = True
+    for inp, out in zip(inputs, outputs):
+        assert normalize_line(watcher, inp) == out
+
+    watcher.major_changes_only = False
+    for inp in inputs:
+        assert normalize_line(watcher, inp) == inp
