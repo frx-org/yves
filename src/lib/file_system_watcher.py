@@ -251,11 +251,11 @@ def scan_files(watcher: FileSystemWatcher) -> list[str]:
 
     today = date.today().strftime("%Y-%m-%d")
 
-    def exclude_filetypes_fn(path: str, exclude_filetypes: list[str]):
+    def exclude_filetypes_fn(path: str, exclude_filetypes: set[str]):
         return not any({path.endswith(filetype) for filetype in exclude_filetypes})
 
     def glob_fn(
-        include_filetypes: list[str], exclude_filetypes: list[str], parent_dir: str
+        include_filetypes: set[str], exclude_filetypes: set[str], parent_dir: str
     ):
         result = []
         for include_filetype in include_filetypes:
