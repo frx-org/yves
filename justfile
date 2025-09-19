@@ -24,9 +24,16 @@ build:
     @uv build {{ yves }}
 
 # Build yves with nix
-[group("nix")]
+[group("yves")]
 nix-build:
     @nix-build {{ yves }} -A yves
+
+# Build docker image
+[group("yves")]
+docker-build:
+    @nix-build {{ yves }} -A docker.copyToDockerDaemon
+    {{ yves }}/result/bin/copy-to-docker-daemon
+    rm result
 
 # Run checks on codebase
 [group("dev")]

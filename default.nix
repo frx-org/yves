@@ -17,6 +17,9 @@
     inherit (pkgs) lib;
     inherit pyproject-nix uv2nix;
   },
+  nix2container ? import source.nix2container {
+    inherit pkgs system;
+  },
 }:
 
 let
@@ -36,6 +39,11 @@ in
 
   homeModules = {
     default = ./modules/home-manager.nix;
+  };
+
+  docker = pkgs.callPackage ./docker.nix {
+    inherit (nix2container) nix2container;
+    inherit yves;
   };
 
   shell = pkgs.mkShellNoCC {

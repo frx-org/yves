@@ -1,5 +1,18 @@
 {
   "pins": {
+    "nix2container": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nlewo",
+        "repo": "nix2container"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "4f2437f6a1844b843b380d483087ae6d461240ee",
+      "url": "https://github.com/nlewo/nix2container/archive/4f2437f6a1844b843b380d483087ae6d461240ee.tar.gz",
+      "hash": "1mjsskk3lr54c01vx8cd4fjk50xmvh53q1sa35yjqxg9kdsj9015"
+    },
     "nixpkgs": {
       "type": "Channel",
       "name": "nixpkgs-unstable",
