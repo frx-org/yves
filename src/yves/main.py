@@ -10,21 +10,26 @@ from lib.llm_summarizer import update_from_config as llm_update_from_config
 
 def main():
     """Execute main function."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
+    global_parser = argparse.ArgumentParser(add_help=False)
+    global_parser.add_argument(
         "--config",
         "-c",
         type=str,
         default="~/.config/yves/config",
         help="Path to configuration file",
     )
-    parser.add_argument("--debug", action="store_true", help="Debug logging")
+    global_parser.add_argument("--debug", action="store_true", help="Debug logging")
 
+    parser = argparse.ArgumentParser()
     sub_parsers = parser.add_subparsers(dest="command")
-    sub_parsers.add_parser("init", help="Initialize Yves")
-    sub_parsers.add_parser("check", help="Check if LLM works")
-    sub_parsers.add_parser("record", help="Watch and summarize")
-    sub_parsers.add_parser("describe", help="Show configuration")
+    sub_parsers.add_parser("init", parents=[global_parser], help="Initialize Yves")
+    sub_parsers.add_parser("check", parents=[global_parser], help="Check if LLM works")
+    sub_parsers.add_parser(
+        "record", parents=[global_parser], help="Watch and summarize"
+    )
+    sub_parsers.add_parser(
+        "describe", parents=[global_parser], help="Show configuration"
+    )
     p_args = parser.parse_args()
 
     if p_args.command is None:

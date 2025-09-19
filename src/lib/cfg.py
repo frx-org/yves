@@ -70,7 +70,7 @@ def write_config(cfg: ConfigParser, path: str):
         Path to write the configuration file
 
     """
-    expand_path = os.path.expanduser(path)
+    expand_path = os.path.abspath(os.path.expanduser(path))
     parent_dir = os.path.dirname(expand_path)
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir, exist_ok=True)
