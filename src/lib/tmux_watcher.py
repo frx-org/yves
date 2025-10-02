@@ -185,7 +185,9 @@ def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
             capture_output=True,
             text=True,
         )
-        if result.returncode == 0:
+        if result is None:
+            current_panes = set()
+        elif result.returncode == 0:
             current_panes = set(result.stdout.strip().splitlines())
         else:
             current_panes = set()
@@ -201,7 +203,8 @@ def get_active_tmux_panes(watcher: TmuxWatcher, timeout: int):
     watcher.panes = list(current_panes)
     if len(watcher.panes) == 0:
         logger.warning("No active tmux panes detected.")
-        while result.returncode != 0:
+        result = None
+        while result is None or result.returncode != 0:
             result = subprocess.run(
                 ["tmux", "list-panes", "-a", "-F", "#S:#I.#P"],
                 capture_output=True,
