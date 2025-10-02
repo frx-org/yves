@@ -141,7 +141,7 @@ def write_commands_to_file(
 
     # Append new completed commands
     for cmd in completed_commands:
-        timestamp_str = int(cmd["timestamp"].timestamp())
+        timestamp_str = int(cmd["timestamp"].timestamp())  # type: ignore
         all_events.append(
             {
                 "event_type": "command_completed",
@@ -149,7 +149,7 @@ def write_commands_to_file(
                 "pane": cmd["pane"],
                 "command": cmd["command"],
                 # Split output into lines for easier processing later
-                "output": cmd["output"].splitlines(),
+                "output": cmd["output"].splitlines(),  # type: ignore
             }
         )
 
