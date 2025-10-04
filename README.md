@@ -98,6 +98,9 @@ This will:
 > `./path/to/yves/src` must point to the `yves` source directory.
 > You can achieve this with your favorite fetcher, using Flakes, `npins`, etc.
 
+> [!TIP]
+> If you use the `home-manager` module you do not have to manually build the package since it will be done for you!
+
 #### Initialize configuration file
 
 > [!TIP]
