@@ -94,6 +94,10 @@ This will:
 }
 ```
 
+> [!NOTE]
+> `./path/to/yves/src` must point to the `yves` source directory.
+> You can achieve this with your favorite fetcher, using Flakes, `npins`, etc.
+
 #### Initialize configuration file
 
 > [!TIP]
