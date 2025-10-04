@@ -79,7 +79,7 @@ def get_command_from_content(pane_content: str) -> str:
                     if is_valid_command(cmd):
                         return cmd
 
-        # TODO: to remove https://github.com/rxfremk/yves/pull/19#discussion_r2310915036
+        # TODO: to remove https://github.com/frx-org/yves/pull/19#discussion_r2310915036
         if line.startswith(">>> ") and len(line) > 4:
             cmd = line[4:].strip()
             if is_valid_command(cmd):

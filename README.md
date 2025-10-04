@@ -10,7 +10,7 @@ Meet Yves (also known as "**Y**our **V**aluable **E**fficient **S**ummarizer"), 
 
 > [!WARNING]
 > This is **highly experimental** as it is not done yet.
-> You _will_ encounter bugs, please open an [issue](https://github.com/rxfremk/yves/issues/new/choose) and remember to be polite.
+> You _will_ encounter bugs, please open an [issue](https://github.com/frx-org/yves/issues/new/choose) and remember to be polite.
 
 > [!CAUTION]
 > This is a private repository: if we gave you an access it means that we trust you so do not steal or leak the code and be respectful with everyone.
@@ -214,7 +214,7 @@ You can provide the summary time with the field `at` with the following format `
 
 ## Bugs reports and questions
 
-If you see a bug, please open an [issue](https://github.com/rxfremk/yves/issues/new/choose).
+If you see a bug, please open an [issue](https://github.com/frx-org/yves/issues/new/choose).
 If you have any question regarding the project or its usage you can also post an issue.
 We will open GitHub discussions later when the community will be bigger but for now we consider issues are enough.
 
