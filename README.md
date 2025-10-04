@@ -42,8 +42,6 @@ And will send these to a LLM that will write the report.
 
 ### Build
 
-#### Using `uv`
-
 You can create a virtual environment with `uv`
 
 ```bash
@@ -51,36 +49,6 @@ uv sync
 ```
 
 which will produce the `yves` binary that will be added into your `$PATH`.
-
-#### Using `nix`
-
-##### Using binary
-
-We use [uv2nix](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
-
-```bash
-nix-build
-```
-
-which will produce the `yves` binary in `result/bin/yves`.
-
-##### Using `home-manager` module
-
-If you use [home-manager](https://github.com/nix-community/home-manager), we provide a module for you to load it.
-
-###### Vanilla `nix`
-
-```nix
-{ pkgs, ...}:
-
-{
-    imports = [ (import "${./path/to/yves/src}/default.nix" { inherit pkgs; }).homeModules.default ]
-
-    services.yves = {
-      enable = true;
-    };
-}
-```
 
 ### Run
 
@@ -92,6 +60,39 @@ yves
 
 By default if you just call Yves, they will provide you information about how to work with them (_i.e._ documentation).
 You can give directives to them for your specific needs (_i.e._ subcommands).
+
+### Using Nix
+
+#### Build the binary
+
+We use [uv2nix](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
+
+```bash
+nix-build
+```
+
+which will produce the `yves` binary in `result/bin/yves`.
+
+#### Using the `home-manager` module
+
+If you use [home-manager](https://github.com/nix-community/home-manager), we provide a module for you to load it.
+
+This will:
+
+- Create a `systemd` user service that will automatically start `yves` in a watching mode: you can check the status with `systemctl --user status yves.service`
+- Install the `yves` package
+
+```nix
+{ pkgs, ...}:
+
+{
+  imports = [ (import "${./path/to/yves/src}/default.nix" { inherit pkgs; }).homeModules.default ]
+
+  services.yves = {
+    enable = true;
+  };
+}
+```
 
 #### Initialize configuration file
 
@@ -127,6 +128,9 @@ Call your personal assistant to record your steps (this is the main subcommand).
 ```bash
 yves record
 ```
+
+> [!NOTE]
+> If you use the `systemd` user service, this is automatically done but remember to restart the service after configuring Yves!
 
 ### Global arguments
 
