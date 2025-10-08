@@ -24,6 +24,7 @@ def main():
     sub_parsers = parser.add_subparsers(dest="command")
     sub_parsers.add_parser("init", parents=[global_parser], help="Initialize Yves")
     sub_parsers.add_parser("check", parents=[global_parser], help="Check if LLM works")
+    sub_parsers.add_parser("summarize", parents=[global_parser], help="Summarize")
     sub_parsers.add_parser(
         "record", parents=[global_parser], help="Watch and summarize"
     )
@@ -62,6 +63,24 @@ def main():
         config_path = os.path.expanduser(p_args.config)
         cfg = parse_config(config_path)
         print_config(cfg)
+    elif p_args.command == "summarize":
+        from threading import Event, Thread
+
+        from lib.file_system_watcher import FileSystemWatcher
+        from lib.file_system_watcher import update_from_config as fs_update_from_config
+        from lib.file_system_watcher import watch as fs_watch
+        from lib.signal import setup_signal_handler
+        from lib.tmux_watcher import TmuxWatcher
+        from lib.tmux_watcher import update_from_config as tmux_update_from_config
+        from lib.tmux_watcher import watch as tmux_watch
+
+        config_path = os.path.expanduser(p_args.config)
+
+        summarizer = LLMSummarizer()
+        llm_update_from_config(summarizer, config_path)
+
+        empty_event = Event()
+        generate_summary(summarizer, empty_event, wait_to_summarize=False)
     else:
         from threading import Event, Thread
 
