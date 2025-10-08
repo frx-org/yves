@@ -38,5 +38,5 @@ package = true
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.data-files]
+[tool.setuptools.package-data]
 "yves.prompts" = ["*.txt"]
