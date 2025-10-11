@@ -243,6 +243,7 @@ def generate_summary(
                 f"Reading logs: {summarizer.tmux_log_path}, {summarizer.fs_log_path}"
             )
 
+            today = date.today().strftime("%Y-%m-%d")
             output_file = os.path.join(summarizer.output_dir, f"{today}.md")
 
             logger.debug(
@@ -272,7 +273,8 @@ def generate_summary(
             with open(summarizer.tmux_log_path, "w") as f:
                 logger.debug(f"Emptying {summarizer.tmux_log_path}")
 
-            break
+            if not wait_to_summarize:
+                break
 
         sleep(timeout)
 
