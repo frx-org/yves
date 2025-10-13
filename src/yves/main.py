@@ -31,6 +31,7 @@ def main():
     sub_parsers.add_parser(
         "describe", parents=[global_parser], help="Show configuration"
     )
+    sub_parsers.add_parser("version", parents=[global_parser], help="Package version")
     p_args = parser.parse_args()
 
     if p_args.command is None:
@@ -45,11 +46,15 @@ def main():
     logger = logging.getLogger(__name__)
 
     logger.debug(f"Subcommand: {p_args.command}")
-    if p_args.command == "init":
+    if p_args.command == "version":
+        from importlib.metadata import version
+
+        print(f"Yves {version('yves')}")
+    elif p_args.command == "init":
         from lib.interactive import configure_interactively
 
         configure_interactively()
-    if p_args.command == "check":
+    elif p_args.command == "check":
         from lib.llm_summarizer import check
 
         config_path = os.path.expanduser(p_args.config)
