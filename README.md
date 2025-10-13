@@ -13,18 +13,15 @@ Meet Yves (also known as "**Y**our **V**aluable **E**fficient **S**ummarizer"), 
 > You _will_ encounter bugs, please open an [issue](https://github.com/frx-org/yves/issues/new/choose) and remember to be polite.
 
 > [!CAUTION]
-> This is a private repository: if we gave you an access it means that we trust you so do not steal or leak the code and be respectful with everyone.
 > Remember that it is a **hobby project** and it first aims to solve _our_ problems.
 > If submitted feature requests are considered relevant (which is purely subjective), we will make our best to implement them but note that we will take our time since we are definitely not paid for this.
->
-> We will revoke access if we see disrespectful behaviors regarding the project or its users.
 
 ## Usage
 
 Yves will watch
 
 - Directories on your file system to check changes (addition/deletion/modification)
-- [tmux](https://github.com/tmux/tmux) for commands and outputs
+- [`tmux`](https://github.com/tmux/tmux) for commands and outputs
 
 And will send these to a LLM that will write the report.
 
@@ -37,8 +34,9 @@ And will send these to a LLM that will write the report.
 - `tmux` is optional but is recommended to give more insights to the LLM
 - LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, ...)
 - One of the following to build the binary
-  - UV
-  - Nix
+  - [UV](https://docs.astral.sh/uv/)
+  - [Nix](https://nixos.org/)
+- [`just`](https://just.systems/) to easily run commands (_optional_)
 
 ### Build
 
@@ -50,32 +48,21 @@ uv sync
 
 which will produce the `yves` binary that will be added into your `$PATH`.
 
-### Run
-
-In general, you can call your favorite assistant by calling their name _i.e._
-
-```bash
-yves
-```
-
-By default if you just call Yves, they will provide you information about how to work with them (_i.e._ documentation).
-You can give directives to them for your specific needs (_i.e._ subcommands).
-
 ### Using Nix
 
 #### Build the binary
 
-We use [uv2nix](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
+We use [`uv2nix`](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
 
 ```bash
-nix-build
+nix-build -A yves
 ```
 
 which will produce the `yves` binary in `result/bin/yves`.
 
 #### Using the `home-manager` module
 
-If you use [home-manager](https://github.com/nix-community/home-manager), we provide a module for you to load it.
+If you use [`home-manager`](https://github.com/nix-community/home-manager), we provide a module for you to load it.
 
 This will:
 
@@ -96,10 +83,21 @@ This will:
 
 > [!NOTE]
 > `./path/to/yves/src` must point to the `yves` source directory.
-> You can achieve this with your favorite fetcher, using Flakes, `npins`, etc.
+> You can achieve this with your favorite fetcher, using Flakes, [`niv`](https://github.com/nmattia/niv), [`npins`](https://github.com/andir/npins), etc.
 
 > [!TIP]
 > If you use the `home-manager` module you do not have to manually build the package since it will be done for you!
+
+### Run
+
+In general, you can call your favorite assistant by calling their name _i.e._
+
+```bash
+yves
+```
+
+By default if you just call Yves, they will provide you information about how to work with them (_i.e._ help page).
+You can give directives to them for your specific needs (_i.e._ subcommands).
 
 #### Initialize configuration file
 
@@ -223,14 +221,14 @@ You can provide the summary time with the field `at` with the following format `
 
 If you see a bug, please open an [issue](https://github.com/frx-org/yves/issues/new/choose).
 If you have any question regarding the project or its usage you can also post an issue.
-We will open GitHub discussions later when the community will be bigger but for now we consider issues are enough.
+We will open GitHub discussions later if the community becomes bigger but for now we consider issues are enough.
 
 > [!IMPORTANT]
 > If you find a bug with an AI assistance, please disclose it in the issue.
 
 ## Contributing
 
-If you have write permission in this repository you are welcomed to contribute.
+You are more than welcomed to contribute.
 
 We use `uv` to manage dependencies.
 So please use it to make sure we have the same working environment.
