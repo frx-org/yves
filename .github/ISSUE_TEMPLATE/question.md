@@ -1,10 +1,7 @@
 ---
 name: Question
 about: Ask a question about the project or its usage
-title: ''
+title: ""
 labels: question
-assignees: ''
-
+assignees: ""
 ---
-
-
