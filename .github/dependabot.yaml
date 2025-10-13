@@ -5,3 +5,5 @@ updates:
     schedule:
       interval: weekly
       time: "02:00"
+    assignees:
+      - rx342
