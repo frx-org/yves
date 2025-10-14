@@ -473,8 +473,8 @@ def write_changes_to_file(
         changes_list.append(
             {
                 "file": display_path,
-                "status": change["type"].lower(),  # e.g., "modified", "new"
-                "diff": change.get("diff", "").splitlines()
+                "status": change["type"].lower(),  # type: ignore
+                "diff": change.get("diff", "").splitlines()  # type: ignore
                 if isinstance(change.get("diff"), str)
                 else change.get("diff", []),
                 "is_binary": change.get("is_binary", False),

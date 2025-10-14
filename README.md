@@ -10,7 +10,7 @@ Meet Yves (also known as "**Y**our **V**aluable **E**fficient **S**ummarizer"), 
 
 > [!WARNING]
 > This is **highly experimental** as it is not done yet.
-> You _will_ encounter bugs, please open an [issue](https://github.com/rxfremk/yves/issues/new/choose) and remember to be polite.
+> You _will_ encounter bugs, please open an [issue](https://github.com/frx-org/yves/issues/new/choose) and remember to be polite.
 
 > [!CAUTION]
 > This is a private repository: if we gave you an access it means that we trust you so do not steal or leak the code and be respectful with everyone.
@@ -42,8 +42,6 @@ And will send these to a LLM that will write the report.
 
 ### Build
 
-#### Using `uv`
-
 You can create a virtual environment with `uv`
 
 ```bash
@@ -51,16 +49,6 @@ uv sync
 ```
 
 which will produce the `yves` binary that will be added into your `$PATH`.
-
-#### Using `nix`
-
-We use [uv2nix](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
-
-```bash
-nix-build
-```
-
-which will produce the `yves` binary in `result/bin/yves`.
 
 ### Run
 
@@ -72,6 +60,46 @@ yves
 
 By default if you just call Yves, they will provide you information about how to work with them (_i.e._ documentation).
 You can give directives to them for your specific needs (_i.e._ subcommands).
+
+### Using Nix
+
+#### Build the binary
+
+We use [uv2nix](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
+
+```bash
+nix-build
+```
+
+which will produce the `yves` binary in `result/bin/yves`.
+
+#### Using the `home-manager` module
+
+If you use [home-manager](https://github.com/nix-community/home-manager), we provide a module for you to load it.
+
+This will:
+
+- Create a `systemd` user service that will automatically start `yves` in a watching mode: you can check the status with `systemctl --user status yves.service`
+- Install the `yves` package
+
+```nix
+{ pkgs, ...}:
+
+{
+  imports = [ (import "${./path/to/yves/src}/default.nix" { inherit pkgs; }).homeModules.default ]
+
+  services.yves = {
+    enable = true;
+  };
+}
+```
+
+> [!NOTE]
+> `./path/to/yves/src` must point to the `yves` source directory.
+> You can achieve this with your favorite fetcher, using Flakes, `npins`, etc.
+
+> [!TIP]
+> If you use the `home-manager` module you do not have to manually build the package since it will be done for you!
 
 #### Initialize configuration file
 
@@ -107,6 +135,9 @@ Call your personal assistant to record your steps (this is the main subcommand).
 ```bash
 yves record
 ```
+
+> [!NOTE]
+> If you use the `systemd` user service, this is automatically done but remember to restart the service after configuring Yves!
 
 ### Global arguments
 
@@ -190,7 +221,7 @@ You can provide the summary time with the field `at` with the following format `
 
 ## Bugs reports and questions
 
-If you see a bug, please open an [issue](https://github.com/rxfremk/yves/issues/new/choose).
+If you see a bug, please open an [issue](https://github.com/frx-org/yves/issues/new/choose).
 If you have any question regarding the project or its usage you can also post an issue.
 We will open GitHub discussions later when the community will be bigger but for now we consider issues are enough.
 

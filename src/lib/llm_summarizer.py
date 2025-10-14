@@ -202,7 +202,10 @@ def summarize(summarizer: LLMSummarizer, text: str):
 
 
 def generate_summary(
-    summarizer: LLMSummarizer, stop_event: Event, timeout: int = 1
+    summarizer: LLMSummarizer,
+    stop_event: Event,
+    timeout: int = 1,
+    wait_to_summarize: bool = True,
 ) -> None:
     """
     Save the generated summary to the specified output file.
@@ -215,6 +218,9 @@ def generate_summary(
         Event sent to stop watching
     timeout : int
         Timeout in seconds in the while loop
+    wait_to_summarize : bool
+        If `True` we wait for the `stop_event` to be set to summarize.
+        Else we summarize directly.
     """
     from datetime import date
     from time import sleep
@@ -225,9 +231,11 @@ def generate_summary(
     if not os.path.exists(summarizer.output_dir):
         os.makedirs(summarizer.output_dir, exist_ok=True)
 
-    while not stop_event.is_set():
+    while not stop_event.is_set() or not wait_to_summarize:
         now = datetime.now()
-        if now.time() >= summarizer.run_hour and now.date() > summarizer.last_run_day:
+        if not wait_to_summarize or (
+            now.time() >= summarizer.run_hour and now.date() > summarizer.last_run_day
+        ):
             logger.debug(
                 f"Generating summary using {summarizer.model_name} from {summarizer.provider}..."
             )
@@ -235,6 +243,7 @@ def generate_summary(
                 f"Reading logs: {summarizer.tmux_log_path}, {summarizer.fs_log_path}"
             )
 
+            today = date.today().strftime("%Y-%m-%d")
             output_file = os.path.join(summarizer.output_dir, f"{today}.md")
 
             logger.debug(
@@ -264,7 +273,8 @@ def generate_summary(
             with open(summarizer.tmux_log_path, "w") as f:
                 logger.debug(f"Emptying {summarizer.tmux_log_path}")
 
-            break
+            if not wait_to_summarize:
+                break
 
         sleep(timeout)
 
