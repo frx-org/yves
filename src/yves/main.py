@@ -36,7 +36,7 @@ def main():
 
     if p_args.command is None:
         parser.print_help()
-        exit(1)
+        exit(0)
 
     logging.basicConfig(
         level=logging.DEBUG if p_args.debug else logging.INFO,
