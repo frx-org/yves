@@ -92,7 +92,9 @@ def main():
         config_path = os.path.expanduser(p_args.config)
 
         fs_watcher = FileSystemWatcher()
+        fs_update_from_config(fs_watcher, config_path)
         tmux_watcher = TmuxWatcher()
+        tmux_update_from_config(tmux_watcher, config_path)
         summarizer = LLMSummarizer()
         llm_update_from_config(summarizer, config_path)
 
@@ -104,11 +106,9 @@ def main():
         ]
 
         if fs_watcher.enable:
-            fs_update_from_config(fs_watcher, config_path)
             threads.append(Thread(target=fs_watch, args=(fs_watcher, stop_event)))
 
         if tmux_watcher.enable:
-            tmux_update_from_config(tmux_watcher, config_path)
             threads.append(Thread(target=tmux_watch, args=(tmux_watcher, stop_event)))
 
         for thread in threads:
