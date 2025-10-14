@@ -69,15 +69,7 @@ def main():
         cfg = parse_config(config_path)
         print_config(cfg)
     elif p_args.command == "summarize":
-        from threading import Event, Thread
-
-        from lib.file_system_watcher import FileSystemWatcher
-        from lib.file_system_watcher import update_from_config as fs_update_from_config
-        from lib.file_system_watcher import watch as fs_watch
-        from lib.signal import setup_signal_handler
-        from lib.tmux_watcher import TmuxWatcher
-        from lib.tmux_watcher import update_from_config as tmux_update_from_config
-        from lib.tmux_watcher import watch as tmux_watch
+        from threading import Event
 
         config_path = os.path.expanduser(p_args.config)
 
