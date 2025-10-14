@@ -85,6 +85,7 @@ def main():
         from lib.file_system_watcher import update_from_config as fs_update_from_config
         from lib.file_system_watcher import watch as fs_watch
         from lib.signal import setup_signal_handler
+        from lib.threading import make_runner
         from lib.tmux_watcher import TmuxWatcher
         from lib.tmux_watcher import update_from_config as tmux_update_from_config
         from lib.tmux_watcher import watch as tmux_watch
@@ -101,18 +102,50 @@ def main():
         stop_event = Event()
         setup_signal_handler(stop_event)
 
+        exceptions = []
+
         threads = [
-            Thread(target=generate_summary, args=(summarizer, stop_event)),
+            Thread(
+                target=make_runner(
+                    generate_summary,
+                    summarizer,
+                    stop_event=stop_event,
+                    exceptions=exceptions,
+                )
+            ),
         ]
 
         if fs_watcher.enable:
-            threads.append(Thread(target=fs_watch, args=(fs_watcher, stop_event)))
+            threads.append(
+                Thread(
+                    target=make_runner(
+                        fs_watch,
+                        fs_watcher,
+                        stop_event=stop_event,
+                        exceptions=exceptions,
+                    )
+                )
+            )
 
         if tmux_watcher.enable:
-            threads.append(Thread(target=tmux_watch, args=(tmux_watcher, stop_event)))
+            threads.append(
+                Thread(
+                    target=make_runner(
+                        tmux_watch,
+                        tmux_watcher,
+                        stop_event=stop_event,
+                        exceptions=exceptions,
+                    )
+                )
+            )
 
         for thread in threads:
             thread.start()
 
         for thread in threads:
             thread.join()
+
+        if exceptions:
+            for exception in exceptions:
+                logging.error(f"Failure of {exception}")
+            exit(1)
