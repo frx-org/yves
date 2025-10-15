@@ -21,12 +21,19 @@ If you are using `nix` we provide a [`shell.nix`](./shell.nix) to get a whole wo
 
 ### Formatting and linting
 
-We use [`ruff`](https://docs.astral.sh/ruff/) for formatting and linting in the CI.
+We use
+
+- [`ruff`](https://docs.astral.sh/ruff/) for formatting and linting in the CI.
+- [`basedpyright`](https://docs.basedpyright.com/latest) for type checking
+- For the documentation, we use [`numpydoc`](https://numpydoc.readthedocs.io/en/latest/format.html) style.
+
 Your code must respect that or else CI will fail.
-For the documentation, we use [`numpydoc`](https://numpydoc.readthedocs.io/en/latest/format.html) style.
 
 > [!TIP]
 > If you have `just` and `nix` you can run `just format` to automatically format everything.
+
+> [!TIP]
+> If you have `just` and `nix` you can run `just check` that will check your modifications and inform you if it is compliant with the CI.
 
 ### Testing
 
