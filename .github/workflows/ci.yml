@@ -19,11 +19,29 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - name: Install the project
-        run: uv sync --locked --all-extras --dev
+        run: uv sync --locked --dev
       - name: Ruff lint
         run: uv run ruff check
       - name: Ruff format
         run: uv run ruff format --check
+
+  basedpyright:
+    name: Basedpyright checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.0
+      - name: Install python
+        uses: actions/setup-python@v6.0.0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Install the project
+        run: uv sync --locked --dev
+      - name: Basedpyright type check
+        run: uv run basedpyright
 
   nix-fmt:
     name: Nix checks
@@ -41,7 +59,7 @@ jobs:
   pytest:
     name: Unit tests
     runs-on: ubuntu-latest
-    needs: [ruff, nix-fmt]
+    needs: [ruff, nix-fmt, basedpyright]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
@@ -53,7 +71,7 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - name: Install the project
-        run: uv sync --locked --all-extras --dev
+        run: uv sync --locked --dev
       - name: pytest
         run: uv run pytest
 
