@@ -3,8 +3,68 @@
 import logging
 import os
 from configparser import ConfigParser
+from datetime import time
 
 logger = logging.getLogger(__name__)
+
+
+def convert_to_list(x: str) -> list[str]:
+    """Convert an element from ConfigParser to a list.
+
+    Parameters
+    ----------
+    x : str
+        Element to be converted to a list.
+
+    Returns
+    -------
+    list[str]
+        Converted list.
+
+    """
+    if x.strip():
+        return [s.strip() for s in x.split(",")]
+    else:
+        return []
+
+
+def convert_to_set(x: str) -> set[str]:
+    """Convert an element from ConfigParser to a set.
+
+    Parameters
+    ----------
+    x : str
+        Element to be converted to a set.
+
+    Returns
+    -------
+    set[str]
+        Converted set.
+
+    """
+    if x.strip():
+        return {s.strip() for s in x.split(",")}
+    else:
+        return set()
+
+
+def convert_to_time(x: str) -> time:
+    """Convert an element from ConfigParser to a time object.
+
+    Parameters
+    ----------
+    x : str
+        Element to be converted to a datetime.
+
+    Returns
+    -------
+    time
+        Converted time object.
+
+    """
+    from datetime import datetime
+
+    return datetime.strptime(x, "%H:%M").time()
 
 
 def default_config() -> ConfigParser:
@@ -16,19 +76,7 @@ def default_config() -> ConfigParser:
         Default configuration values
 
     """
-    config = ConfigParser(
-        converters={
-            "list": lambda vs: []
-            if not vs.strip()
-            else [v.strip() for v in vs.split(",")],
-            "set": lambda vs: {}
-            if not vs.strip()
-            else {v.strip() for v in vs.split(",")},
-            "int": lambda n: int(n),
-            "float": lambda n: float(n),
-            "bool": lambda b: b.lower() == "true",
-        }
-    )
+    config = ConfigParser()
     config["filesystem"] = {
         "enable": "True",
         "dirs": "",
@@ -125,11 +173,7 @@ def parse_config(
             "set": lambda vs: {}
             if not vs.strip()
             else {v.strip() for v in vs.split(",")},
-            "int": lambda n: int(n),
-            "float": lambda n: float(n),
-            "bool": lambda b: b.lower() == "true",
             "time": lambda t: datetime.strptime(t, "%H:%M").time(),
-            "date": lambda d: datetime.strptime(d, "%Y-%m-%d").date(),
         }
     )
     user_config.read(path)

@@ -42,14 +42,14 @@ def update_from_config(watcher: TmuxWatcher, config_path: str) -> None:
         Path to the configuration file
 
     """
-    from lib.cfg import parse_config
+    from lib.cfg import convert_to_list, parse_config
 
     cfg = parse_config(config_path)
 
-    watcher.enable = cfg.getbool("tmux", "enable")  # type: ignore
-    watcher.panes = cfg.getlist("tmux", "panes")  # type: ignore
+    watcher.enable = cfg.getboolean("tmux", "enable")
+    watcher.panes = convert_to_list(cfg.get("tmux", "panes"))
     watcher.output_file = os.path.expanduser(cfg["tmux"]["output_file"])
-    watcher.capture_full_output = cfg.getbool("tmux", "capture_full_output")  # type: ignore
+    watcher.capture_full_output = cfg.getboolean("tmux", "capture_full_output")  # type: ignore
 
 
 def check_for_completed_commands(watcher: TmuxWatcher) -> list[dict[str, object]]:
@@ -141,7 +141,15 @@ def write_commands_to_file(
 
     # Append new completed commands
     for cmd in completed_commands:
-        timestamp_str = int(cmd["timestamp"].timestamp())  # type: ignore
+        timestamp = cmd["timestamp"]
+        if not isinstance(timestamp, datetime):
+            raise TypeError("`timestamp` is not `datetime`")
+
+        output = cmd["output"]
+        if not isinstance(output, str):
+            raise TypeError("`output` is not `str`")
+
+        timestamp_str = int(timestamp.timestamp())
         all_events.append(
             {
                 "event_type": "command_completed",
@@ -149,7 +157,7 @@ def write_commands_to_file(
                 "pane": cmd["pane"],
                 "command": cmd["command"],
                 # Split output into lines for easier processing later
-                "output": cmd["output"].splitlines(),  # type: ignore
+                "output": output.splitlines(),
             }
         )
 

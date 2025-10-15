@@ -60,7 +60,7 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
         Path to the configuration file
 
     """
-    from lib.cfg import parse_config
+    from lib.cfg import convert_to_time, parse_config
 
     cfg = parse_config(config_path)
 
@@ -74,10 +74,10 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
     summarizer.tmux_log_path = os.path.expanduser(cfg["tmux"]["output_file"])
     summarizer.output_dir = os.path.expanduser(cfg["summarizer"]["output_dir"])
     summarizer.token_limit = cfg.getint("summarizer", "token_limit")
-    summarizer.run_hour = cfg.gettime("summarizer", "at")  # type: ignore
+    summarizer.run_hour = convert_to_time(cfg.get("summarizer", "at"))
 
 
-def get_extra_headers(provider: str) -> dict:
+def get_extra_headers(provider: str) -> dict[object, object]:
     """Return `extra_headers` value for litellm `completion` function.
 
     Parameters
