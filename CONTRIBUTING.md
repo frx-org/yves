@@ -11,10 +11,10 @@ If you see a bug, please open an [issue](https://github.com/frx-org/yves/issues/
 
 ## Contributing
 
-We use `uv` to manage dependencies.
+We use [`uv`](https://docs.astral.sh/uv/) to manage dependencies.
 So please use it to make sure we have the same working environment.
 
-If you are using `nix` we provide a [`shell.nix`](./shell.nix) to get a whole working dev environment.
+If you are using [`nix`](https://nixos.org/) we provide a [`shell.nix`](./shell.nix) to get a whole working dev environment.
 
 > [!IMPORTANT]
 > If you contribute with an AI assistance, please disclose it in the pull request.
@@ -30,10 +30,10 @@ We use
 Your code must respect that or else CI will fail.
 
 > [!TIP]
-> If you have `just` and `nix` you can run `just format` to automatically format everything.
+> If you have [`just`](https://just.systems/) and [`nix`](https://nixos.org/) you can run `just format` to automatically format everything.
 
 > [!TIP]
-> If you have `just` and `nix` you can run `just check` that will check your modifications and inform you if it is compliant with the CI.
+> If you have [`just`](https://just.systems/) and [`nix`](https://nixos.org/) you can run `just check` that will check your modifications and inform you if it is compliant with the CI.
 
 ### Testing
 
@@ -41,4 +41,4 @@ We use [`pytest`](https://docs.pytest.org/en/stable/) to run unit tests in the C
 You are invited to write tests for your code as often as possible.
 
 > [!TIP]
-> If you have `just` and `nix` you can run `just test` to automatically run every tests.
+> If you have [`just`](https://just.systems/) and [`nix`](https://nixos.org/) you can run `just test` to automatically run every tests.

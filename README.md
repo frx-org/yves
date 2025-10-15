@@ -31,16 +31,16 @@ And will send these to a LLM that will write the report.
 
 ### Requirements
 
-- `tmux` is optional but is recommended to give more insights to the LLM
+- [`tmux`](https://github.com/tmux/tmux) is optional but is recommended to give more insights to the LLM
 - LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, ...)
 - One of the following to build the binary
-  - [UV](https://docs.astral.sh/uv/)
-  - [Nix](https://nixos.org/)
+  - [`uv`](https://docs.astral.sh/uv/)
+  - [`nix`](https://nixos.org/)
 - [`just`](https://just.systems/) to easily run commands (_optional_)
 
 ### Build
 
-You can create a virtual environment with `uv`
+You can create a virtual environment with [`uv`](https://docs.astral.sh/uv/)
 
 ```bash
 uv sync
@@ -52,7 +52,7 @@ which will produce the `yves` binary that will be added into your `$PATH`.
 
 #### Build the binary
 
-We use [`uv2nix`](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
+We use [`uv2nix`](https://github.com/pyproject-nix/uv2nix) to build the project with [`nix`](https://nixos.org/)
 
 ```bash
 nix-build -A yves
@@ -86,7 +86,7 @@ This will:
 > You can achieve this with your favorite fetcher, using Flakes, [`niv`](https://github.com/nmattia/niv), [`npins`](https://github.com/andir/npins), etc.
 
 > [!TIP]
-> If you use the `home-manager` module you do not have to manually build the package since it will be done for you!
+> If you use the [`home-manager`](https://github.com/nix-community/home-manager) module you do not have to manually build the package since it will be done for you!
 
 ### Run
 
@@ -191,11 +191,11 @@ You must set directories to `dirs` variable (split by commas).
 You can specify specific panes you want to watch with `panes` (split by commas) with the following format `session:window.pane`.
 
 > [!TIP]
-> You can leave it as empty and it will watch every Tmux panes, which is generally what you want.
+> You can leave it as empty and it will watch every [`tmux`](https://github.com/tmux/tmux) panes, which is generally what you want.
 
 ### LLM provider
 
-We use [LiteLLM](https://docs.litellm.ai/) to support LLM providers.
+We use [`LiteLLM`](https://docs.litellm.ai/) to support LLM providers.
 If it is supported by this, it will probably be supported by Yves.
 
 LiteLLM uses the following format `{provider}/{model_name}`.
