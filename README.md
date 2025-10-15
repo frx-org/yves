@@ -32,7 +32,7 @@ And will send these to a LLM that will write the report.
 ### Requirements
 
 - [`tmux`](https://github.com/tmux/tmux) is optional but is recommended to give more insights to the LLM
-- LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, ...)
+- LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, your local machine...)
 - One of the following to build the binary
   - [`uv`](https://docs.astral.sh/uv/)
   - [`nix`](https://nixos.org/)
