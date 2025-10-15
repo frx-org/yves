@@ -23,6 +23,15 @@ def test_ask_config_path(tmp_path, monkeypatch):
     assert dir_cfg_path.exists()
 
 
+def test_ask_overwrite_config(tmp_path, monkeypatch):
+    """Test `ask_overwrite_config`."""
+    from lib.interactive import ask_overwrite_config
+
+    monkeypatch.setattr(questionary.Question, "ask", lambda _: True)
+    result = ask_overwrite_config("/this/is/a/random/path")
+    assert result is True
+
+
 def test_ask_and_update_fs_enable(monkeypatch):
     """Test `ask_and_update_fs_enable`."""
     from lib.cfg import ConfigParser

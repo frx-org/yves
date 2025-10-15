@@ -32,6 +32,27 @@ def ask_config_path() -> str:
     return cfg_path
 
 
+def ask_overwrite_config(config_path: str) -> bool:
+    """Ask the user if they want to overwrite the existing config.
+
+    Parameters
+    ----------
+    config_path : str
+        Path to configuration file.
+
+    Returns
+    -------
+    bool
+        `True` if they want to overwrite, else `False`.
+
+    """
+    overwrite = questionary.confirm(
+        f"{config_path} already exists, do you want to overwrite its content?",
+    ).ask()
+
+    return overwrite
+
+
 def ask_and_update_fs_enable(cfg: ConfigParser) -> bool:
     """Ask the user if they want to enable file system watch and update `cfg`.
 
@@ -244,16 +265,22 @@ def configure_interactively() -> None:
     )
 
     cfg_path = ask_config_path()
-    fs_enable = ask_and_update_fs_enable(cfg)
-    if fs_enable:
-        ask_and_update_fs_dirs(cfg)
-        ask_and_update_fs_exclude(cfg)
+    cfg_exists = os.path.exists(os.path.expanduser(cfg_path))
+    overwrite_cfg = False
+    if cfg_exists:
+        overwrite_cfg = ask_overwrite_config(cfg_path)
 
-    ask_and_update_tmux_enable(cfg)
-    ask_and_update_llm_provider(cfg)
-    ask_and_update_summarizer(cfg)
+    if not cfg_exists or overwrite_cfg:
+        fs_enable = ask_and_update_fs_enable(cfg)
+        if fs_enable:
+            ask_and_update_fs_dirs(cfg)
+            ask_and_update_fs_exclude(cfg)
 
-    write_config(cfg, cfg_path)
+        _ = ask_and_update_tmux_enable(cfg)
+        ask_and_update_llm_provider(cfg)
+        ask_and_update_summarizer(cfg)
 
-    print(f"\nThis is your current configuration stored in {cfg_path}\n")
-    print_config(cfg)
+        write_config(cfg, cfg_path)
+
+        print(f"\nThis is your current configuration stored in {cfg_path}\n")
+        print_config(cfg)
