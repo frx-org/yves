@@ -1,10 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
+title: ""
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 **Describe the bug**
@@ -17,8 +16,10 @@ Steps to reproduce the behavior _e.g._ which command you ran.
 A clear and concise description of what you expected to happen.
 
 **Versions:**
- - OS: [_e.g._ Ubuntu, NixOS, macOS]
- - Yves version (with `yves --version`)
+
+- OS: [_e.g._ Ubuntu, NixOS, macOS]
+- Yves version (with `yves version`)
+- UV version (with `uv --version`)
 
 **Additional context**
 Add any other context about the problem here.

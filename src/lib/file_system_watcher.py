@@ -54,21 +54,27 @@ def update_from_config(watcher: FileSystemWatcher, config_path: str) -> None:
         Path to the configuration file
 
     """
-    from lib.cfg import parse_config
+    from lib.cfg import convert_to_list, convert_to_set, parse_config
 
     cfg = parse_config(config_path)
 
-    watcher.enable = cfg.getbool("filesystem", "enable")  # type: ignore
-    watcher.dirs = [os.path.expanduser(p) for p in cfg.getlist("filesystem", "dirs")]  # type: ignore
+    watcher.enable = cfg.getboolean("filesystem", "enable")
+    watcher.dirs = [
+        os.path.expanduser(p) for p in convert_to_list(cfg.get("filesystem", "dirs"))
+    ]
     if len(watcher.dirs) == 0:
         logger.warning("No directory specified to watch")
 
     watcher.output_file = os.path.expanduser(cfg["filesystem"]["output_file"])
     watcher.tmux_output_file = os.path.expanduser(cfg["tmux"]["output_file"])
     watcher.summary_output_dir = os.path.expanduser(cfg["summarizer"]["output_dir"])
-    watcher.include_filetypes = cfg.getset("filesystem", "include_filetypes")  # type: ignore
-    watcher.exclude_filetypes = cfg.getset("filesystem", "exclude_filetypes")  # type: ignore
-    watcher.major_changes_only = cfg.getbool("filesystem", "major_changes_only")  # type: ignore
+    watcher.include_filetypes = convert_to_set(
+        cfg.get("filesystem", "include_filetypes")
+    )
+    watcher.exclude_filetypes = convert_to_set(
+        cfg.get("filesystem", "exclude_filetypes")
+    )
+    watcher.major_changes_only = cfg.getboolean("filesystem", "major_changes_only")
     watcher.min_lines_changed = cfg.getint("filesystem", "min_lines_changed")
     watcher.similarity_threshold = cfg.getfloat("filesystem", "similarity_threshold")
 
@@ -408,7 +414,10 @@ def check_for_changes(
             }
         elif watcher.file_snapshots[filepath]["hash"] != current_hash:
             # Changed file
-            old_lines: list[str] = watcher.file_snapshots[filepath]["lines"]  # type: ignore
+            watcher_lines = watcher.file_snapshots[filepath]["lines"]
+            if not isinstance(watcher_lines, list):
+                raise TypeError("`watcher_lines` is not a list")
+            old_lines = watcher_lines
 
             if is_major_change(watcher, old_lines, current_lines, filepath):
                 diff = generate_diff(
@@ -462,21 +471,30 @@ def write_changes_to_file(
     # Append new changes
     changes_list = []
     for change in changes:
-        watch_dir = find_file_in_dirs(change["file"], watcher.dirs)  # type: ignore
+        change_file = change["file"]
+        if not isinstance(change_file, str):
+            raise TypeError("`change_file` is not `str`")
+
+        watch_dir = find_file_in_dirs(change_file, watcher.dirs)
         if watch_dir:
-            rel_path = os.path.relpath(change["file"], watch_dir)  # type: ignore
+            rel_path = os.path.relpath(change_file, watch_dir)
             repo_name = os.path.basename(os.path.normpath(watch_dir))
             display_path = f"{repo_name}/{rel_path}"
         else:
             display_path = change["file"]
 
+        if not isinstance(change["type"], str):
+            raise TypeError("`change['type']` is not `str`.")
+
+        diff = change.get("diff", "")
+        if not isinstance(diff, str):
+            raise TypeError("`diff` is not a `str`.")
+
         changes_list.append(
             {
                 "file": display_path,
-                "status": change["type"].lower(),  # type: ignore
-                "diff": change.get("diff", "").splitlines()  # type: ignore
-                if isinstance(change.get("diff"), str)
-                else change.get("diff", []),
+                "status": change["type"].lower(),
+                "diff": diff.splitlines(),
                 "is_binary": change.get("is_binary", False),
             }
         )

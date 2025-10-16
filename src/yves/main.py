@@ -31,11 +31,12 @@ def main():
     sub_parsers.add_parser(
         "describe", parents=[global_parser], help="Show configuration"
     )
+    sub_parsers.add_parser("version", parents=[global_parser], help="Package version")
     p_args = parser.parse_args()
 
     if p_args.command is None:
         parser.print_help()
-        exit(1)
+        exit(0)
 
     logging.basicConfig(
         level=logging.DEBUG if p_args.debug else logging.INFO,
@@ -45,11 +46,15 @@ def main():
     logger = logging.getLogger(__name__)
 
     logger.debug(f"Subcommand: {p_args.command}")
-    if p_args.command == "init":
+    if p_args.command == "version":
+        from importlib.metadata import version
+
+        print(f"Yves {version('yves')}")
+    elif p_args.command == "init":
         from lib.interactive import configure_interactively
 
         configure_interactively()
-    if p_args.command == "check":
+    elif p_args.command == "check":
         from lib.llm_summarizer import check
 
         config_path = os.path.expanduser(p_args.config)
@@ -64,15 +69,7 @@ def main():
         cfg = parse_config(config_path)
         print_config(cfg)
     elif p_args.command == "summarize":
-        from threading import Event, Thread
-
-        from lib.file_system_watcher import FileSystemWatcher
-        from lib.file_system_watcher import update_from_config as fs_update_from_config
-        from lib.file_system_watcher import watch as fs_watch
-        from lib.signal import setup_signal_handler
-        from lib.tmux_watcher import TmuxWatcher
-        from lib.tmux_watcher import update_from_config as tmux_update_from_config
-        from lib.tmux_watcher import watch as tmux_watch
+        from threading import Event
 
         config_path = os.path.expanduser(p_args.config)
 
@@ -88,6 +85,7 @@ def main():
         from lib.file_system_watcher import update_from_config as fs_update_from_config
         from lib.file_system_watcher import watch as fs_watch
         from lib.signal import setup_signal_handler
+        from lib.threading import make_runner
         from lib.tmux_watcher import TmuxWatcher
         from lib.tmux_watcher import update_from_config as tmux_update_from_config
         from lib.tmux_watcher import watch as tmux_watch
@@ -95,27 +93,59 @@ def main():
         config_path = os.path.expanduser(p_args.config)
 
         fs_watcher = FileSystemWatcher()
+        fs_update_from_config(fs_watcher, config_path)
         tmux_watcher = TmuxWatcher()
+        tmux_update_from_config(tmux_watcher, config_path)
         summarizer = LLMSummarizer()
         llm_update_from_config(summarizer, config_path)
 
         stop_event = Event()
         setup_signal_handler(stop_event)
 
+        exceptions = []
+
         threads = [
-            Thread(target=generate_summary, args=(summarizer, stop_event)),
+            Thread(
+                target=make_runner(
+                    generate_summary,
+                    summarizer,
+                    stop_event=stop_event,
+                    exceptions=exceptions,
+                )
+            ),
         ]
 
         if fs_watcher.enable:
-            fs_update_from_config(fs_watcher, config_path)
-            threads.append(Thread(target=fs_watch, args=(fs_watcher, stop_event)))
+            threads.append(
+                Thread(
+                    target=make_runner(
+                        fs_watch,
+                        fs_watcher,
+                        stop_event=stop_event,
+                        exceptions=exceptions,
+                    )
+                )
+            )
 
         if tmux_watcher.enable:
-            tmux_update_from_config(tmux_watcher, config_path)
-            threads.append(Thread(target=tmux_watch, args=(tmux_watcher, stop_event)))
+            threads.append(
+                Thread(
+                    target=make_runner(
+                        tmux_watch,
+                        tmux_watcher,
+                        stop_event=stop_event,
+                        exceptions=exceptions,
+                    )
+                )
+            )
 
         for thread in threads:
             thread.start()
 
         for thread in threads:
             thread.join()
+
+        if exceptions:
+            for exception in exceptions:
+                logging.error(f"Failure of {exception}")
+            exit(1)

@@ -13,18 +13,15 @@ Meet Yves (also known as "**Y**our **V**aluable **E**fficient **S**ummarizer"), 
 > You _will_ encounter bugs, please open an [issue](https://github.com/frx-org/yves/issues/new/choose) and remember to be polite.
 
 > [!CAUTION]
-> This is a private repository: if we gave you an access it means that we trust you so do not steal or leak the code and be respectful with everyone.
 > Remember that it is a **hobby project** and it first aims to solve _our_ problems.
 > If submitted feature requests are considered relevant (which is purely subjective), we will make our best to implement them but note that we will take our time since we are definitely not paid for this.
->
-> We will revoke access if we see disrespectful behaviors regarding the project or its users.
 
 ## Usage
 
 Yves will watch
 
 - Directories on your file system to check changes (addition/deletion/modification)
-- [tmux](https://github.com/tmux/tmux) for commands and outputs
+- [`tmux`](https://github.com/tmux/tmux) for commands and outputs
 
 And will send these to a LLM that will write the report.
 
@@ -34,15 +31,16 @@ And will send these to a LLM that will write the report.
 
 ### Requirements
 
-- `tmux` is optional but is recommended to give more insights to the LLM
-- LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, ...)
+- [`tmux`](https://github.com/tmux/tmux) is optional but is recommended to give more insights to the LLM
+- LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, your local machine...)
 - One of the following to build the binary
-  - UV
-  - Nix
+  - [`uv`](https://docs.astral.sh/uv/)
+  - [`nix`](https://nixos.org/)
+- [`just`](https://just.systems/) to easily run commands (_optional_)
 
 ### Build
 
-You can create a virtual environment with `uv`
+You can create a virtual environment with [`uv`](https://docs.astral.sh/uv/)
 
 ```bash
 uv sync
@@ -50,32 +48,21 @@ uv sync
 
 which will produce the `yves` binary that will be added into your `$PATH`.
 
-### Run
-
-In general, you can call your favorite assistant by calling their name _i.e._
-
-```bash
-yves
-```
-
-By default if you just call Yves, they will provide you information about how to work with them (_i.e._ documentation).
-You can give directives to them for your specific needs (_i.e._ subcommands).
-
 ### Using Nix
 
 #### Build the binary
 
-We use [uv2nix](https://github.com/pyproject-nix/uv2nix) to build the project with `nix`
+We use [`uv2nix`](https://github.com/pyproject-nix/uv2nix) to build the project with [`nix`](https://nixos.org/)
 
 ```bash
-nix-build
+nix-build -A yves
 ```
 
 which will produce the `yves` binary in `result/bin/yves`.
 
 #### Using the `home-manager` module
 
-If you use [home-manager](https://github.com/nix-community/home-manager), we provide a module for you to load it.
+If you use [`home-manager`](https://github.com/nix-community/home-manager), we provide a module for you to load it.
 
 This will:
 
@@ -96,10 +83,21 @@ This will:
 
 > [!NOTE]
 > `./path/to/yves/src` must point to the `yves` source directory.
-> You can achieve this with your favorite fetcher, using Flakes, `npins`, etc.
+> You can achieve this with your favorite fetcher, using Flakes, [`niv`](https://github.com/nmattia/niv), [`npins`](https://github.com/andir/npins), etc.
 
 > [!TIP]
-> If you use the `home-manager` module you do not have to manually build the package since it will be done for you!
+> If you use the [`home-manager`](https://github.com/nix-community/home-manager) module you do not have to manually build the package since it will be done for you!
+
+### Run
+
+In general, you can call your favorite assistant by calling their name _i.e._
+
+```bash
+yves
+```
+
+By default if you just call Yves, they will provide you information about how to work with them (_i.e._ help page).
+You can give directives to them for your specific needs (_i.e._ subcommands).
 
 #### Initialize configuration file
 
@@ -193,11 +191,11 @@ You must set directories to `dirs` variable (split by commas).
 You can specify specific panes you want to watch with `panes` (split by commas) with the following format `session:window.pane`.
 
 > [!TIP]
-> You can leave it as empty and it will watch every Tmux panes, which is generally what you want.
+> You can leave it as empty and it will watch every [`tmux`](https://github.com/tmux/tmux) panes, which is generally what you want.
 
 ### LLM provider
 
-We use [LiteLLM](https://docs.litellm.ai/) to support LLM providers.
+We use [`LiteLLM`](https://docs.litellm.ai/) to support LLM providers.
 If it is supported by this, it will probably be supported by Yves.
 
 LiteLLM uses the following format `{provider}/{model_name}`.
@@ -219,32 +217,11 @@ provider = openai
 Yves will write a report for you everyday and only once (_i.e._ you cannot arbitrarily choose specific days or multiple time reports per day).
 You can provide the summary time with the field `at` with the following format `%H:%M` (_i.e._ 24-hour format).
 
-## Bugs reports and questions
-
-If you see a bug, please open an [issue](https://github.com/frx-org/yves/issues/new/choose).
-If you have any question regarding the project or its usage you can also post an issue.
-We will open GitHub discussions later when the community will be bigger but for now we consider issues are enough.
-
-> [!IMPORTANT]
-> If you find a bug with an AI assistance, please disclose it in the issue.
-
 ## Contributing
 
-If you have write permission in this repository you are welcomed to contribute.
+Please refer to [CONTRIBUTING.md](/CONTRIBUTING.md).
 
-We use `uv` to manage dependencies.
-So please use it to make sure we have the same working environment.
+## Have any questions?
 
-> [!IMPORTANT]
-> If you contribute with an AI assistance, please disclose it in the pull request.
-
-### Formatting and linting
-
-We use `ruff` for formatting and linting in the CI.
-Your code must respect that or else CI will fail.
-For the documentation, we use [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) style.
-
-### Testing
-
-We use `pytest` to run unit tests in the CI.
-You are invited to write tests for your code as often as possible.
+If you have any questions regarding the project or its usage you can also post an issue.
+We will open GitHub discussions later if the community becomes bigger but for now we consider issues are enough.
