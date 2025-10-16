@@ -48,46 +48,6 @@ uv sync
 
 which will produce the `yves` binary that will be added into your `$PATH`.
 
-### Using Nix
-
-#### Build the binary
-
-We use [`uv2nix`](https://github.com/pyproject-nix/uv2nix) to build the project with [`nix`](https://nixos.org/)
-
-```bash
-nix-build -A yves
-```
-
-which will produce the `yves` binary in `result/bin/yves`.
-
-#### Using the `home-manager` module
-
-If you use [`home-manager`](https://github.com/nix-community/home-manager), we provide a module for you to load it.
-
-This will:
-
-- Create a `systemd` user service that will automatically start `yves` in a watching mode: you can check the status with `systemctl --user status yves.service`
-- Install the `yves` package
-
-```nix
-{ pkgs, ...}:
-
-{
-  imports = [ (import "${./path/to/yves/src}/default.nix" { inherit pkgs; }).homeModules.default ]
-
-  services.yves = {
-    enable = true;
-  };
-}
-```
-
-> [!NOTE]
-> `./path/to/yves/src` must point to the `yves` source directory.
-> You can achieve this with your favorite fetcher, using Flakes, [`niv`](https://github.com/nmattia/niv), [`npins`](https://github.com/andir/npins), etc.
-
-> [!TIP]
-> If you use the [`home-manager`](https://github.com/nix-community/home-manager) module you do not have to manually build the package since it will be done for you!
-
 ### Run
 
 In general, you can call your favorite assistant by calling their name _i.e._
@@ -145,6 +105,46 @@ These flags can be used for any subcommands.
 | --------------- | ------ | ----------------------- | -------------------------- |
 | `--config`/`-c` | `str`  | `~/.config/yves/config` | Path to configuration file |
 | `--debug`       | `bool` | `False`                 | Set logging level to debug |
+
+## Using Nix
+
+### Build the binary
+
+We use [`uv2nix`](https://github.com/pyproject-nix/uv2nix) to build the project with [`nix`](https://nixos.org/)
+
+```bash
+nix-build -A yves
+```
+
+which will produce the `yves` binary in `result/bin/yves`.
+
+### Using the `home-manager` module
+
+If you use [`home-manager`](https://github.com/nix-community/home-manager), we provide a module for you to load it.
+
+This will:
+
+- Create a `systemd` user service that will automatically start `yves` in a watching mode: you can check the status with `systemctl --user status yves.service`
+- Install the `yves` package
+
+```nix
+{ pkgs, ...}:
+
+{
+  imports = [ (import "${./path/to/yves/src}/default.nix" { inherit pkgs; }).homeModules.default ]
+
+  services.yves = {
+    enable = true;
+  };
+}
+```
+
+> [!NOTE]
+> `./path/to/yves/src` must point to the `yves` source directory.
+> You can achieve this with your favorite fetcher, using Flakes, [`niv`](https://github.com/nmattia/niv), [`npins`](https://github.com/andir/npins), etc.
+
+> [!TIP]
+> If you use the [`home-manager`](https://github.com/nix-community/home-manager) module you do not have to manually build the package since it will be done for you!
 
 ## Configuration
 
