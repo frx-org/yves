@@ -31,6 +31,19 @@ And will send these to a LLM that will write the report.
 
 ### Requirements
 
+#### System
+
+We actively support Linux x86-64 machines.
+
+> [!NOTE]
+> The project is actively tested on Ubuntu and NixOS distributions.
+
+It is also expected to work on ARM64 systems as well as on macOS (both Intel and ARM64) but note that they are currently **untested**.
+
+At this time, Windows is **not supported**.
+
+#### Tools
+
 - [`tmux`](https://github.com/tmux/tmux) is optional but is recommended to give more insights to the LLM
 - LLM provider (_e.g._ Mistral AI, OpenAI, Anthropic, your local machine...)
 - One of the following to build the binary
@@ -107,6 +120,9 @@ These flags can be used for any subcommands.
 | `--debug`       | `bool` | `False`                 | Set logging level to debug |
 
 ## Using Nix
+
+> [!WARNING]
+> [`nix`](https://nixos.org/) is only tested for `x86_64-linux` machines!
 
 ### Build the binary
 
