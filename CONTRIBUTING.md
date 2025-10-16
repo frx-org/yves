@@ -1,6 +1,6 @@
 # Contributing to Yves
 
-You are more than welcomed to contribute for our project.
+You are more than welcome to contribute for our project.
 
 ## Bugs reports and questions
 
