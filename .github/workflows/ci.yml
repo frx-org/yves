@@ -76,12 +76,13 @@ jobs:
         run: uv run pytest
 
   uv-build:
-    name: Build with UV (python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    name: Build with UV (${{ matrix.runner}}, python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.runner }}
     needs: [pytest]
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+        runner: ["ubuntu-latest", "macos-15-intel", "macos-15"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
