@@ -1,0 +1,36 @@
+[
+    {
+        "event_type": "changes_detected",
+        "timestamp": 1758134916,
+        "changes": [
+            {
+                "file": "personal/yves/tests/test_llm.py",
+                "status": "modified",
+                "diff": [
+                    "--- a/yves/test_llm.py",
+                    "+++ b/yves/test_llm.py",
+                    "@@ -6,3 +6,6 @@"
+                ],
+                "is_binary": "false"
+            }
+        ]
+    },
+    {
+        "event_type": "changes_detected",
+        "timestamp": 1758134955,
+        "changes": [
+            {
+                "file": "personal/yves/tests/test_llm.py",
+                "status": "modified",
+                "diff": [
+                    "--- a/yves/test_llm.py",
+                    "+++ b/yves/test_llm.py",
+                    "@@ -6,6 +6,5 @@",
+                    "     from lib.llm import merge_logs_by_timestamp",
+                    "-"
+                ],
+                "is_binary": "true"
+            }
+        ]
+    }
+]

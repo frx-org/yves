@@ -288,17 +288,29 @@ def check(summarizer: LLMSummarizer):
         Summarizer instance to be updated
 
     """
-    from json import dumps
-
-    from lib.llm import load_prompt
+    from json import dumps, load
+    from importlib.resources import files
 
     logger.info(
         "We are going to check if you can communicate with your LLM provider. If everything works as intended, you shouldn't see any error messages."
     )
     logger.info(f"Checking {summarizer.model_name} from {summarizer.provider}...")
 
-    long_json = dumps("\n".join([load_prompt("single") for _ in range(1000)]))
-    ret = summarize(summarizer, long_json)
+    prompt_file = files("yves.check") / "fs_prompt_example.json"
+    with prompt_file.open("r", encoding="utf-8") as f:
+        fs_log_data = load(f)
+
+    fs_log_json = dumps(fs_log_data)
+    num_chars_per_token = 3.5
+    json_token_length = len(fs_log_json) / num_chars_per_token
+    # NOTE: the `json` length is supposedly shorter than the token limit
+    # hence it cannot be null
+    full_split_coeff = int(summarizer.token_limit / json_token_length)
+    multiple_splits_coeff = 1.5
+    multiple_fs_log_json = dumps(
+        fs_log_data * int(full_split_coeff * multiple_splits_coeff)
+    )
+    ret = summarize(summarizer, multiple_fs_log_json)
 
     if ret:
         logger.info("✅ Everything seems fine!")
