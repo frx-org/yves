@@ -289,25 +289,28 @@ def check(summarizer: LLMSummarizer):
 
     """
     from json import dumps, load
-    from pathlib import Path
+    from importlib.resources import files
 
     logger.info(
         "We are going to check if you can communicate with your LLM provider. If everything works as intended, you shouldn't see any error messages."
     )
     logger.info(f"Checking {summarizer.model_name} from {summarizer.provider}...")
 
-    file_path = (
-        Path(__file__).parents[2] / "tests" / "samples" / "fs_prompt_example.json"
-    )
-    with open(file_path, "r", encoding="utf-8") as f:
+    prompt_file = files("yves.check") / "fs_prompt_example.json"
+    with prompt_file.open("r", encoding="utf-8") as f:
         fs_log_data = load(f)
 
-    long_json = dumps(fs_log_data)
+    fs_log_json = dumps(fs_log_data)
     num_chars_per_token = 3.5
-    json_token_length = len(long_json) / num_chars_per_token
-    copies_that_fit = int(summarizer.token_limit / json_token_length)
-    long_json = dumps(fs_log_data * int(copies_that_fit * 1.5))
-    ret = summarize(summarizer, long_json)
+    json_token_length = len(fs_log_json) / num_chars_per_token
+    # NOTE: the `json` length is supposedly shorter than the token limit
+    # hence it cannot be null
+    full_split_coeff = int(summarizer.token_limit / json_token_length)
+    multiple_splits_coeff = 1.5
+    multiple_fs_log_json = dumps(
+        fs_log_data * int(full_split_coeff * multiple_splits_coeff)
+    )
+    ret = summarize(summarizer, multiple_fs_log_json)
 
     if ret:
         logger.info("✅ Everything seems fine!")
