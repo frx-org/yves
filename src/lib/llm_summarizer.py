@@ -290,14 +290,50 @@ def check(summarizer: LLMSummarizer):
     """
     from json import dumps
 
-    from lib.llm import load_prompt
-
     logger.info(
         "We are going to check if you can communicate with your LLM provider. If everything works as intended, you shouldn't see any error messages."
     )
     logger.info(f"Checking {summarizer.model_name} from {summarizer.provider}...")
-
-    long_json = dumps("\n".join([load_prompt("single") for _ in range(1000)]))
+    fs_log_data = [
+        {
+            "event_type": "changes_detected",
+            "timestamp": 1758134916,
+            "changes": [
+                {
+                    "file": "personal/yves/tests/test_llm.py",
+                    "status": "modified",
+                    "diff": [
+                        "--- a/yves/test_llm.py",
+                        "+++ b/yves/test_llm.py",
+                        "@@ -6,3 +6,6 @@",
+                    ],
+                    "is_binary": "false",
+                }
+            ],
+        },
+        {
+            "event_type": "changes_detected",
+            "timestamp": 1758134955,
+            "changes": [
+                {
+                    "file": "personal/yves/tests/test_llm.py",
+                    "status": "modified",
+                    "diff": [
+                        "--- a/yves/test_llm.py",
+                        "+++ b/yves/test_llm.py",
+                        "@@ -6,6 +6,5 @@",
+                        "     from lib.llm import merge_logs_by_timestamp",
+                        "-",
+                    ],
+                    "is_binary": "true",
+                }
+            ],
+        },
+    ]
+    long_json = dumps(fs_log_data)
+    json_token_length = len(long_json) / 3.5
+    copies_that_fit = int(summarizer.token_limit / json_token_length)
+    long_json = dumps(fs_log_data * int(copies_that_fit * 1.5))
     ret = summarize(summarizer, long_json)
 
     if ret:
