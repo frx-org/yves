@@ -3,136 +3,56 @@
 
 def test_merge_logs_by_timestamp(tmp_path):
     """Test `merge_logs_by_timestamp`."""
-    import json
+    from json import load, dump, dumps
 
     from lib.llm import merge_logs_by_timestamp
+    from importlib.resources import files
 
     fs_log_path = tmp_path / "fs_log_path.json"
-    fs_log_data = [
-        {
-            "event_type": "changes_detected",
-            "timestamp": 1758134916,
-            "changes": [
-                {
-                    "file": "personal/yves/tests/test_llm.py",
-                    "status": "modified",
-                    "diff": [
-                        "--- a/yves/test_llm.py",
-                        "+++ b/yves/test_llm.py",
-                        "@@ -6,3 +6,6 @@",
-                    ],
-                    "is_binary": "false",
-                }
-            ],
-        },
-        {
-            "event_type": "changes_detected",
-            "timestamp": 1758134955,
-            "changes": [
-                {
-                    "file": "personal/yves/tests/test_llm.py",
-                    "status": "modified",
-                    "diff": [
-                        "--- a/yves/test_llm.py",
-                        "+++ b/yves/test_llm.py",
-                        "@@ -6,6 +6,5 @@",
-                        "     from lib.llm import merge_logs_by_timestamp",
-                        "-",
-                    ],
-                    "is_binary": "true",
-                }
-            ],
-        },
-    ]
+    fs_prompt_file = files("yves.check") / "fs_prompt_example.json"
+    with fs_prompt_file.open("r", encoding="utf-8") as f:
+        fs_log_data = load(f)
 
     with fs_log_path.open("w") as f:
-        json.dump(fs_log_data, f)
+        dump(fs_log_data, f)
 
     tmux_log_path = tmp_path / "tmux_log_path.json"
-    tmux_log_data = [
-        {
-            "event_type": "command_completed",
-            "timestamp": 1758134923,
-            "pane": "yves-90cdb:2.2",
-            "command": "eza -l",
-            "output": [
-                "❯ eza -l",
-                ".rw-r--r-- 1,4k yves 14 sept. 08:25  default.nix",
-                ".rw-r--r--  887 yves 13 sept. 09:58  justfile",
-                ".rw-r--r--   23 yves 13 sept. 09:58  shell.nix",
-                ".rw-r--r-- 386k yves 16 sept. 20:47  uv.lock",
-                "",
-            ],
-        },
-        {
-            "event_type": "command_completed",
-            "timestamp": 1758135065,
-            "pane": "yves-90cdb:2.2",
-            "command": "nvim -R README.md",
-            "output": ["❯ nvim -R README.md", "", "path/to/yves 2m4s"],
-        },
-    ]
+    tmux_prompt_file = files("yves.check") / "tmux_prompt_example.json"
+    with tmux_prompt_file.open("r", encoding="utf-8") as f:
+        tmux_log_data = load(f)
 
     with tmux_log_path.open("w") as f:
-        json.dump(tmux_log_data, f)
+        dump(tmux_log_data, f)
 
-    expected_merged = [
-        {
-            "event_type": "changes_detected",
-            "timestamp": 1758134916,
-            "changes": [
-                {
-                    "file": "personal/yves/tests/test_llm.py",
-                    "status": "modified",
-                    "diff": [
-                        "--- a/yves/test_llm.py",
-                        "+++ b/yves/test_llm.py",
-                        "@@ -6,3 +6,6 @@",
-                    ],
-                    "is_binary": "false",
-                }
-            ],
-        },
-        {
-            "event_type": "command_completed",
-            "timestamp": 1758134923,
-            "pane": "yves-90cdb:2.2",
-            "command": "eza -l",
-            "output": [
-                "❯ eza -l",
-                ".rw-r--r-- 1,4k yves 14 sept. 08:25  default.nix",
-                ".rw-r--r--  887 yves 13 sept. 09:58  justfile",
-                ".rw-r--r--   23 yves 13 sept. 09:58  shell.nix",
-                ".rw-r--r-- 386k yves 16 sept. 20:47  uv.lock",
-                "",
-            ],
-        },
-        {
-            "event_type": "changes_detected",
-            "timestamp": 1758134955,
-            "changes": [
-                {
-                    "file": "personal/yves/tests/test_llm.py",
-                    "status": "modified",
-                    "diff": [
-                        "--- a/yves/test_llm.py",
-                        "+++ b/yves/test_llm.py",
-                        "@@ -6,6 +6,5 @@",
-                        "     from lib.llm import merge_logs_by_timestamp",
-                        "-",
-                    ],
-                    "is_binary": "true",
-                }
-            ],
-        },
-        {
-            "event_type": "command_completed",
-            "timestamp": 1758135065,
-            "pane": "yves-90cdb:2.2",
-            "command": "nvim -R README.md",
-            "output": ["❯ nvim -R README.md", "", "path/to/yves 2m4s"],
-        },
-    ]
+    merged_prompt_file = files("yves.check") / "merged_prompt_example.json"
+    with merged_prompt_file.open("r", encoding="utf-8") as f:
+        expected_merged = load(f)
+
     merged_str = merge_logs_by_timestamp(tmux_log_path, fs_log_path)
 
-    assert merged_str == json.dumps(expected_merged, ensure_ascii=False, indent=0)
+    assert merged_str == dumps(expected_merged, ensure_ascii=False, indent=0)
+
+
+def test_split_json_by_token_limit():
+    """Test `split_json_by_token_limit`."""
+    from json import dumps, load
+    from importlib.resources import files
+    from lib.llm import split_json_by_token_limit
+
+    prompt_file = files("yves.check") / "fs_prompt_example.json"
+    with prompt_file.open("r", encoding="utf-8") as f:
+        fs_log_data = load(f)
+    fs_log_json = dumps(fs_log_data)
+
+    num_chars_per_token = 3.5
+    json_token_length = len(fs_log_json) / num_chars_per_token
+    token_limit = json_token_length
+    multiple_fs_log_json = dumps(fs_log_data * 2)
+
+    splits = split_json_by_token_limit(multiple_fs_log_json, int(token_limit))
+    assert len(splits) == 2
+    assert (
+        "[" + splits[0].replace(" ", "") + "]"
+        == "[" + splits[1].replace(" ", "") + "]"
+        == fs_log_json.replace(" ", "")
+    )

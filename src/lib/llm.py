@@ -138,7 +138,7 @@ def split_json_by_token_limit(json_str: str, token_limit: int) -> list[str]:
                 sublists += split_item(item_str, num_chars_limit)
                 current = ""
             else:
-                current += item_str
+                current += "," + item_str if current else item_str
                 current_tokens += item_tokens
     if current:
         sublists += split_item(current, num_chars_limit)
