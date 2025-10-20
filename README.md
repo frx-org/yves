@@ -40,7 +40,15 @@ We actively support Linux x86-64 machines.
 
 It is also expected to work on ARM64 systems as well as on macOS (both Intel and ARM64) but note that they are currently **untested**.
 
-At this time, Windows is **not supported**.
+At this time, Windows is not fully supported. While the filesystem watcher works and changes made to monitored directories are properly summarized, [`tmux`](https://github.com/tmux/tmux) requires a Linux distribution to be installed on your Windows machine. Currently, no Windows-based [`tmux`](https://github.com/tmux/tmux) alternative is supported.
+
+Therefore, to run `yves` on Windows, even just for directory monitoring, you should disable the [`tmux`](https://github.com/tmux/tmux) monitor in the configuration file (see [Configuration](#configuration)):
+```
+[tmux]
+enable = False
+```
+
+In addition to that, make sure all path related parameters are adapted correctly in the config file.
 
 #### Tools
 
@@ -171,6 +179,7 @@ This is an example configuration
 
 ```
 [filesystem]
+enable = True
 dirs = ~/work/yves, /persist/my/other/project
 output_file = ~/.local/state/yves/fs_changes.json
 include_filetypes = .py, .nix
@@ -180,6 +189,7 @@ min_lines_changed = 3
 similarity_threshold = 0.7
 
 [tmux]
+enable = True
 panes =
 output_file = ~/.local/state/yves/tmux_changes.json
 capture_full_output = False
