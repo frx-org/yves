@@ -17,15 +17,15 @@ def test_merge_logs_by_timestamp(tmp_path):
         dump(fs_log_data, f)
 
     tmux_log_path = tmp_path / "tmux_log_path.json"
-    tmux_prompt_file = files("yves.check") / "tmux_prompt_example.json"
-    with tmux_prompt_file.open("r", encoding="utf-8") as f:
+    tmux_prompt_file = "./samples/tmux_prompt_example.json"
+    with open(tmux_prompt_file, "r", encoding="utf-8") as f:
         tmux_log_data = load(f)
 
     with tmux_log_path.open("w") as f:
         dump(tmux_log_data, f)
 
-    merged_prompt_file = files("yves.check") / "merged_prompt_example.json"
-    with merged_prompt_file.open("r", encoding="utf-8") as f:
+    merged_prompt_file = "./samples/merged_prompt_example.json"
+    with open(merged_prompt_file, "r", encoding="utf-8") as f:
         expected_merged = load(f)
 
     merged_str = merge_logs_by_timestamp(tmux_log_path, fs_log_path)
