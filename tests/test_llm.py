@@ -40,7 +40,8 @@ def test_split_json_by_token_limit():
     """Test `split_json_by_token_limit`."""
     from json import load
     from importlib.resources import files
-    from lib.llm import split_json_by_token_limit, multiply_prompt
+    from lib.llm import split_json_by_token_limit
+    from lib.llm_summarizer import multiply_prompt
 
     prompt_file = files("yves.check") / "fs_prompt_example.json"
     with prompt_file.open("r", encoding="utf-8") as f:
