@@ -143,3 +143,38 @@ def split_json_by_token_limit(json_str: str, token_limit: int) -> list[str]:
     if current:
         sublists += split_item(current, num_chars_limit)
     return sublists
+
+
+def multiply_prompt(
+    log_data: list, factor: float, token_limit: float = 0
+) -> tuple[str, str, float]:
+    """Multiply the prompt content by a given factor.
+
+    Parameters
+    ----------
+    token_limit : int
+        Maximum number of tokens.
+    log_json : str
+        Original log in JSON format.
+    factor : int
+        Factor by which to multiply the log content.
+
+    Returns
+    -------
+    str
+        The multiplied log in JSON format.
+
+    """
+    from json import dumps
+
+    log_json = dumps(log_data)
+    num_chars_per_token = 3.5
+    json_token_length = len(log_json) / num_chars_per_token
+    # NOTE: the `json` length is supposedly shorter than the token limit
+    # hence it cannot be null
+    if token_limit == 0:
+        token_limit = json_token_length
+
+    full_split_coeff = int(token_limit / json_token_length)
+    multiple_log_json = dumps(log_data * int(full_split_coeff * factor))
+    return multiple_log_json, log_json, token_limit

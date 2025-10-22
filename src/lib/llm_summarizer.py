@@ -293,8 +293,9 @@ def check(summarizer: LLMSummarizer):
         Summarizer instance to be updated
 
     """
-    from json import dumps, load
+    from json import load
     from importlib.resources import files
+    from lib.llm import multiply_prompt
 
     logger.info(
         "We are going to check if you can communicate with your LLM provider. If everything works as intended, you shouldn't see any error messages."
@@ -305,15 +306,8 @@ def check(summarizer: LLMSummarizer):
     with prompt_file.open("r", encoding="utf-8") as f:
         fs_log_data = load(f)
 
-    fs_log_json = dumps(fs_log_data)
-    num_chars_per_token = 3.5
-    json_token_length = len(fs_log_json) / num_chars_per_token
-    # NOTE: the `json` length is supposedly shorter than the token limit
-    # hence it cannot be null
-    full_split_coeff = int(summarizer.token_limit / json_token_length)
-    multiple_splits_coeff = 1.5
-    multiple_fs_log_json = dumps(
-        fs_log_data * int(full_split_coeff * multiple_splits_coeff)
+    multiple_fs_log_json, _, _ = multiply_prompt(
+        fs_log_data, factor=1.5, token_limit=summarizer.token_limit
     )
     ret = summarize(summarizer, multiple_fs_log_json)
 
