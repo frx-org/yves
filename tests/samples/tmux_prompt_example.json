@@ -1,0 +1,23 @@
+[
+    {
+        "event_type": "command_completed",
+        "timestamp": 1758134923,
+        "pane": "yves-90cdb:2.2",
+        "command": "eza -l",
+        "output": [
+            "❯ eza -l",
+            ".rw-r--r-- 1,4k yves 14 sept. 08:25  default.nix",
+            ".rw-r--r--  887 yves 13 sept. 09:58  justfile",
+            ".rw-r--r--   23 yves 13 sept. 09:58  shell.nix",
+            ".rw-r--r-- 386k yves 16 sept. 20:47  uv.lock",
+            ""
+        ]
+    },
+    {
+        "event_type": "command_completed",
+        "timestamp": 1758135065,
+        "pane": "yves-90cdb:2.2",
+        "command": "nvim -R README.md",
+        "output": ["❯ nvim -R README.md", "", "path/to/yves 2m4s"]
+    }
+]

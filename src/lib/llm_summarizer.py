@@ -284,6 +284,48 @@ def generate_summary(
         sleep(timeout)
 
 
+def multiply_prompt(
+    log_data: list, factor: float, token_limit: float = 0
+) -> tuple[str, str, float]:
+    """Multiply the prompt content by a given factor.
+
+    Parameters
+    ----------
+    log_data : list
+        The original log data as a list of dicts.
+    factor : float
+        The multiplication factor.
+    token_limit : float
+        Maximum number of tokens.
+        If set to 0, it will take the estimated maximum value.
+
+    Returns
+    -------
+    tuple of str, str, float
+        A tuple containing:
+        - The multiplied log in JSON format.
+        - The original log in JSON format.
+        - The token limit used.
+
+    """
+    from json import dumps
+
+    log_json = dumps(log_data)
+    num_chars_per_token = 3.5
+    json_token_length = len(log_json) / num_chars_per_token
+    # NOTE: the `json` length is supposedly shorter than the token limit
+    # hence it cannot be null
+    if token_limit == 0:
+        token_limit = json_token_length
+        logger.debug(
+            "`token_limit` is 0: set its value to `json_token_length` as estimated maximum value"
+        )
+
+    full_split_coeff = int(token_limit / json_token_length)
+    multiple_log_json = dumps(log_data * int(full_split_coeff * factor))
+    return multiple_log_json, log_json, token_limit
+
+
 def check(summarizer: LLMSummarizer):
     """Check if the LLM provider works as intended.
 
@@ -293,7 +335,7 @@ def check(summarizer: LLMSummarizer):
         Summarizer instance to be updated
 
     """
-    from json import dumps, load
+    from json import load
     from importlib.resources import files
 
     logger.info(
@@ -305,15 +347,8 @@ def check(summarizer: LLMSummarizer):
     with prompt_file.open("r", encoding="utf-8") as f:
         fs_log_data = load(f)
 
-    fs_log_json = dumps(fs_log_data)
-    num_chars_per_token = 3.5
-    json_token_length = len(fs_log_json) / num_chars_per_token
-    # NOTE: the `json` length is supposedly shorter than the token limit
-    # hence it cannot be null
-    full_split_coeff = int(summarizer.token_limit / json_token_length)
-    multiple_splits_coeff = 1.5
-    multiple_fs_log_json = dumps(
-        fs_log_data * int(full_split_coeff * multiple_splits_coeff)
+    multiple_fs_log_json, _, _ = multiply_prompt(
+        fs_log_data, factor=1.5, token_limit=summarizer.token_limit
     )
     ret = summarize(summarizer, multiple_fs_log_json)
 
