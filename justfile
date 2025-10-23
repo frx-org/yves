@@ -35,6 +35,7 @@ check:
     @nix-shell {{ yves }}/shell.nix --command "just py-check"
     @nix-shell {{ yves }}/shell.nix --command "treefmt --ci"
     @nix-shell {{ yves }}/shell.nix --command "prettier --check '**/*.md'"
+    @nix-shell {{ yves }}/shell.nix --command "just --fmt --unstable --check"
 
 # Format codebase
 [group("dev")]
@@ -42,6 +43,7 @@ format:
     @nix-shell {{ yves }}/shell.nix --command "just py-format"
     @nix-shell {{ yves }}/shell.nix --command "treefmt"
     @nix-shell {{ yves }}/shell.nix --command "prettier --write '**/*.md'"
+    @nix-shell {{ yves }}/shell.nix --command "just --fmt --unstable"
 
 # Run pytest
 [group("dev")]
