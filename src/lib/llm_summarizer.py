@@ -295,9 +295,10 @@ def multiply_prompt(
         The original log data as a list of dicts.
     factor : float
         The multiplication factor.
-    token_limit : float, optional
+    token_limit : float
         Maximum number of tokens.
         If set to 0, it will take the estimated maximum value.
+
     Returns
     -------
     tuple of str, str, float
