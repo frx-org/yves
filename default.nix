@@ -42,6 +42,7 @@ in
     packages = with pkgs; [
       just
       nixfmt-tree
+      prettier
       uv
     ];
   };

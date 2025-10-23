@@ -34,12 +34,14 @@ nix-build:
 check:
     @nix-shell {{ yves }}/shell.nix --command "just py-check"
     @nix-shell {{ yves }}/shell.nix --command "treefmt --ci"
+    @nix-shell {{ yves }}/shell.nix --command "prettier --check '**/*.md'"
 
 # Format codebase
 [group("dev")]
 format:
     @nix-shell {{ yves }}/shell.nix --command "just py-format"
     @nix-shell {{ yves }}/shell.nix --command "treefmt"
+    @nix-shell {{ yves }}/shell.nix --command "prettier --write '**/*.md'"
 
 # Run pytest
 [group("dev")]
