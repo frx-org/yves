@@ -33,6 +33,7 @@ nix-build:
 [group("dev")]
 check:
     @nix-shell {{ yves }}/shell.nix --command "just py-check"
+    @nix-shell {{ yves }}/shell.nix --command "treefmt --ci"
 
 # Format codebase
 [group("dev")]
