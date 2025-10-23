@@ -56,10 +56,23 @@ jobs:
       - name: Nix format
         run: nix-shell ./shell.nix --command "treefmt --ci"
 
+  prettier:
+    name: Prettier checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.0
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Prettier format
+        run: nix-shell ./shell.nix --command "prettier --check '**/*.md'"
+
   pytest:
     name: Unit tests
     runs-on: ubuntu-latest
-    needs: [ruff, nix-fmt, basedpyright]
+    needs: [ruff, nix-fmt, basedpyright, prettier]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
