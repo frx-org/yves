@@ -55,13 +55,13 @@ def main():
 
         configure_interactively()
     elif p_args.command == "check":
-        from lib.check import check_llm
+        from lib.check import check_all
 
         config_path = os.path.expanduser(p_args.config)
         summarizer = LLMSummarizer()
         llm_update_from_config(summarizer, config_path)
 
-        check_llm(summarizer)
+        check_all(os.path.expanduser(p_args.config), summarizer)
     elif p_args.command == "describe":
         from lib.cfg import parse_config, print_config
 
