@@ -43,6 +43,7 @@ It is also expected to work on ARM64 systems as well as on macOS (both Intel and
 At this time, Windows is not fully supported. While the filesystem watcher works and changes made to monitored directories are properly summarized, [`tmux`](https://github.com/tmux/tmux) requires a Linux distribution to be installed on your Windows machine. Currently, no Windows-based [`tmux`](https://github.com/tmux/tmux) alternative is supported.
 
 Therefore, to run `yves` on Windows, even just for directory monitoring, you should disable the [`tmux`](https://github.com/tmux/tmux) monitor in the configuration file (see [Configuration](#configuration)):
+
 ```
 [tmux]
 enable = False

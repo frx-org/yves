@@ -23,9 +23,11 @@ If you are using [`nix`](https://nixos.org/) we provide a [`shell.nix`](./shell.
 
 We use
 
-- [`ruff`](https://docs.astral.sh/ruff/) for formatting and linting in the CI.
-- [`basedpyright`](https://docs.basedpyright.com/latest) for type checking
-- For the documentation, we use [`numpydoc`](https://numpydoc.readthedocs.io/en/latest/format.html) style.
+- [`ruff`](https://docs.astral.sh/ruff/) for Python formatting and linting in the CI
+- [`basedpyright`](https://docs.basedpyright.com/latest) for Python type checking
+- [`prettier`](https://github.com/prettier/prettier) for Markdown formatting
+- [`just`](https://just.systems/) for formatting Justfile
+- For the documentation, we use [`numpydoc`](https://numpydoc.readthedocs.io/en/latest/format.html) style
 
 Your code must respect that or else CI will fail.
 
