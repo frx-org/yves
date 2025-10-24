@@ -1,4 +1,6 @@
 * @fremk @rx342
 *.nix @rx342
+justfile @rx342
 /npins @rx342
 /.github/workflows @rx342
+/.github/dependabot.yaml @rx342
