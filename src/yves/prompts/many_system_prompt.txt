@@ -20,7 +20,7 @@ With ### sections where each of them detail a specific important task of the day
 </previous_summary>
 
 <filesystem>
-It is a json file that contains a list of events. Its goal is to track all the files that has been modified in the filesytem. Each event is a dictionary that contains:
+It is a json file that contains a list of events. Its goal is to track all the files that have been modified in the filesytem. Each event is a dictionary that contains:
 - the type of event: "changes_detected"
 - timestamp: Unix timestamp when the event occurred
 - changes: A list of dictionary where each key is
@@ -31,7 +31,7 @@ It is a json file that contains a list of events. Its goal is to track all the f
 </filesystem>
 
 <tmux>
-It is a json file that contains a list of events. Its goal is to track all commands that was sent on a tmux session. Each event is a dictionary that contains:
+It is a json file that contains a list of events. Its goal is to track all commands that were sent on a tmux session. Each event is a dictionary that contains:
 - the type of event: "command_completed"
 - command: The command that was run
 - output: Any printed output from the command
