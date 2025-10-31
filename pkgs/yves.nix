@@ -32,7 +32,7 @@ let
   );
   yves-venv = pythonSet.mkVirtualEnv "yves-venv" workspace.deps.default;
 in
-pkgs.runCommandNoCC "yves"
+pkgs.runCommand "yves"
   {
     buildInputs = [ yves-venv ];
   }
