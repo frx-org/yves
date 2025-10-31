@@ -45,6 +45,7 @@ Here are some important rules to follow:
 - Put the same actions in a same sentence, do not write an action multiple times in different paragraphs
 - Only report what has been done, do not extrapolate about what's left to do
 - Report the big tasks of the day, do not report minor changes
+- Don't put the report in a markdown code block, just write a markdown file
 
 Your answer report must follow this type of structure:
 
