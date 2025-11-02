@@ -28,7 +28,7 @@ def test_ask_overwrite_config(tmp_path, monkeypatch):
     from lib.interactive import ask_overwrite_config
 
     monkeypatch.setattr(questionary.Question, "ask", lambda _: True)
-    result = ask_overwrite_config("/this/is/a/random/path")
+    result = ask_overwrite_config(tmp_path)
     assert result is True
 
 
