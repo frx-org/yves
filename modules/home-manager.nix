@@ -34,11 +34,22 @@ in
           Path to configuration file.
         '';
       };
+      extraPackages = lib.mkOption {
+        default = [ ];
+        example = lib.literalExpression ''
+          [
+            pkgs.prettier
+          ]
+        '';
+        description = ''
+          Extra packages to install with the service (e.g. formatter).
+        '';
+      };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+    home.packages = [ cfg.package ] ++ cfg.extraPackages;
     systemd.user.services = {
       yves = {
         Unit = {
