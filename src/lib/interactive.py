@@ -248,6 +248,62 @@ def ask_and_update_summarizer(cfg: ConfigParser) -> None:
     cfg["summarizer"]["at"] = summary_hour
 
 
+def is_valid_formatter(formatter: str) -> bool:
+    """Check if the formatter exists.
+
+    Parameters
+    ----------
+    formatter : str
+        Formatter name
+
+    Returns
+    -------
+    bool
+        Returns `True` if the command exists.
+        Note if equal to "None", we return `True`.
+
+    """
+    from lib.check import command_exists
+
+    if formatter == "None":
+        return True
+
+    return command_exists(formatter)
+
+
+def ask_formatter(cfg: ConfigParser, formatters: list[str]) -> None:
+    """Ask the user if they want the summary to be formatted.
+
+    Parameters
+    ----------
+    cfg : ConfigParser
+        Configure instance to update
+    formatters : list[str]
+        List of allowed formatters
+
+    """
+    while True:
+        formatter = questionary.select(
+            "Do you want the summary to be automatically formatted? Choose one of the allowed formatters (you must have the formatter installed on your system)",
+            choices=formatters,
+        ).ask()
+
+        if is_valid_formatter(formatter):
+            break
+        else:
+            logger.error(
+                f"You chose {formatter} but we cannot find this command on your system, please choose another answer"
+            )
+
+    if formatter == "None":
+        logger.debug("No formatter chosen")
+        cfg["formatter"]["enable"] = "False"
+    else:
+        logger.debug(f"Chosen formatter: {formatter}")
+        cfg["formatter"]["enable"] = "True"
+        cfg["formatter"]["command"] = formatter
+
+
 def configure_interactively() -> None:
     """Interactively configure Yves with the user."""
     from textwrap import dedent
@@ -279,6 +335,7 @@ def configure_interactively() -> None:
         _ = ask_and_update_tmux_enable(cfg)
         ask_and_update_llm_provider(cfg)
         ask_and_update_summarizer(cfg)
+        ask_formatter(cfg, ["prettier", "None"])
 
         write_config(cfg, cfg_path)
 

@@ -155,3 +155,43 @@ def test_ask_and_update_summarizer(tmp_path, monkeypatch):
 
     assert cfg["summarizer"] == {"output_dir": str(summary_dir), "at": "19:30"}
     assert summary_dir.exists()
+
+
+def test_is_valid_formatter():
+    """Test `is_valid_formatter`."""
+    from lib.interactive import is_valid_formatter
+
+    assert is_valid_formatter("None")
+
+    # NOTE: command needs to exist
+    assert is_valid_formatter("pytest")
+    assert not is_valid_formatter("this-must-fail")
+
+
+def test_ask_formatter(monkeypatch):
+    """Test `ask_formatter`."""
+    from lib.cfg import ConfigParser
+    from lib.interactive import ask_formatter
+
+    answers = iter(["None"])
+    monkeypatch.setattr("questionary.Question.ask", lambda _: next(answers))
+    cfg = ConfigParser()
+    cfg["formatter"] = {}
+    ask_formatter(cfg, ["prettier", "None"])
+    assert cfg["formatter"]["enable"] == "False"
+
+    answers = iter(["pytest"])
+    monkeypatch.setattr("questionary.Question.ask", lambda _: next(answers))
+    cfg = ConfigParser()
+    cfg["formatter"] = {}
+    ask_formatter(cfg, ["pytest", "None"])
+    assert cfg["formatter"]["enable"] == "True"
+    assert cfg["formatter"]["command"] == "pytest"
+
+    answers = iter(["formatter-that-does-not_exist", "pytest"])
+    monkeypatch.setattr("questionary.Question.ask", lambda _: next(answers))
+    cfg = ConfigParser()
+    cfg["formatter"] = {}
+    ask_formatter(cfg, ["pytest", "None"])
+    assert cfg["formatter"]["enable"] == "True"
+    assert cfg["formatter"]["command"] == "pytest"
