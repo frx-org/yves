@@ -31,14 +31,14 @@ in
         type = lib.types.str;
         default = "${config.xdg.configHome}/yves/config";
         description = ''
-          Path to configuration file
+          Path to configuration file.
         '';
       };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ yves ];
+    home.packages = [ cfg.package ];
     systemd.user.services = {
       yves = {
         Unit = {
