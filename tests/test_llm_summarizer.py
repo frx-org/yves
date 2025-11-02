@@ -31,6 +31,10 @@ def test_update_from_config(tmp_path):
         "token_limit": "154546",
         "at": "15:49",
     }
+    config["formatter"] = {
+        "enable": "True",
+        "command": "prettier",
+    }
     with open(abs_path, "w") as f:
         config.write(f)
 
@@ -45,4 +49,6 @@ def test_update_from_config(tmp_path):
         str(summarize_output_dir),
         154546,
         datetime.strptime("15:49", "%H:%M").time(),
+        datetime.strptime("0001-01-01", "%Y-%m-%d").date(),
+        "prettier",
     )
