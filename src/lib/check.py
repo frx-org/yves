@@ -1,10 +1,29 @@
-"""Check library."""
+"""Sanity check library."""
 
 import logging
 
 from lib.llm_summarizer import LLMSummarizer
 
 logger = logging.getLogger(__name__)
+
+
+def command_exists(command: str) -> bool:
+    """Check if a command exists.
+
+    Parameters
+    ----------
+    command : str
+        Command to check
+
+    Returns
+    -------
+    bool
+        `True` is the command exists, else `False`
+
+    """
+    from shutil import which
+
+    return which(command) is not None
 
 
 def check_config(config_path: str) -> bool:
@@ -56,6 +75,15 @@ def check_config(config_path: str) -> bool:
             f"`similarity_threshold` is not in [0, 1] (value is {fs_similarity_threshold})"
         )
         is_valid = False
+
+    tmux_enabled = cfg.getboolean("tmux", "enable")
+    if tmux_enabled:
+        logger.debug("Tmux watcher is enabled")
+        if command_exists("tmux"):
+            logger.debug("`tmux` command found")
+        else:
+            logger.error("Tmux watcher is enabled but `tmux` command is not found")
+            is_valid = False
 
     return is_valid
 
