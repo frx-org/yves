@@ -52,3 +52,31 @@ def test_update_from_config(tmp_path):
         datetime.strptime("0001-01-01", "%Y-%m-%d").date(),
         "prettier",
     )
+
+
+def test_format_summary(tmp_path):
+    """Test `format_summary`."""
+    import shutil
+    from pathlib import Path
+    from uuid import uuid4
+
+    from lib.llm_summarizer import LLMSummarizer, format_summary
+
+    llm_summarizer = LLMSummarizer()
+    original_report = Path(__file__).parent / "samples" / "reports" / "original.md"
+    copy_original_report = tmp_path / f"{uuid4().hex}.md"
+
+    shutil.copyfile(original_report, copy_original_report)
+    format_summary(llm_summarizer, str(copy_original_report))
+    assert original_report.read_text() == copy_original_report.read_text()
+
+    llm_summarizer.formatter = "non-existant_formatter"
+    shutil.copyfile(original_report, copy_original_report)
+    format_summary(llm_summarizer, str(copy_original_report))
+    assert original_report.read_text() == copy_original_report.read_text()
+
+    llm_summarizer.formatter = "prettier"
+    shutil.copyfile(original_report, copy_original_report)
+    format_summary(llm_summarizer, str(copy_original_report))
+    prettier_report = Path(__file__).parent / "samples" / "reports" / "prettier.md"
+    assert prettier_report.read_text() == copy_original_report.read_text()
