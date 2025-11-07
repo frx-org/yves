@@ -89,17 +89,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
-      - name: Install python
-        uses: actions/setup-python@v6.0.0
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7.1.2
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
         with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: Install the project
-        run: uv sync --locked --dev
+          nix_path: nixpkgs=channel:nixos-unstable
       - name: pytest
-        run: uv run pytest
+        run: nix-shell ./shell.nix --command "just pytest"
 
   uv-build:
     name: Build with UV (${{ matrix.runner}}, python ${{ matrix.python-version }})
