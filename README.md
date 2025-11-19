@@ -9,6 +9,11 @@ If you have already been in one of these situations:
 Meet Yves (also known as "**Y**our **V**aluable **E**fficient **S**ummarizer"), your personal assistant that will write a daily summary about what you did every day in a professional `markdown` report.
 
 > [!WARNING]
+> This project is not meant to replace a human-written report.
+> It only helps by producing the equivalent of an initial draft.
+> Since it connects to an LLM of your choice, you should be aware of the limitations of such models.
+
+> [!WARNING]
 > This is **highly experimental** as it is not done yet.
 > You _will_ encounter bugs, please open an [issue](https://github.com/frx-org/yves/issues/new/choose) and remember to be polite.
 
