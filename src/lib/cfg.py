@@ -103,6 +103,10 @@ def default_config() -> ConfigParser:
         "token_limit": "1000000",
         "at": "19:00",
     }
+    config["formatter"] = {
+        "enable": "False",
+        "command": "",
+    }
 
     return config
 

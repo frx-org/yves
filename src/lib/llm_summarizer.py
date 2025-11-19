@@ -34,6 +34,8 @@ class LLMSummarizer:
         Hour to give the summary of the day
     last_run_day: time
         Last time we gave a summary
+    formatter : str | None
+        Formatter command to format the summary
     """
 
     import platform
@@ -52,6 +54,7 @@ class LLMSummarizer:
     token_limit: int = 1000000
     run_hour: time = datetime.strptime("19:00", "%H:%M").time()
     last_run_day: date = datetime.strptime("0001-01-01", "%Y-%m-%d").date()
+    formatter: str | None = None
 
 
 def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
@@ -80,6 +83,12 @@ def update_from_config(summarizer: LLMSummarizer, config_path: str) -> None:
     summarizer.output_dir = os.path.expanduser(cfg["summarizer"]["output_dir"])
     summarizer.token_limit = cfg.getint("summarizer", "token_limit")
     summarizer.run_hour = convert_to_time(cfg.get("summarizer", "at"))
+
+    formatter_enabled = cfg.getboolean("formatter", "enable")
+    if formatter_enabled:
+        summarizer.formatter = cfg["formatter"]["command"]
+    else:
+        summarizer.formatter = None
 
 
 def get_extra_headers(provider: str) -> dict[object, object]:
@@ -206,6 +215,30 @@ def summarize(summarizer: LLMSummarizer, text: str):
     return summarize_many(summarizer, list_text)
 
 
+def format_summary(summarizer: LLMSummarizer, summary_path: str):
+    """Format summary report.
+
+    Parameters
+    ----------
+    summarizer : LLMSummarizer
+        The summarizer instance.
+    summary_path : str
+        Path to the summary to format.
+
+    """
+    from subprocess import DEVNULL, STDOUT, check_call
+
+    if summarizer.formatter:
+        if summarizer.formatter == "prettier":
+            check_call(
+                ["prettier", "--write", summary_path], stdout=DEVNULL, stderr=STDOUT
+            )
+
+        logger.debug(
+            f"Summary {summary_path} has been formatted with {summarizer.formatter}"
+        )
+
+
 def generate_summary(
     summarizer: LLMSummarizer,
     stop_event: Event,
@@ -270,6 +303,8 @@ def generate_summary(
                 logger.info(f"Summary saved to {output_file}")
             except Exception as e:
                 logger.error(f"Failed to save summary: {e}")
+
+            format_summary(summarizer, output_file)
 
             summarizer.last_run_day = now.date()
 

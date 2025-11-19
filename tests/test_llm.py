@@ -18,7 +18,9 @@ def test_merge_logs_by_timestamp(tmp_path):
         dump(fs_log_data, f)
 
     tmux_log_path = tmp_path / "tmux_log_path.json"
-    tmux_prompt_file = Path(__file__).parent / "samples" / "tmux_prompt_example.json"
+    tmux_prompt_file = (
+        Path(__file__).parent / "samples" / "prompts" / "tmux_prompt_example.json"
+    )
     with tmux_prompt_file.open("r", encoding="utf-8") as f:
         tmux_log_data = load(f)
 
@@ -26,7 +28,7 @@ def test_merge_logs_by_timestamp(tmp_path):
         dump(tmux_log_data, f)
 
     merged_prompt_file = (
-        Path(__file__).parent / "samples" / "merged_prompt_example.json"
+        Path(__file__).parent / "samples" / "prompts" / "merged_prompt_example.json"
     )
     with merged_prompt_file.open("r", encoding="utf-8") as f:
         expected_merged = load(f)

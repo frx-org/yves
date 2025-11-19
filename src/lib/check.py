@@ -26,8 +26,8 @@ def command_exists(command: str) -> bool:
     return which(command) is not None
 
 
-def check_config(config_path: str) -> bool:
-    """Check if configuration file has valid values.
+def check_file_system_config(config_path) -> bool:
+    """Check file system watcher configuration.
 
     Parameters
     ----------
@@ -45,8 +45,6 @@ def check_config(config_path: str) -> bool:
     from lib.cfg import convert_to_list, parse_config
 
     is_valid = True
-
-    logger.info(f"Checking your configuration file {config_path}...")
     cfg = parse_config(config_path)
 
     fs_watcher_dirs = [
@@ -76,6 +74,28 @@ def check_config(config_path: str) -> bool:
         )
         is_valid = False
 
+    return is_valid
+
+
+def check_tmux_config(config_path) -> bool:
+    """Check tmux watcher configuration.
+
+    Parameters
+    ----------
+    config_path : str
+        Path to the configuration file
+
+    Returns
+    -------
+    bool
+        Return `True` is configuration is valid else `False`
+
+    """
+    from lib.cfg import parse_config
+
+    is_valid = True
+    cfg = parse_config(config_path)
+
     tmux_enabled = cfg.getboolean("tmux", "enable")
     if tmux_enabled:
         logger.debug("Tmux watcher is enabled")
@@ -84,6 +104,65 @@ def check_config(config_path: str) -> bool:
         else:
             logger.error("Tmux watcher is enabled but `tmux` command is not found")
             is_valid = False
+
+    return is_valid
+
+
+def check_formatter(config_path: str) -> bool:
+    """Check if formatter configuration.
+
+    Parameters
+    ----------
+    config_path : str
+        Path to the configuration file
+
+    Returns
+    -------
+    bool
+        Return `True` is configuration is valid else `False`
+
+    """
+    from lib.cfg import parse_config
+
+    cfg = parse_config(config_path)
+    formatter_enabled = cfg.getboolean("formatter", "enable")
+    if not formatter_enabled:
+        logger.debug("Formatter is not enabled")
+        return True
+
+    formatter_command = cfg["formatter"]["command"]
+    if len(formatter_command) == 0:
+        logger.error("Formatter enabled but command is empty")
+        return False
+
+    is_valid = command_exists(formatter_command)
+    if is_valid:
+        logger.debug(f"Formatter command `{formatter_command}` found")
+    else:
+        logger.error(f"Formatter command `{formatter_command}` not found")
+        return False
+
+    return True
+
+
+def check_config(config_path: str) -> bool:
+    """Check if configuration file has valid values.
+
+    Parameters
+    ----------
+    config_path : str
+        Path to the configuration file
+
+    Returns
+    -------
+    bool
+        Return `True` is configuration is valid else `False`
+
+    """
+    logger.info(f"Checking your configuration file {config_path}...")
+    is_valid = check_file_system_config(config_path)
+    is_valid = is_valid and check_tmux_config(config_path)
+    is_valid = is_valid and check_formatter(config_path)
 
     return is_valid
 

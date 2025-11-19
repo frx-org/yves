@@ -31,14 +31,25 @@ in
         type = lib.types.str;
         default = "${config.xdg.configHome}/yves/config";
         description = ''
-          Path to configuration file
+          Path to configuration file.
+        '';
+      };
+      extraPackages = lib.mkOption {
+        default = [ ];
+        example = lib.literalExpression ''
+          [
+            pkgs.prettier
+          ]
+        '';
+        description = ''
+          Extra packages to install with the service (e.g. formatter).
         '';
       };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ yves ];
+    home.packages = [ cfg.package ] ++ cfg.extraPackages;
     systemd.user.services = {
       yves = {
         Unit = {
