@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install python
         uses: actions/setup-python@v6.2.0
       - name: Install uv
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install python
         uses: actions/setup-python@v6.2.0
       - name: Install uv
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install Nix
         uses: cachix/install-nix-action@v31
         with:
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install Nix
         uses: cachix/install-nix-action@v31
         with:
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install Nix
         uses: cachix/install-nix-action@v31
         with:
@@ -88,7 +88,7 @@ jobs:
     needs: [ruff, nix-fmt, basedpyright, prettier, just]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install Nix
         uses: cachix/install-nix-action@v31
         with:
@@ -106,7 +106,7 @@ jobs:
         runner: ["ubuntu-latest", "macos-latest", "macos-15-intel"]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install python
         uses: actions/setup-python@v6.2.0
         with:
@@ -129,7 +129,7 @@ jobs:
     needs: [pytest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Install Nix
         uses: cachix/install-nix-action@v31
         with:
