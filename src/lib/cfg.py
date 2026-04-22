@@ -171,12 +171,12 @@ def parse_config(
 
     user_config = ConfigParser(
         converters={
-            "list": lambda vs: []
-            if not vs.strip()
-            else [v.strip() for v in vs.split(",")],
-            "set": lambda vs: {}
-            if not vs.strip()
-            else {v.strip() for v in vs.split(",")},
+            "list": lambda vs: (
+                [] if not vs.strip() else [v.strip() for v in vs.split(",")]
+            ),
+            "set": lambda vs: (
+                {} if not vs.strip() else {v.strip() for v in vs.split(",")}
+            ),
             "time": lambda t: datetime.strptime(t, "%H:%M").time(),
         }
     )
