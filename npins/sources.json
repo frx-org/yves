@@ -3,8 +3,8 @@
     "nixpkgs": {
       "type": "Channel",
       "name": "nixpkgs-unstable",
-      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre851377.c53baa668526/nixexprs.tar.xz",
-      "hash": "07fqbza7npcfnggqrd7w86h0086a2sv9v0kvz5in106g9fg5vg4v"
+      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.05pre981196.b86751bc4085/nixexprs.tar.xz",
+      "hash": "sha256-mBqzkn7oJti2hqeO8iTbDxKw+1ifxpP53feQ0CEXies="
     },
     "pyproject-build-systems": {
       "type": "Git",
@@ -15,9 +15,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "5b8e37fe0077db5c1df3a5ee90a651345f085d38",
-      "url": "https://github.com/pyproject-nix/build-system-pkgs/archive/5b8e37fe0077db5c1df3a5ee90a651345f085d38.tar.gz",
-      "hash": "1511r99ap7dg7i1sjv23g88d395pfxkll60zazv028xwbmkd4z7a"
+      "revision": "ffaa2161dd5d63e0e94591f86b54fc239660fb2e",
+      "url": "https://github.com/pyproject-nix/build-system-pkgs/archive/ffaa2161dd5d63e0e94591f86b54fc239660fb2e.tar.gz",
+      "hash": "sha256-qapCOQmR++yZSY43dzrp3wCrkOTLpod+ONtJWBk6iKU="
     },
     "pyproject-nix": {
       "type": "Git",
@@ -28,9 +28,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "8d77f342d66ad1601cdb9d97e9388b69f64d4c8e",
-      "url": "https://github.com/pyproject-nix/pyproject.nix/archive/8d77f342d66ad1601cdb9d97e9388b69f64d4c8e.tar.gz",
-      "hash": "1plmw8qbd2pg37jpnb3jh55qmxsyd5vqqjzlgghwf80f3hd6b4za"
+      "revision": "69f57f27e52a87c54e28138a75ec741cd46663c9",
+      "url": "https://github.com/pyproject-nix/pyproject.nix/archive/69f57f27e52a87c54e28138a75ec741cd46663c9.tar.gz",
+      "hash": "sha256-Gs1VnEkCkkRZxJQAC/Dhz0Jbfi22mFXChbtNg9w/Ybg="
     },
     "uv2nix": {
       "type": "Git",
@@ -41,10 +41,10 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "64298e806f4a5f63a51c625edc100348138491aa",
-      "url": "https://github.com/pyproject-nix/uv2nix/archive/64298e806f4a5f63a51c625edc100348138491aa.tar.gz",
-      "hash": "10nk9118rh89m7qllr5p06crmzwrxyswap375my9zx6k1q00m5zl"
+      "revision": "60982c30e16db3e0cba6c0ed13f0894b06ab2bf1",
+      "url": "https://github.com/pyproject-nix/uv2nix/archive/60982c30e16db3e0cba6c0ed13f0894b06ab2bf1.tar.gz",
+      "hash": "sha256-XeGmo/BhkFXd8vVyendr3X4mQmw7CEkeQcpy7AHbVcg="
     }
   },
-  "version": 5
+  "version": 7
 }
